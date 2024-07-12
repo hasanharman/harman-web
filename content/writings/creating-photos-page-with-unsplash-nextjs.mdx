@@ -1,0 +1,52 @@
+---
+title: Creating Photos page with Unsplash, Nextjs Server Actions
+description: Creating Photos page with Unsplash, Nextjs Server Actions
+date: 2024-07-12
+published: true
+---
+
+Unsplash is one of the best places to find quality images online. Over the years, I have used so much that I decided to contribute to the Unsplash by adding my photographs. Then I encounter the [photos section of Adem Ilter's website](https://ademilter.com/photos). I decided to add my own photos page. Let's start planning.
+
+These are the steps we must follow one by one. This is not a tutorial we can complete in a short time. We must wait for the approval a couple of times.&#x20;
+
+1. [Creating an Unsplash Account](https://unsplash.com/)
+2. Submitting some photos and waiting for the publishing
+3. [Creating an application on Unsplash Developers](https://unsplash.com/developers) to get an API Key. [You can check the docs here.](https://unsplash.com/documentation)
+4. Creating server actions
+5. Fetching and displaying the data
+
+Let's define the Unsplah API Key in the env.development file. We should add this env.production file or environment variables inside Vercel or other platforms.
+
+```ts {4} showLineNumbers
+UNSPLASH_ACCESS_KEY= Get the key from unsplah developer's application page. This will be the Access Key.
+```
+
+Now we can create our server actions.
+
+Create a file whose name is **actions** inside the root folder. Then you can create **unsplash.ts** inside the actions
+
+```tsx {4} showLineNumbers
+async function getData(url: string) {
+  const res = await fetch(url, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Error fetching data from Unsplash: ${res.statusText}`);
+  }
+  return await res.json();
+}
+
+export async function getStats() {
+  const base_url = "https://api.unsplash.com/users/haskup/statistics";
+  const url = `${base_url}?client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
+  return await getData(url);
+}
+
+export async function getPhotos(per_page = 50) {
+  const base_url = "https://api.unsplash.com/users/haskup/photos";
+  const url = `${base_url}?per_page=${per_page}&client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
+  return await getData(url);
+}
+```
+
+I want to display the statistics and photos like in the example website. These functions are enough for these purposes. If you widen the example you can check the documentation.

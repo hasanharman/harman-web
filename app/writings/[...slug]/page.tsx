@@ -72,7 +72,8 @@ export default async function PostPage({ params }: PostPageProps) {
   }
 
   return (
-    <article className="space-y-5">
+    // <article className="space-y-5">
+    <article className="prose dark:prose-invert">
       <h1 className="text-3xl font-semibold">{post?.title}</h1>
       {post.description ? (
         <p className="text-lg text-muted-foreground">{post.description}</p>

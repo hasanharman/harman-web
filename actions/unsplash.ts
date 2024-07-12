@@ -1,5 +1,3 @@
-// app/actions/unsplashActions.js
-
 async function getData(url: string) {
   const res = await fetch(url, {
     method: "GET",

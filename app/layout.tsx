@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ViewTransitions } from "next-view-transitions";
-
+import { Analytics } from "@vercel/analytics/react";
 import { Questrial } from "next/font/google";
 
 import Header from "@/components/header";
@@ -26,6 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <ViewTransitions>
+      <Analytics />
       <html lang="en">
         <body className="max-w-3xl mx-auto space-y-6 my-5 px-5 md:px-0">
           <Header fontClass={font.className} />

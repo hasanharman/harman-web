@@ -73,7 +73,7 @@ export default function Home() {
           alt="Hasan Harman"
           width="64"
           height="64"
-          className="rounded-full border-4"
+          className="w-16 h-16 rounded-full border-4"
         />
         <h2 className="text-2xl font-semibold">Hasan Harman</h2>
         <p className="text-muted-foreground ">

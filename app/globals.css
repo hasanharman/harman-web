@@ -67,3 +67,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+img {
+  width: auto;
+  height: auto;
+}

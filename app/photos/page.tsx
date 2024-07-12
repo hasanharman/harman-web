@@ -1,7 +1,14 @@
 import React from "react";
+import { Metadata } from "next";
 
 import { getStats, getPhotos } from "@/actions/unsplash";
 import { ParallaxScroll } from "@/components/parallax-scroll";
+
+export const metadata: Metadata = {
+  title: "Hasan Harman - Photos",
+  description:
+    "Every photo we took has its own place in time. People looked at the moments when I stopped time, and people recorded these memories the same way I recorded them.",
+};
 
 export default async function Photos() {
   try {

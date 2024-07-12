@@ -77,7 +77,7 @@ export default function Home() {
         />
         <h2 className="text-2xl font-semibold">Hasan Harman</h2>
         <p className="text-muted-foreground ">
-          Curious enginner & Frontend developer from Istanbul 🇹🇷
+          Curious engineer & Frontend developer from Istanbul 🇹🇷
         </p>
         <div className="flex justify-center items-center">
           {images.map((image, idx) => (
@@ -153,14 +153,6 @@ export default function Home() {
             </div>
           </div>
         ))}
-      </div>
-      {/* Writings section */}
-      <div className="space-y-5 my-10">
-        <h3 className="text-lg font-semibold">Writings</h3>
-      </div>
-      {/* Projects section */}
-      <div className="space-y-5 my-10">
-        <h3 className="text-lg font-semibold">Projects</h3>
       </div>
     </section>
   );

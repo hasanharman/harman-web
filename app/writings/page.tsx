@@ -6,7 +6,8 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Hasan Harman - Writings",
-  description: "This is a description",
+  description:
+    "I write about things I learn, things I build, and things I think about. I hope you find something useful here.",
 };
 
 const POSTS_PER_PAGE = 5;

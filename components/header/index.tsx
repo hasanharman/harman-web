@@ -23,11 +23,11 @@ export default function Header({ fontClass }: HeaderProps) {
   const pathname = usePathname();
 
   const MENU = [
-    {
-      label: "Projects",
-      href: "/projects",
-      isDisabled: true,
-    },
+    // {
+    //   label: "Projects",
+    //   href: "/projects",
+    //   isDisabled: true,
+    // },
     {
       label: "Writings",
       href: "/writings",
@@ -49,14 +49,14 @@ export default function Header({ fontClass }: HeaderProps) {
     <header className="flex justify-between items-center">
       <Link
         href="/"
-        className={cn("text-xl hover:text-slate-700", {
+        className={cn("text-base md:text-xl hover:text-slate-700", {
           [pacifico.className]: true,
         })}
       >
         Hasan Harman
       </Link>
       <div
-        className={cn(fontClass, "text-sm md:text-base space-x-2 md:space-x-4")}
+        className={cn(fontClass, "text-xs md:text-base space-x-2 md:space-x-4")}
       >
         {MENU.map(({ label, href, isDisabled }) => (
           <Link

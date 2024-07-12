@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="en">
-        <body className="max-w-3xl mx-auto space-y-6 my-5 px-5 md:px-0">
+        <body className="max-w-3xl mx-auto space-y-6 my-5 px-2 md:px-0">
           <NextTopLoader color="#2F7B70" />
           <Header fontClass={font.className} />
           <main className={font.className}>{children}</main>

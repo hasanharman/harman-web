@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://hasanharman.dev/
+
+# Sitemaps
+Sitemap: https://hasanharman.dev/sitemap.xml

@@ -24,33 +24,37 @@ export async function GET(req: NextRequest) {
 
     return new ImageResponse(
       (
-        <div tw="flex relative flex-col p-12 w-full h-full items-start text-black bg-white">
-          <div tw="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M4 11a9 9 0 0 1 9 9" />
-              <path d="M4 4a16 16 0 0 1 16 16" />
-              <circle cx="5" cy="19" r="1" />
-            </svg>
-            <p tw="ml-2 font-bold text-2xl">Hasan Harman</p>
-          </div>
-          <div tw="flex flex-col flex-1 py-10">
-            <div tw="flex text-xl uppercase font-bold tracking-tight font-normal">
-              Writings
+        <div className="h-[50rem] w-full dark:bg-black bg-white  dark:bg-grid-white/[0.2] bg-grid-black/[0.2] relative flex items-center justify-center">
+          {/* Radial gradient for the container to give a faded look */}
+          <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+          <div tw="flex relative flex-col p-12 w-full h-full items-start text-black bg-white">
+            <div tw="flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 11a9 9 0 0 1 9 9" />
+                <path d="M4 4a16 16 0 0 1 16 16" />
+                <circle cx="5" cy="19" r="1" />
+              </svg>
+              <p tw="ml-2 font-bold text-2xl">Hasan Harman</p>
             </div>
-            <div tw="flex text-[80px] font-bold text-[50px]">{heading}</div>
-          </div>
-          <div tw="flex items-center w-full justify-between">
-            <div tw="flex text-xl">{siteConfig.url}</div>
-            <div tw="flex items-center text-xl">
-              <div tw="flex ml-2">{siteConfig.links.github}</div>
+            <div tw="flex flex-col flex-1 py-10">
+              <div tw="flex text-xl uppercase font-bold tracking-tight font-normal">
+                Writings
+              </div>
+              <div tw="flex text-[80px] font-bold text-[50px]">{heading}</div>
+            </div>
+            <div tw="flex items-center w-full justify-between">
+              <div tw="flex text-xl">{siteConfig.url}</div>
+              <div tw="flex items-center text-xl">
+                <div tw="flex ml-2">{siteConfig.links.github}</div>
+              </div>
             </div>
           </div>
         </div>

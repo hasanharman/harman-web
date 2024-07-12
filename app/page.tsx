@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 import Avatar from "@/assets/avatar.jpeg";
 import SightImage from "@/assets/sight.jpg";
 import HomeImage from "@/assets/home.jpg";
 import HabitImage from "@/assets/habit.jpg";
-import Link from "next/link";
 
 export default function Home() {
   const images = [SightImage, HabitImage, HomeImage];

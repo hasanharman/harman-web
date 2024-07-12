@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { motion } from "framer-motion";
+
+import SocialMediaButtons from "@/components/social-media-buttons";
 
 import Avatar from "@/assets/avatar.jpeg";
 import SightImage from "@/assets/sight.jpg";
@@ -79,6 +81,7 @@ export default function Home() {
         <p className="text-muted-foreground ">
           Curious engineer & Frontend developer from Istanbul 🇹🇷
         </p>
+        <SocialMediaButtons />
         <div className="flex justify-center items-center">
           {images.map((image, idx) => (
             <motion.div

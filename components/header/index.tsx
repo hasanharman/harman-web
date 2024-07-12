@@ -26,18 +26,22 @@ export default function Header({ fontClass }: HeaderProps) {
     {
       label: "Projects",
       href: "/projects",
+      isDisabled: true,
     },
     {
       label: "Writings",
       href: "/writings",
+      isDisabled: false,
     },
     {
       label: "Photos",
       href: "/photos",
+      isDisabled: false,
     },
     {
       label: "Connect",
       href: "/connect",
+      isDisabled: false,
     },
   ];
 
@@ -51,16 +55,21 @@ export default function Header({ fontClass }: HeaderProps) {
       >
         Hasan Harman
       </Link>
-      <div className={cn(fontClass, "text-sm md:text-base space-x-2 md:space-x-4")}>
-        {MENU.map(({ label, href }) => (
+      <div
+        className={cn(fontClass, "text-sm md:text-base space-x-2 md:space-x-4")}
+      >
+        {MENU.map(({ label, href, isDisabled }) => (
           <Link
             key={href}
             href={href}
             className={cn("text-muted-foreground hover:text-black", {
               "text-accent-foreground": pathname === href,
+              "pointer-events-none": isDisabled,
             })}
           >
-            {label}
+            <Button variant="link" className="p-0" disabled={isDisabled}>
+              {label}
+            </Button>
           </Link>
         ))}
       </div>

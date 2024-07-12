@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import NextTopLoader from "nextjs-toploader";
+
 import { Questrial } from "next/font/google";
 
 import Header from "@/components/header";
@@ -26,13 +29,15 @@ export default function RootLayout({
 }>) {
   return (
     <ViewTransitions>
-      <Analytics />
       <html lang="en">
         <body className="max-w-3xl mx-auto space-y-6 my-5 px-5 md:px-0">
+          <NextTopLoader color="#2F7B70" />
           <Header fontClass={font.className} />
           <main className={font.className}>{children}</main>
         </body>
       </html>
+      <Analytics />
+      <SpeedInsights />
     </ViewTransitions>
   );
 }

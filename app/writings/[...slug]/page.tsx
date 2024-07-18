@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import "@/styles/mdx.css";
 import { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import TableOfContents from "@/components/table-of-contents";
 
 interface PostPageProps {
   params: {
@@ -71,14 +72,18 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
+  if (!post.body) {
+    return null;
+  }
+
   return (
-    // <article className="space-y-5">
     <article className="prose dark:prose-invert">
       <h1 className="text-3xl font-semibold">{post?.title}</h1>
       {post.description ? (
         <p className="text-lg text-muted-foreground">{post.description}</p>
       ) : null}
       <hr className="my-4" />
+      <TableOfContents tocList={post.toc} />
       <MDXContent code={post.body} />
     </article>
   );

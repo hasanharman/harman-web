@@ -19,11 +19,15 @@ These are the steps we need to follow, one by one. This is not a quick tutorial;
 5. Fetching and displaying the data
 6. Creating the Parallax Component
 
+#### Starting the coding part
+
 First, define the Unsplash API Key in the `env.development` file. Additionally, add this to the `env.production` file or set environment variables in Vercel or other platforms.
 
 ```txt
 UNSPLASH_ACCESS_KEY= Get the key from unsplah developer's application page. This will be the Access Key.
 ```
+
+#### Creating server actions
 
 Next, let's create our server actions. Create a folder named `actions` in the root directory. Inside this folder, create a file named `unsplash.ts`.
 
@@ -50,6 +54,8 @@ export async function getPhotos(per_page = 50) {
   return await getData(url);
 }
 ```
+
+#### Fetching and displaying the data
 
 I want to display the statistics and photos like in the example website. The following functions will suffice for these purposes. If you want to extend the example, you can refer to the documentation.
 
@@ -93,6 +99,8 @@ export default async function Photos() {
   }
 }
 ```
+
+#### Creating the Parallax Component
 
 We retrieve the data using the `getStats()` and `getPhotos()` actions. I created a `ParallaxScroll` component to enhance the photo gallery display. We will pass the photos array to the `ParallaxScroll` component, which was created by [Manu Arora](https://x.com/mannupaaji) founder of [Acernity UI](https://ui.aceternity.com/components). One of the best UI component libraries online.
 

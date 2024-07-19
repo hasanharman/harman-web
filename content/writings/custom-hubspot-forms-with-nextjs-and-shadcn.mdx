@@ -184,7 +184,7 @@ We have created the necessary form fields and structure to validate the form bef
 
 Now, let's focus on the form submission function. It will be straightforward and effective.
 
-```txt
+```tsx
 async function onSubmit(values: z.infer<typeof formSchema>) {
     const portalId = "Portal ID";
     const formGuid = "Form ID"
@@ -239,7 +239,7 @@ We need to inform the user whether the form submission was successful. To do thi
 
 Add these lines to the file:
 
-```txt
+```tsx
 import { useState } from "react";
 
 export default function FormPage() {

@@ -72,3 +72,35 @@ img {
   width: auto;
   height: auto;
 }
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #000;
+  transform-origin: 0%;
+}
+
+/* #progress {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  transform: rotate(-90deg);
+}
+
+circle {
+  stroke-dashoffset: 0;
+  stroke-width: 8%;
+  fill: none;
+}
+
+.bg {
+  stroke: #818181;
+  opacity: 0.3;
+}
+
+#progress .indicator {
+  stroke: #141414;
+} */

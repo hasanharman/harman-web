@@ -6,6 +6,14 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface TocItem {
   title: string;
@@ -19,51 +27,88 @@ interface TableOfContentsProps {
 
 export default function TableOfContents({ tocList }: TableOfContentsProps) {
   return (
-    <HoverCard>
-      <HoverCardTrigger asChild>
-        <div className="absolute right-1 space-y-2">
+    <>
+      <div className="hidden md:block">
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <div className="absolute right-1 space-y-2">
+              {tocList.map((item, index) => (
+                <div
+                  className="flex flex-col items-end space-y-2"
+                  key={item.title}
+                >
+                  <div className="w-7 flex flex-col items-end h-0.5 bg-slate-400 hover:bg-black rounded-xl" />
+                  {item.items && item.items.length > 0 && (
+                    <div className="flex flex-col space-y-2">
+                      {item.items.map((subItem, subIndex) => (
+                        <div
+                          key={subItem.title}
+                          className="w-5 flex flex-col items-end h-0.5 bg-slate-400 hover:bg-black rounded-xl"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-fit p-3 space-y-2 ">
+            {tocList.map((item, index) => (
+              <div className="space-y-2" key={item.title}>
+                <Link
+                  href={item.url}
+                  className="text-sm no-underline hover:underline"
+                >
+                  {item.title}
+                </Link>
+                {item.items && item.items.length > 0 && (
+                  <div className="flex flex-col space-y-2">
+                    {item.items.map((subItem, subIndex) => (
+                      <Link
+                        href={subItem.url}
+                        key={subItem.title}
+                        className="text-xs ml-3 no-underline hover:underline"
+                      >
+                        {subItem.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </HoverCardContent>
+        </HoverCard>
+      </div>
+      <Card className="md:hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="m-0">Table of Contents</CardTitle>
+        </CardHeader>
+        <CardContent>
           {tocList.map((item, index) => (
-            <div className="flex flex-col items-end space-y-2" key={item.title}>
-              <div className="w-7 flex flex-col items-end h-0.5 bg-slate-400 hover:bg-black rounded-xl" />
+            <div className="space-y-2" key={item.title}>
+              <Link
+                href={item.url}
+                className="text-sm no-underline hover:underline"
+              >
+                {item.title}
+              </Link>
               {item.items && item.items.length > 0 && (
                 <div className="flex flex-col space-y-2">
                   {item.items.map((subItem, subIndex) => (
-                    <div
+                    <Link
+                      href={subItem.url}
                       key={subItem.title}
-                      className="w-5 flex flex-col items-end h-0.5 bg-slate-400 hover:bg-black rounded-xl"
-                    />
+                      className="text-xs ml-3 no-underline hover:underline"
+                    >
+                      {subItem.title}
+                    </Link>
                   ))}
                 </div>
               )}
             </div>
           ))}
-        </div>
-      </HoverCardTrigger>
-      <HoverCardContent className="w-fit p-3 space-y-2 ">
-        {tocList.map((item, index) => (
-          <div className="space-y-2" key={item.title}>
-            <Link
-              href={item.url}
-              className="text-sm no-underline hover:underline"
-            >
-              {item.title}
-            </Link>
-            {item.items && item.items.length > 0 && (
-              <div className="flex flex-col space-y-2">
-                {item.items.map((subItem, subIndex) => (
-                  <Link
-                    href={subItem.url}
-                    key={subItem.title}
-                    className="text-xs ml-3 no-underline hover:underline"
-                  >
-                    {subItem.title}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </HoverCardContent>
-    </HoverCard>
+        </CardContent>
+      </Card>
+    </>
   );
 }

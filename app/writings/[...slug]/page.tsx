@@ -6,6 +6,7 @@ import "@/styles/mdx.css";
 import { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 import TableOfContents from "@/components/table-of-contents";
+import ScrollTracker from "@/components/scroll-tracker";
 
 interface PostPageProps {
   params: {
@@ -84,6 +85,8 @@ export default async function PostPage({ params }: PostPageProps) {
       ) : null}
       <hr className="my-4" />
       <TableOfContents tocList={post.toc} />
+      <ScrollTracker />
+
       <MDXContent code={post.body} />
     </article>
   );

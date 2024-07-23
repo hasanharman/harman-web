@@ -10,9 +10,10 @@ import Avatar from "@/assets/avatar.jpeg";
 import SightImage from "@/assets/sight.jpg";
 import HomeImage from "@/assets/home.jpg";
 import HabitImage from "@/assets/habit.jpg";
+import AstroImage from "@/assets/astro.png";
 
 export default function Home() {
-  const images = [SightImage, HabitImage, HomeImage];
+  const images = [SightImage, HabitImage, HomeImage, AstroImage];
 
   const experiences = [
     {
@@ -103,7 +104,7 @@ export default function Home() {
             >
               <Image
                 src={image}
-                alt="bali images"
+                alt="personal images"
                 width="500"
                 height="500"
                 className="rounded-lg h-20 w-20 md:h-40 md:w-56 object-cover flex-shrink-0"

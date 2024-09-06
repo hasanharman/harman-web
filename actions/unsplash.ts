@@ -10,12 +10,16 @@ async function getData(url: string) {
 
 export async function getStats() {
   const base_url = "https://api.unsplash.com/users/haskup/statistics";
-  const url = `${base_url}?client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
+  const url = `${base_url}?client_id=${
+    process.env.UNSPLASH_ACCESS_KEY
+  }&_=${Date.now()}`; // Added cache-busting parameter
   return await getData(url);
 }
 
-export async function getPhotos(per_page = 50) {
+export async function getPhotos(per_page = 100) {
   const base_url = "https://api.unsplash.com/users/haskup/photos";
-  const url = `${base_url}?per_page=${per_page}&client_id=${process.env.UNSPLASH_ACCESS_KEY}`;
+  const url = `${base_url}?per_page=${per_page}&client_id=${
+    process.env.UNSPLASH_ACCESS_KEY
+  }&_=${Date.now()}`; // Added cache-busting parameter
   return await getData(url);
 }

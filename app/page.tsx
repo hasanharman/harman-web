@@ -23,6 +23,21 @@ import { cn } from "@/lib/utils";
 export default function Home() {
   const images = [SightImage, HabitImage, HomeImage, AstroImage];
 
+  const projects = [
+    {
+      title: "Shadcn Form Builder",
+      company: "this link",
+      date: "09-2024",
+      description:
+        "I made building forms faster for shadcn & react hook form and zod.",
+      logo: "https://shadcn-form-build.vercel.app/favicon.ico",
+      url: "https://shadcn-form-build.vercel.app/",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
+  ];
+
   const experiences = [
     {
       title: "Frontend Developer & Director",
@@ -52,7 +67,8 @@ export default function Home() {
       title: "Full Stack Developer",
       company: "Closar",
       date: "2022 - 2023",
-      description: "Closar is an AR company focused on the houses. I help them create website starting with Angular then we moved to react. My main contribution here is to designing and coding the onboarding part specially. I have used Firebase v9 for Database, Storage, Authentication and Functions. Then I create a digital guide for home owners.",
+      description:
+        "Closar is an AR company focused on the houses. I help them create website starting with Angular then we moved to react. My main contribution here is to designing and coding the onboarding part specially. I have used Firebase v9 for Database, Storage, Authentication and Functions. Then I create a digital guide for home owners.",
       logo: "https://i.pinimg.com/originals/8e/03/cc/8e03cca348047dee0314bdc04c3079ad.png",
       url: "https://www.hostbot.app/",
       isRounded: false,
@@ -132,7 +148,6 @@ export default function Home() {
         </div>
       </div>
       {/* Experience section */}
-
       <h3 className="text-lg font-semibold mt-10 mb-5">Experiences</h3>
       <div className="hidden md:flex items-center gap-3">
         {experiences.map((item, id) => (
@@ -175,6 +190,90 @@ export default function Home() {
       </div>
       <div className="md:hidden space-y-5 my-10">
         {experiences.map((experience, idx) => (
+          <div key={"experience" + idx} className="flex space-x-5 items-start">
+            {experience.isTransparent ? (
+              <div className="flex justify-center items-center rounded-full border h-10 w-10 overflow-hidden shadow-lg">
+                <Image
+                  src={experience.logo}
+                  alt={experience.company}
+                  width={48}
+                  height={48}
+                  className="w-full h-full max-w-6 max-h-6 object-contain"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-10 w-10 overflow-hidden border rounded-full shadow-lg">
+                <Image
+                  src={experience.logo}
+                  alt={experience.company}
+                  width={48}
+                  height={48}
+                  className="w-full h-full rounded-full"
+                />
+              </div>
+            )}
+            <div className="space-y-1 flex-1">
+              <p className="text-xs text-muted-foreground">{experience.date}</p>
+              <div className="text-lg font-semibold">
+                {experience.title} at{" "}
+                <Link
+                  href={experience.url}
+                  target="_blank"
+                  className="hover:underline hover:underline-offset-2 hover:text-slate-700"
+                >
+                  {experience.company}
+                </Link>
+              </div>
+              <p className="text-sm font-light text-muted-foreground">
+                {experience.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Projects section */}
+      <h3 className="text-lg font-semibold mt-10 mb-5">Projects</h3>
+      <div className="hidden md:flex items-center gap-3">
+        {projects.map((item, id) => (
+          <HoverCard key={id}>
+            <HoverCardTrigger asChild>
+              <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
+                <Image
+                  src={item.logo}
+                  alt={item.company}
+                  width="80"
+                  height="80"
+                  className={cn(
+                    "w-10 h-10  hover:scale-110 transition-all duration-150",
+                    {
+                      "rounded-lg": !item.isRounded,
+                      "object-contain": item.isSquare,
+                    }
+                  )}
+                />
+              </div>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-fit max-w-prose p-5">
+              <p className="text-xs text-muted-foreground">{item.date}</p>
+              <div className="text-lg font-semibold">
+                {item.title} at{" "}
+                <Link
+                  href={item.url}
+                  target="_blank"
+                  className="hover:underline hover:underline-offset-2 hover:text-slate-700"
+                >
+                  {item.company}
+                </Link>
+              </div>
+              <p className="text-sm font-light text-muted-foreground">
+                {item.description}
+              </p>{" "}
+            </HoverCardContent>
+          </HoverCard>
+        ))}
+      </div>
+      <div className="md:hidden space-y-5 my-10">
+        {projects.map((experience, idx) => (
           <div key={"experience" + idx} className="flex space-x-5 items-start">
             {experience.isTransparent ? (
               <div className="flex justify-center items-center rounded-full border h-10 w-10 overflow-hidden shadow-lg">

@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import Image from "next/image";
 
-import Avatar from "@/assets/avatar.jpeg";
+import Avatar from "@/assets/avatar.webp";
 import SocialMediaButtons from "@/components/social-media-buttons";
 
 export const metadata: Metadata = {

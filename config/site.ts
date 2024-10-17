@@ -1,5 +1,3 @@
-import Avatar from "@/assets/avatar.jpeg";
-
 export const siteConfig = {
   name: "Hasan Harman",
   url: "https://hasanharman.dev",

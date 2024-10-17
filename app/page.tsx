@@ -9,16 +9,19 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import SocialMediaButtons from "@/components/social-media-buttons";
 
-import Avatar from "@/assets/avatar.jpeg";
-import SightImage from "@/assets/sight.jpg";
-import HomeImage from "@/assets/home.jpg";
-import HabitImage from "@/assets/habit.jpg";
-import AstroImage from "@/assets/astro.png";
-import { cn } from "@/lib/utils";
+import Avatar from "@/assets/avatar.webp";
+import SightImage from "@/assets/sight.webp";
+import HomeImage from "@/assets/home.webp";
+import HabitImage from "@/assets/habit.webp";
+import AstroImage from "@/assets/astro.webp";
+import HostbotLogo from "@/assets/companies/hb.jpg";
+import ClupLogo from "@/assets/companies/clup.png";
+import Pacemaker from "@/assets/companies/pacemaker.jpg";
+import { url } from "inspector";
 
 export default function Home() {
   const images = [SightImage, HabitImage, HomeImage, AstroImage];
@@ -45,11 +48,11 @@ export default function Home() {
       date: "2023 - Today",
       description:
         "Hostbot is the first property management software in Turkey. I'm responsible for the technical frontend architecture and development of the project. We developed this system with Nextjs Tailwindcss and server actions.",
-      logo: "https://media.licdn.com/dms/image/D4D0BAQG1TOBGAoYHig/company-logo_200_200/0/1705317220125/hostbotapp_logo?e=1728518400&v=beta&t=1A-KfmqSUdYuzTNyYDQQvIpA1OHY1pz_zJ-qSJaTvMI",
+      logo: HostbotLogo,
       url: "https://www.hostbot.app/",
-      isRounded: true,
-      isSquare: true,
-      isTransparent: true,
+      isRounded: false,
+      isSquare: false,
+      isTransparent: false,
     },
     {
       title: "Frontend Developer",
@@ -57,8 +60,8 @@ export default function Home() {
       date: "2023 - 2024",
       description:
         "I was responsible for writing reusable components with Nextjs and establishing the frontend structure of the project. I personally developed the user profile, messaging and payment steps using Stripe.",
-      logo: "https://media.licdn.com/dms/image/D4D0BAQHn2wIcg0cBhw/company-logo_200_200/0/1706217207241/clup_com_logo?e=1728518400&v=beta&t=myNMQWzHJ-I7dLx2oiPa-rdOO_JcpTcVRK1cvQcFCZM",
-      url: "https://www.hostbot.app/",
+      logo: ClupLogo,
+      url: "https://clup.com/",
       isRounded: false,
       isSquare: true,
       isTransparent: false,
@@ -70,7 +73,7 @@ export default function Home() {
       description:
         "Closar is an AR company focused on the houses. I help them create website starting with Angular then we moved to react. My main contribution here is to designing and coding the onboarding part specially. I have used Firebase v9 for Database, Storage, Authentication and Functions. Then I create a digital guide for home owners.",
       logo: "https://i.pinimg.com/originals/8e/03/cc/8e03cca348047dee0314bdc04c3079ad.png",
-      url: "https://www.hostbot.app/",
+      url: "https://closar.com/",
       isRounded: false,
       isSquare: false,
       isTransparent: false,
@@ -81,8 +84,8 @@ export default function Home() {
       date: "2021 - 2022",
       description:
         "Pacemaker is a multidisciplinary digital agency. I initially joined Pacemaker as a frontend developer and successfully progressed to the role of a full-stack developer over the years. During my tenure at Pacemaker, I contributed to nearly 20 projects within a span of 2 years. In my final 6 months, I assumed the additional responsibility of managing the development team.",
-      logo: "https://media.licdn.com/dms/image/C4D0BAQGC8erqhDgRVw/company-logo_200_200/0/1630501102453/pacemakersw_logo?e=1728518400&v=beta&t=tI7udKe4DTVguS8Nc6nOgUKMrv_nFhlfHWU_M-NEhH0",
-      url: "https://www.hostbot.app/",
+      logo: Pacemaker,
+      url: "https://pacemaker.com.tr/",
       isRounded: true,
       isSquare: true,
       isTransparent: true,
@@ -94,7 +97,7 @@ export default function Home() {
       description:
         "My involvement in developing a portable game console for Vestel phones led to a job offer directly from Vestel. Initially, I primarily focused on smart home applications, where I specialized in crafting user interfaces using Swift. Subsequently, following a departmental transition, I took on the task of coding a dial test simulator for electric cars.",
       logo: "https://statics.vestel.com.tr/contents/images/archive/vestel-kirmizi-logo-buyuk1(1).png",
-      url: "https://www.hostbot.app/",
+      url: "https://www.vestel.com.tr/",
       isRounded: true,
       isSquare: true,
       isTransparent: true,
@@ -152,23 +155,25 @@ export default function Home() {
       <div className="hidden md:flex items-center gap-3">
         {experiences.map((item, id) => (
           <HoverCard key={id}>
-            <HoverCardTrigger asChild>
-              <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
-                <Image
-                  src={item.logo}
-                  alt={item.company}
-                  width="80"
-                  height="80"
-                  className={cn(
-                    "w-10 h-10  hover:scale-110 transition-all duration-150",
-                    {
-                      "rounded-lg": !item.isRounded,
-                      "object-contain": item.isSquare,
-                    }
-                  )}
-                />
-              </div>
-            </HoverCardTrigger>
+            <Link href={item.url} target="_blank">
+              <HoverCardTrigger asChild>
+                <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
+                  <Image
+                    src={item.logo}
+                    alt={item.company}
+                    width="80"
+                    height="80"
+                    className={cn(
+                      "w-10 h-10  hover:scale-110 transition-all duration-150",
+                      {
+                        "rounded-lg": !item.isRounded,
+                        "object-contain": item.isSquare,
+                      }
+                    )}
+                  />
+                </div>
+              </HoverCardTrigger>
+            </Link>
             <HoverCardContent className="w-fit max-w-prose p-5">
               <p className="text-xs text-muted-foreground">{item.date}</p>
               <div className="text-lg font-semibold">
@@ -236,23 +241,25 @@ export default function Home() {
       <div className="hidden md:flex items-center gap-3">
         {projects.map((item, id) => (
           <HoverCard key={id}>
-            <HoverCardTrigger asChild>
-              <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
-                <Image
-                  src={item.logo}
-                  alt={item.company}
-                  width="80"
-                  height="80"
-                  className={cn(
-                    "w-10 h-10  hover:scale-110 transition-all duration-150",
-                    {
-                      "rounded-lg": !item.isRounded,
-                      "object-contain": item.isSquare,
-                    }
-                  )}
-                />
-              </div>
-            </HoverCardTrigger>
+            <Link href={item.url} target="_blank">
+              <HoverCardTrigger asChild>
+                <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
+                  <Image
+                    src={item.logo}
+                    alt={item.company}
+                    width="80"
+                    height="80"
+                    className={cn(
+                      "w-10 h-10  hover:scale-110 transition-all duration-150",
+                      {
+                        "rounded-lg": !item.isRounded,
+                        "object-contain": item.isSquare,
+                      }
+                    )}
+                  />
+                </div>
+              </HoverCardTrigger>
+            </Link>
             <HoverCardContent className="w-fit max-w-prose p-5">
               <p className="text-xs text-muted-foreground">{item.date}</p>
               <div className="text-lg font-semibold">

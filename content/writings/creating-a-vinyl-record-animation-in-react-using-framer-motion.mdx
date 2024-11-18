@@ -1,0 +1,130 @@
+---
+title: Creating a Vinyl Record Animation in React Using Framer Motion
+description: Bring the charm of vinyl to your React projects with a sleek spinning record animation!
+date: 2024-11-18
+published: true
+---
+
+<VinylRecord />
+
+Last weekend, while scrolling through Twitter, I came across a video of a spinning movie CD. (Unfortunately, I couldn’t find the original post to share here.) Coincidentally, I was listening to Linkin Park’s latest album at the time. Linkin Park holds a special place in my heart—they were the first band I ever listened to in a foreign language, and I’ve been a fan since I was seven.
+
+I still feel a pang of sadness whenever I think of Chester 💔, but I’m also grateful that Emily continues to carry the torch. Their music has always been a source of inspiration for me.
+
+Anyway, back to the topic! Inspired by that CD animation, I decided to create a spinning vinyl record component in React using **Framer Motion**. Let’s build it together!
+
+### Getting Started
+
+This will be a simple component, so we’ll only need to install one package.
+
+```js
+npm i framer-motion
+```
+
+1. Create a new file in the `components` folder and name it `vinyl-record.tsx`.
+2. Copy the code below into your new file.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+
+const DiscVariants = {
+  hidden: {
+    top: "-10%",
+    x: "-50%",
+    opacity: 0.9,
+  },
+  visible: {
+    top: "-50%",
+    x: "-50%",
+    opacity: 1,
+  },
+};
+
+const CoverVariants = {
+  initial: { scale: 1 },
+  hover: {
+    scale: 1.05,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+    },
+  },
+};
+
+export default function VinylRecord() {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div className="flex items-center justify-center min-h-[80vh] bg-gray-100 p-4">
+      <div className="relative w-64 h-64">
+        <AnimatePresence>
+          {/* Vinyl Disc */}
+          <motion.div
+            className="absolute left-1/2 rounded-full z-0 w-60 h-60"
+            variants={DiscVariants}
+            initial="hidden"
+            animate={isHovered ? "visible" : "hidden"}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
+            style={{
+              background:
+                "radial-gradient(circle at center, #0a0a0a 0%, #000000 80%)",
+              boxShadow: "inset 0 0 10px rgba(255, 255, 255, 0.5)",
+            }}
+          >
+            {/* Grooves Pattern */}
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 rounded-full"
+              style={{
+                background:
+                  "repeating-radial-gradient(circle at center, #333 0, #333 1px, transparent 1px, transparent 4px)",
+              }}
+            />
+            {/* Center Label */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/4 h-1/4 bg-gray-400 rounded-full flex items-center justify-center">
+              <motion.div
+                className="w-1/3 h-1/3 bg-white rounded-full"
+                animate={{ rotate: isHovered ? 360 : 0 }}
+                transition={{
+                  duration: 3,
+                  ease: "linear",
+                  repeat: Infinity,
+                }}
+              />
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Record Cover */}
+        <motion.div
+          className="relative w-full h-full rounded shadow-xl z-10 overflow-hidden"
+          variants={CoverVariants}
+          initial="initial"
+          whileHover="hover"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <Image
+            src="https://linkinpedia.com/w/images/thumb/f/fe/Album-From_Zero.png/800px-Album-From_Zero.png"
+            alt="Album Cover"
+            fill
+            sizes="(max-width: 256px) 100vw, 256px"
+            className="object-cover"
+            priority
+          />
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+```
+
+That’s it! You can customize the size, animations, and image to match your preferences.

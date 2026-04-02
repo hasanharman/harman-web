@@ -22,7 +22,7 @@ const CoverVariants = {
   hover: {
     scale: 1.05,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 30,
     },
@@ -43,7 +43,7 @@ export default function VinylRecord() {
             initial="hidden"
             animate={isHovered ? "visible" : "hidden"}
             transition={{
-              type: "spring",
+              type: "spring" as const,
               stiffness: 300,
               damping: 30,
             }}

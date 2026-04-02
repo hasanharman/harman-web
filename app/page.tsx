@@ -22,10 +22,10 @@ import AstroImage from "@/assets/astro.webp";
 import HostbotLogo from "@/assets/companies/hb.jpg";
 import ClupLogo from "@/assets/companies/clup.png";
 import Pacemaker from "@/assets/companies/pacemaker.jpg";
-import { url } from "inspector";
 
 export default function Home() {
   const images = [SightImage, HabitImage, HomeImage, AstroImage];
+  const imageRotations = [-7, 4, -3, 8];
 
   const projects = [
     {
@@ -167,7 +167,7 @@ export default function Home() {
             <motion.div
               key={"images" + idx}
               style={{
-                rotate: Math.random() * 20 - 10,
+                rotate: imageRotations[idx % imageRotations.length],
               }}
               whileHover={{
                 scale: 1.1,

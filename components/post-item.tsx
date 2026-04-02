@@ -24,9 +24,7 @@ export function PostItem({ slug, title, description, date }: PostItemProps) {
           <IoIosArrowRoundForward className="text-muted-foreground text-xl transition-transform duration-300 group-hover:-rotate-45" />
         </div>
         <div>
-          <h2 className="text-xl font-bold">
-            <Link href={"/" + slug}>{title}</Link>
-          </h2>
+          <h2 className="text-xl font-bold">{title}</h2>
         </div>
         <div className="max-w-none text-muted-foreground">{description}</div>
       </article>

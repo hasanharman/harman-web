@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   PanInfo,
   motion,
@@ -90,10 +91,13 @@ export default function ThreeDPhotoCarousel() {
                     }deg) translateZ(${radius}px)`,
                   }}
                 >
-                  <img
+                  <Image
                     src={url}
                     alt="img"
+                    width={1200}
+                    height={800}
                     className="pointer-events-none h-12 w-full rounded-xl object-cover md:h-40"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
                 </div>
               );

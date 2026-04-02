@@ -2,26 +2,53 @@
 module.exports = {
   reactStrictMode: true,
   output: "standalone",
+  outputFileTracingRoot: __dirname,
   images: {
     unoptimized: true,
-    domains: [
-      "a0.muscache.com",
-      "firebasestorage.googleapis.com",
-      "lh3.googleusercontent.com",
-      "lottie.host",
-      "lottie",
-      "https://u3v5o7m1.apicdn.sanity.io",
-      "source.unsplash.com",
-      "images.unsplash.com",
-      "media.licdn.com",
-      "i.pinimg.com",
-      "instagram.fteq3-3.fna.fbcdn.net",
-    ],
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "a0.muscache.com",
+      },
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lottie.host",
+      },
+      {
+        protocol: "https",
+        hostname: "u3v5o7m1.apicdn.sanity.io",
+      },
+      {
+        protocol: "https",
+        hostname: "source.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+      },
+      {
+        protocol: "https",
+        hostname: "instagram.fteq3-3.fna.fbcdn.net",
+      },
+      {
+        protocol: "https",
         hostname: "cdn.sanity.io",
-        port: "",
       },
     ],
   },

@@ -9,13 +9,14 @@ import TableOfContents from "@/components/table-of-contents";
 import ScrollTracker from "@/components/scroll-tracker";
 
 interface PostPageProps {
-  params: {
+  params: Promise<{
     slug: string[];
-  };
+  }>;
 }
 
 async function getPostFromParams(params: PostPageProps["params"]) {
-  const slug = params?.slug?.join("/");
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug?.join("/");
   const post = posts.find((post) => post.slugAsParams === slug);
 
   return post;
@@ -61,7 +62,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams(): Promise<
-  PostPageProps["params"][]
+  { slug: string[] }[]
 > {
   return posts.map((post: any) => ({ slug: post.slugAsParams.split("/") }));
 }

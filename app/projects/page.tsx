@@ -40,6 +40,15 @@ const projects = [
     github: "https://github.com/hasanharman/trekdate",
     tech: ["JavaScript", "npm package"],
   },
+  {
+    title: "Freelance Timer",
+    description:
+      "A minimal macOS menubar app to track freelance work sessions with projects, summaries, and local-only storage. Features menubar stopwatch, project management with color tags, day/week/month/year summaries with charts, and CSV export.",
+    logo: "https://raw.githubusercontent.com/hasanharman/freelance-timer/main/screenshots/logo.png",
+    url: "https://github.com/hasanharman/freelance-timer/releases/tag/v0.1.0",
+    github: "https://github.com/hasanharman/freelance-timer",
+    tech: ["Swift", "SwiftUI", "Core Data", "Charts"],
+  },
 ];
 
 export default function Projects() {

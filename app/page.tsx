@@ -67,6 +67,19 @@ export default function Home() {
       isSquare: true,
       isTransparent: true,
     },
+    {
+      title: "Freelance Timer",
+      company: "macOS app",
+      date: "2026",
+      description:
+        "A minimal macOS menubar app to track freelance work sessions with projects, summaries, and local-only storage.",
+      logo: "https://raw.githubusercontent.com/hasanharman/freelance-timer/main/screenshots/logo.png",
+      url: "https://github.com/hasanharman/freelance-timer/releases/tag/v0.1.0",
+      github: "https://github.com/hasanharman/freelance-timer",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
   ];
 
   const experiences = [

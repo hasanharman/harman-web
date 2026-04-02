@@ -158,7 +158,7 @@ export default function Home() {
         />
         <h2 className="text-2xl font-semibold">Hasan Harman</h2>
         <p className="text-muted-foreground ">
-          Curious engineer & Frontend developer from Istanbul 🇹🇷
+          Curious engineer & Frontend developer from Mersin 🌴 🇹🇷
         </p>
         <WorldClocks />
         <SocialMediaButtons />

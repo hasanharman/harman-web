@@ -19,7 +19,7 @@ const font = Questrial({
 
 export const metadata: Metadata = {
   title: "Hasan Harman",
-  description: "Curious engineer & Frontend developer from Istanbul 🇹🇷",
+  description: "Curious engineer & Frontend developer from Mersin 🌴 🇹🇷",
   metadataBase: new URL("https://www.hasanharman.dev/"),
   openGraph: {
     images: "https://www.hasanharman.dev/meta.png",

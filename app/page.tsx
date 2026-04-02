@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import SocialMediaButtons from "@/components/social-media-buttons";
+import WorldClocks from "@/components/world-clocks";
 
 import Avatar from "@/assets/avatar.webp";
 import SightImage from "@/assets/sight.webp";
@@ -29,12 +30,39 @@ export default function Home() {
   const projects = [
     {
       title: "Shadcn Form Builder",
-      company: "this link",
+      company: "shadcn-form.com",
       date: "09-2024",
       description:
         "I made building forms faster for shadcn & react hook form and zod.",
-      logo: "https://shadcn-form-build.vercel.app/favicon.ico",
-      url: "https://shadcn-form-build.vercel.app/",
+      logo: "https://raw.githubusercontent.com/hasanharman/form-builder/main/assets/logo.svg",
+      url: "https://www.shadcn-form.com/",
+      github: "https://github.com/hasanharman/form-builder",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
+    {
+      title: "Iso Middle Earth",
+      company: "isomiddleearth.com",
+      date: "2026",
+      description:
+        "An isometric world-builder set in Tolkien's Middle-earth. Create and shape your own landscapes across 7 realms, tile by tile.",
+      logo: "https://isomiddleearth.com/logo.png",
+      url: "https://isomiddleearth.com/",
+      github: "https://github.com/hasanharman/isomiddleearth",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
+    {
+      title: "TrekDate",
+      company: "npm package",
+      date: "2026",
+      description:
+        "Convert JavaScript dates to Star Trek: TNG stardates — the same system used by Captain Jean-Luc Picard.",
+      logo: "https://i.imgur.com/djIi5.png",
+      url: "https://www.npmjs.com/package/trekdate",
+      github: "https://github.com/hasanharman/trekdate",
       isRounded: true,
       isSquare: true,
       isTransparent: true,
@@ -119,6 +147,7 @@ export default function Home() {
         <p className="text-muted-foreground ">
           Curious engineer & Frontend developer from Istanbul 🇹🇷
         </p>
+        <WorldClocks />
         <SocialMediaButtons />
         <div className="flex justify-center items-center">
           {images.map((image, idx) => (

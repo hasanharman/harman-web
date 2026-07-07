@@ -68,14 +68,27 @@ export default function Home() {
       isTransparent: true,
     },
     {
-      title: "Freelance Timer",
+      title: "Open Timer",
       company: "macOS app",
       date: "2026",
       description:
         "A minimal macOS menubar app to track freelance work sessions with projects, summaries, and local-only storage.",
-      logo: "https://raw.githubusercontent.com/hasanharman/freelance-timer/main/screenshots/logo.png",
-      url: "https://github.com/hasanharman/freelance-timer/releases/tag/v0.1.0",
-      github: "https://github.com/hasanharman/freelance-timer",
+      logo: "https://raw.githubusercontent.com/hasanharman/opentimer/main/screenshots/logo.png",
+      url: "https://opentimer.vercel.app/",
+      github: "https://github.com/hasanharman/opentimer",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
+    {
+      title: "OpenSS",
+      company: "macOS app",
+      date: "2026",
+      description:
+        "A minimal macOS menu bar app for long screenshots. Pick a window, auto-scroll to the end, and save one clean PNG.",
+      logo: "https://raw.githubusercontent.com/hasanharman/open-ss/main/website/public/icon.png",
+      url: "https://open-ss.vercel.app/",
+      github: "https://github.com/hasanharman/open-ss",
       isRounded: true,
       isSquare: true,
       isTransparent: true,
@@ -83,6 +96,18 @@ export default function Home() {
   ];
 
   const experiences = [
+    {
+      title: "Frontend Developer",
+      company: "OneUp",
+      date: "Dec 2025 - Today",
+      description:
+        "I work on generative AI and product interfaces at OneUp, building conversational tools that help SMBs manage their financial documents more easily.",
+      logo: "/oneup.svg",
+      url: "https://www.oneup.com/",
+      isRounded: true,
+      isSquare: false,
+      isTransparent: false,
+    },
     {
       title: "Frontend Developer & Director",
       company: "Hostbot Inc.",
@@ -179,7 +204,7 @@ export default function Home() {
                 rotate: 0,
                 zIndex: 100,
               }}
-              className="rounded-xl -mr-4 mt-4 p-1 bg-white dark:bg-neutral-800 dark:border-neutral-700 border border-neutral-100 flex-shrink-0 overflow-hidden"
+              className="rounded-xl -mr-4 mt-4 p-1.5 bg-white dark:bg-neutral-800 dark:border-neutral-700 border border-neutral-200 shadow-lg ring-1 ring-black/5 flex-shrink-0 overflow-hidden"
             >
               <Image
                 src={image}
@@ -216,21 +241,23 @@ export default function Home() {
                 </div>
               </HoverCardTrigger>
             </Link>
-            <HoverCardContent className="w-fit max-w-prose p-5">
-              <p className="text-xs text-muted-foreground">{item.date}</p>
-              <div className="text-lg font-semibold">
-                {item.title} at{" "}
-                <Link
-                  href={item.url}
-                  target="_blank"
-                  className="hover:underline hover:underline-offset-2 hover:text-slate-700"
-                >
-                  {item.company}
-                </Link>
+            <HoverCardContent className="w-72 p-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl ring-1 ring-black/5">
+              <div className="rounded-lg bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-4 space-y-1">
+                <p className="text-xs text-muted-foreground">{item.date}</p>
+                <div className="text-base font-semibold">
+                  {item.title} at{" "}
+                  <Link
+                    href={item.url}
+                    target="_blank"
+                    className="hover:underline hover:underline-offset-2 hover:text-slate-700"
+                  >
+                    {item.company}
+                  </Link>
+                </div>
+                <p className="text-sm font-light text-muted-foreground">
+                  {item.description}
+                </p>
               </div>
-              <p className="text-sm font-light text-muted-foreground">
-                {item.description}
-              </p>{" "}
             </HoverCardContent>
           </HoverCard>
         ))}
@@ -302,21 +329,23 @@ export default function Home() {
                 </div>
               </HoverCardTrigger>
             </Link>
-            <HoverCardContent className="w-fit max-w-prose p-5">
-              <p className="text-xs text-muted-foreground">{item.date}</p>
-              <div className="text-lg font-semibold">
-                {item.title} at{" "}
-                <Link
-                  href={item.url}
-                  target="_blank"
-                  className="hover:underline hover:underline-offset-2 hover:text-slate-700"
-                >
-                  {item.company}
-                </Link>
+            <HoverCardContent className="w-72 p-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl ring-1 ring-black/5">
+              <div className="rounded-lg bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 p-4 space-y-1">
+                <p className="text-xs text-muted-foreground">{item.date}</p>
+                <div className="text-base font-semibold">
+                  {item.title} at{" "}
+                  <Link
+                    href={item.url}
+                    target="_blank"
+                    className="hover:underline hover:underline-offset-2 hover:text-slate-700"
+                  >
+                    {item.company}
+                  </Link>
+                </div>
+                <p className="text-sm font-light text-muted-foreground">
+                  {item.description}
+                </p>
               </div>
-              <p className="text-sm font-light text-muted-foreground">
-                {item.description}
-              </p>{" "}
             </HoverCardContent>
           </HoverCard>
         ))}

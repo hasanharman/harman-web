@@ -65,7 +65,7 @@
 
 :root {
   --radius: 0.5rem;
-  --background: hsl(0 0% 100%);
+  --background: hsl(210 20% 98%);
   --foreground: hsl(222.2 84% 4.9%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(222.2 84% 4.9%);

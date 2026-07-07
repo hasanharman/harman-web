@@ -1,0 +1,271 @@
+---
+title: Submit a Next.js Form Straight to Google Forms with Shadcn
+description: Use a Google Form as a free, backendless database for your contact form.
+date: 2026-07-07
+published: true
+---
+
+Every side project eventually needs a contact form, and every contact form eventually needs somewhere to put the submissions. You could stand up an API route, wire in a database, add an email provider... or you could let Google do all of that for free.
+
+A Google Form is really just a public endpoint that writes each submission into a spreadsheet. Nothing stops us from POSTing to that same endpoint from our own UI. So we get to keep a fully custom, accessible [Shadcn](https://ui.shadcn.com/) form on the frontend, while Google quietly handles storage, spam, and even notifications on the backend.
+
+The trade-offs are worth knowing up front:
+
+1. There is **no real response** — Google's endpoint doesn't send back JSON, so we submit optimistically.
+2. It's great for contact forms, waitlists, and feedback — not for anything that needs a confirmation or a transaction.
+
+If those are fine for you, this is the fastest backend you'll ever not write. The full source is on [GitHub](https://github.com/hasanharman/nextjs-google-forms-shadcn).
+
+### Setting Up the Google Form
+
+Create a normal Google Form with the fields you want — here we'll use **First Name**, **Last Name**, **Email**, and **Message**. We only need three things from it: the **form action URL**, the **entry IDs** for each field, and a couple of **meta fields**.
+
+#### Finding the action URL and entry IDs
+
+The easiest way is the [Google Forms HTML Exporter](https://stefano.brilli.me/google-forms-html-exporter/). Paste your form's URL and it hands you the action URL, every `entry.XXXXXXX` field name, and the meta fields in one go.
+
+If you'd rather do it by hand, open the form in edit mode, hit the **three-dot menu (⋮) → Get pre-filled link**, fill in dummy values, and grab the link. The URL will contain parameters like `entry.510901007=dummy` — those numbers are your entry IDs.
+
+### Installing the Components
+
+We'll use Shadcn's newer **Field** primitives along with **Input**, **Textarea**, **Button**, **Spinner**, and **Sonner** for toasts. We'll also lean on **react-hook-form** and **zod**.
+
+```txt
+npx shadcn@latest add field input textarea button spinner sonner
+```
+
+### Configuring the Endpoint
+
+Keep all the Google-specific values in one place so the form logic stays clean. Replace the placeholders with your own IDs.
+
+```tsx
+const GOOGLE_FORM_ACTION = "YOUR_GOOGLE_FORM_ACTION_URL";
+
+const GOOGLE_ENTRIES = {
+  firstName: "YOUR_FIRST_NAME_ENTRY_ID",
+  lastName: "YOUR_LAST_NAME_ENTRY_ID",
+  email: "YOUR_EMAIL_ENTRY_ID",
+  message: "YOUR_MESSAGE_ENTRY_ID",
+} as const;
+
+const GOOGLE_META_FIELDS = {
+  fvv: "1",
+  fbzx: "YOUR_FBZX_VALUE",
+  pageHistory: "0",
+} as const;
+```
+
+The `fvv`, `fbzx`, and `pageHistory` values come from the exporter too — Google expects them alongside your answers, so we always send them.
+
+### Defining the Schema
+
+Zod gives us type-safe validation and, through `zodResolver`, drives all the field errors for free. Notice the `.trim()` calls — they stop "just spaces" from sneaking past a `min` check.
+
+```tsx
+import { z } from "zod";
+
+const formSchema = z.object({
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "First name must be at least 2 characters")
+    .max(40, "First name can be at most 40 characters"),
+  lastName: z
+    .string()
+    .trim()
+    .max(40, "Last name can be at most 40 characters")
+    .optional(),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Please enter a valid email")
+    .max(120, "Email can be at most 120 characters"),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Message must be at least 10 characters")
+    .max(2000, "Message can be at most 2000 characters"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+```
+
+### Building the Payload
+
+Google Forms expects `application/x-www-form-urlencoded` data, keyed by those `entry.*` IDs. A `URLSearchParams` object serializes exactly that. We map our friendly field names onto Google's entry IDs and merge in the meta fields.
+
+```tsx
+function buildGooglePayload(values: FormValues) {
+  return new URLSearchParams({
+    [GOOGLE_ENTRIES.firstName]: values.firstName,
+    [GOOGLE_ENTRIES.lastName]: values.lastName ?? "",
+    [GOOGLE_ENTRIES.email]: values.email,
+    [GOOGLE_ENTRIES.message]: values.message,
+    ...GOOGLE_META_FIELDS,
+  });
+}
+```
+
+### Creating the Form
+
+Now the component itself. Each field is wired through react-hook-form's `Controller` and wrapped in Shadcn's `Field` primitives, which handle the label, the error slot, and the `data-invalid` / `aria-invalid` accessibility state for us.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Eraser } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
+
+export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      message: "",
+    },
+  });
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <FieldGroup className="gap-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Controller
+            control={form.control}
+            name="firstName"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>First Name *</FieldLabel>
+                <Input
+                  id={field.name}
+                  placeholder="Your answer"
+                  aria-invalid={fieldState.invalid}
+                  {...field}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="lastName"
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Last Name</FieldLabel>
+                <Input id={field.name} placeholder="Your answer" {...field} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </div>
+
+        <Controller
+          control={form.control}
+          name="email"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Email *</FieldLabel>
+              <Input
+                id={field.name}
+                placeholder="example@email.com"
+                aria-invalid={fieldState.invalid}
+                {...field}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={form.control}
+          name="message"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Message *</FieldLabel>
+              <Textarea
+                id={field.name}
+                placeholder="Your answer"
+                className="min-h-32"
+                aria-invalid={fieldState.invalid}
+                {...field}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </FieldGroup>
+
+      <div className="flex items-center justify-end gap-3">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => form.reset()}
+          aria-label="Clear form"
+        >
+          <Eraser />
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? <Spinner /> : "Send"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+```
+
+### Submitting to Google
+
+Here's the one detail that trips everyone up: **`mode: "no-cors"`**. Google's endpoint doesn't send CORS headers, so the browser won't let us read the response. That's fine — the submission still lands in your spreadsheet, we just can't inspect what came back. So we treat "the request didn't throw" as success and show a toast.
+
+```tsx
+const onSubmit = async (values: FormValues) => {
+  setIsSubmitting(true);
+
+  try {
+    await fetch(GOOGLE_FORM_ACTION, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+      },
+      body: buildGooglePayload(values),
+    });
+    form.reset();
+    toast.success("Your message has been sent.");
+  } catch {
+    toast.error("Failed to send message. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+```
+
+Because of `no-cors` we never really see a network error unless the user is offline, so the `catch` is more of a safety net than a validation layer. The real validation already happened in Zod before we ever got here.
+
+### That's It
+
+No API route, no database, no email service — just a Google Form doing quiet backend work behind a form you fully control. Drop the whole thing into a `page.tsx`, wire up your own entry IDs, and every submission shows up in your linked Google Sheet.
+
+You can find the complete, copy-paste-ready version on [GitHub](https://github.com/hasanharman/nextjs-google-forms-shadcn). Feel free to email me if you have any questions.
+
+Happy coding!

@@ -14,13 +14,15 @@ export const metadata: Metadata = {
 export default function Contact() {
   return (
     <div className="flex flex-col items-center space-y-3 py-6 text-center">
-      <Image
-        src={Avatar}
-        alt="Hasan Harman"
-        width="150"
-        height="150"
-        className="w-28 h-28 rounded-full border-4"
-      />
+      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border-4">
+        <Image
+          src={Avatar}
+          alt="Hasan Harman"
+          fill
+          sizes="112px"
+          className="object-cover"
+        />
+      </div>
       <h2 className="text-2xl font-semibold">Let&apos;s Engage</h2>
       <p className="text-muted-foreground font-light">
         I&apos;m open to new opportunities and collaborations.

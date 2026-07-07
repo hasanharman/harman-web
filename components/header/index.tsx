@@ -34,6 +34,11 @@ export default function Header({ fontClass }: HeaderProps) {
       isDisabled: false,
     },
     {
+      label: "Components",
+      href: "/components",
+      isDisabled: false,
+    },
+    {
       label: "Photos",
       href: "/photos",
       isDisabled: false,

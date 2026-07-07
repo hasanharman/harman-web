@@ -41,13 +41,22 @@ const projects = [
     tech: ["JavaScript", "npm package"],
   },
   {
-    title: "Freelance Timer",
+    title: "Open Timer",
     description:
-      "A minimal macOS menubar app to track freelance work sessions with projects, summaries, and local-only storage. Features menubar stopwatch, project management with color tags, day/week/month/year summaries with charts, and CSV export.",
-    logo: "https://raw.githubusercontent.com/hasanharman/freelance-timer/main/screenshots/logo.png",
-    url: "https://github.com/hasanharman/freelance-timer/releases/tag/v0.1.0",
-    github: "https://github.com/hasanharman/freelance-timer",
+      "A minimal macOS menubar app to track freelance work sessions with projects, summaries, and local-only storage. Features a menubar stopwatch, project management with color tags, day/week/month/year summaries with charts, and CSV export.",
+    logo: "https://raw.githubusercontent.com/hasanharman/opentimer/main/screenshots/logo.png",
+    url: "https://opentimer.vercel.app/",
+    github: "https://github.com/hasanharman/opentimer",
     tech: ["Swift", "SwiftUI", "Core Data", "Charts"],
+  },
+  {
+    title: "OpenSS",
+    description:
+      "An open-source macOS menu bar app for long screenshots. Pick a window, auto-scroll to the end, and save one clean stitched PNG — with a `Content only` mode that crops browser chrome and a memory-efficient capture pipeline.",
+    logo: "https://raw.githubusercontent.com/hasanharman/open-ss/main/website/public/icon.png",
+    url: "https://open-ss.vercel.app/",
+    github: "https://github.com/hasanharman/open-ss",
+    tech: ["Swift 6", "AppKit", "ScreenCaptureKit", "GitHub Actions"],
   },
 ];
 

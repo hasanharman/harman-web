@@ -6,6 +6,7 @@ import { ExternalLink, BookOpen } from "lucide-react";
 import VinylRecord from "@/components/vinyl-record";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
+import PhotoFrames from "@/components/photo-frames";
 
 export const metadata: Metadata = {
   title: "Hasan Harman - Components",
@@ -39,6 +40,15 @@ const showcases: Showcase[] = [
       "Live clocks across time zones, plus the current Star Trek stardate via my trekdate package.",
     previewClassName: "min-h-[240px] items-center bg-muted/30 p-6",
     preview: <WorldClocks />,
+  },
+  {
+    title: "Photo Frames",
+    description:
+      "A polaroid-style stack of framed photos that straighten and pop on hover — the set from my homepage.",
+    hint: "Hover a photo",
+    fullWidth: true,
+    previewClassName: "min-h-[260px] items-center bg-muted/30 p-6 overflow-hidden",
+    preview: <PhotoFrames />,
   },
   {
     title: "3D Photo Carousel",

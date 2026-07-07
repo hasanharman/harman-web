@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 import {
   HoverCard,
@@ -13,6 +12,7 @@ import { cn } from "@/lib/utils";
 
 import SocialMediaButtons from "@/components/social-media-buttons";
 import WorldClocks from "@/components/world-clocks";
+import PhotoFrames from "@/components/photo-frames";
 
 import Avatar from "@/assets/avatar.webp";
 import SightImage from "@/assets/sight.webp";
@@ -25,7 +25,6 @@ import Pacemaker from "@/assets/companies/pacemaker.jpg";
 
 export default function Home() {
   const images = [SightImage, HabitImage, HomeImage, AstroImage];
-  const imageRotations = [-7, 4, -3, 8];
 
   const projects = [
     {
@@ -187,35 +186,7 @@ export default function Home() {
         </p>
         <WorldClocks />
         <SocialMediaButtons />
-        <div className="flex justify-center items-center">
-          {images.map((image, idx) => (
-            <motion.div
-              key={"images" + idx}
-              style={{
-                rotate: imageRotations[idx % imageRotations.length],
-              }}
-              whileHover={{
-                scale: 1.1,
-                rotate: 0,
-                zIndex: 100,
-              }}
-              whileTap={{
-                scale: 1.1,
-                rotate: 0,
-                zIndex: 100,
-              }}
-              className="rounded-xl -mr-4 mt-4 p-1.5 bg-white dark:bg-neutral-800 dark:border-neutral-700 border border-neutral-200 shadow-lg ring-1 ring-black/5 flex-shrink-0 overflow-hidden"
-            >
-              <Image
-                src={image}
-                alt="personal images"
-                width="500"
-                height="500"
-                className="rounded-lg h-20 w-20 md:h-40 md:w-56 object-cover flex-shrink-0"
-              />
-            </motion.div>
-          ))}
-        </div>
+        <PhotoFrames images={images} />
       </div>
       {/* Experience section */}
       <h3 className="text-lg font-semibold mt-10 mb-5">Experiences</h3>

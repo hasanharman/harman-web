@@ -188,22 +188,23 @@ export default function Home() {
         <SocialMediaButtons />
         <PhotoFrames images={images} />
       </div>
-      {/* Experience section */}
-      <h3 className="text-lg font-semibold mt-10 mb-5">Experiences</h3>
+      {/* Projects section */}
+      <h3 className="text-lg font-semibold mt-10 mb-5">Projects</h3>
       <div className="hidden md:flex items-center gap-3">
-        {experiences.map((item, id) => (
+        {projects.map((item, id) => (
           <HoverCard key={id}>
             <Link href={item.url} target="_blank">
               <HoverCardTrigger asChild>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card transition-colors hover:border-foreground/30">
+                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border bg-card p-1.5 transition-colors hover:border-foreground/30">
                   <Image
                     src={item.logo}
                     alt={item.company}
                     width="80"
                     height="80"
                     className={cn(
-                      "h-10 w-10 object-contain transition-transform duration-150 hover:scale-110",
-                      item.isRounded && "rounded-lg",
+                      // object-contain so square icons fill the tile while
+                      // non-square logos (e.g. TrekDate) show whole, uncropped.
+                      "h-full w-full rounded-xl object-contain transition-transform duration-150 hover:scale-105",
                       // monochrome dark line-art logo (form-builder) — invert it
                       // in dark mode so it isn't lost on the dark tile.
                       typeof item.logo === "string" &&
@@ -236,7 +237,7 @@ export default function Home() {
         ))}
       </div>
       <div className="md:hidden space-y-5 my-10">
-        {experiences.map((experience, idx) => (
+        {projects.map((experience, idx) => (
           <div key={"experience" + idx} className="flex space-x-5 items-start">
             {experience.isTransparent ? (
               <div className="flex justify-center items-center rounded-full border h-10 w-10 overflow-hidden shadow-lg">
@@ -278,28 +279,20 @@ export default function Home() {
           </div>
         ))}
       </div>
-      {/* Projects section */}
-      <h3 className="text-lg font-semibold mt-10 mb-5">Projects</h3>
+      {/* Experience section */}
+      <h3 className="text-lg font-semibold mt-10 mb-5">Experiences</h3>
       <div className="hidden md:flex items-center gap-3">
-        {projects.map((item, id) => (
+        {experiences.map((item, id) => (
           <HoverCard key={id}>
             <Link href={item.url} target="_blank">
               <HoverCardTrigger asChild>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card transition-colors hover:border-foreground/30">
+                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border bg-card p-1.5 transition-colors hover:border-foreground/30">
                   <Image
                     src={item.logo}
                     alt={item.company}
                     width="80"
                     height="80"
-                    className={cn(
-                      "h-10 w-10 object-contain transition-transform duration-150 hover:scale-110",
-                      item.isRounded && "rounded-lg",
-                      // monochrome dark line-art logo (form-builder) — invert it
-                      // in dark mode so it isn't lost on the dark tile.
-                      typeof item.logo === "string" &&
-                        item.logo.includes("form-builder") &&
-                        "dark:invert"
-                    )}
+                    className="h-full w-full rounded-xl object-contain transition-transform duration-150 hover:scale-105"
                   />
                 </div>
               </HoverCardTrigger>
@@ -326,7 +319,7 @@ export default function Home() {
         ))}
       </div>
       <div className="md:hidden space-y-5 my-10">
-        {projects.map((experience, idx) => (
+        {experiences.map((experience, idx) => (
           <div key={"experience" + idx} className="flex space-x-5 items-start">
             {experience.isTransparent ? (
               <div className="flex justify-center items-center rounded-full border h-10 w-10 overflow-hidden shadow-lg">

@@ -3,6 +3,26 @@ import rehypeSlug from "rehype-slug";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
+// Turn on line numbers for every highlighted code block by adding the
+// `data-line-numbers` attribute rehype-pretty-code leaves off. The matching
+// counter CSS already lives in styles/mdx.css. Runs after rehype-pretty-code.
+function rehypeCodeLineNumbers() {
+  const walk = (node: any, parent: any) => {
+    if (
+      node.type === "element" &&
+      node.tagName === "code" &&
+      parent?.tagName === "pre" &&
+      node.properties?.["data-language"]
+    ) {
+      node.properties["data-line-numbers"] = "";
+    }
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) walk(child, node);
+    }
+  };
+  return (tree: any) => walk(tree, null);
+}
+
 const computedFields = <T extends { slug: string }>(data: T) => ({
   ...data,
   slugAsParams: data.slug.split("/").slice(1).join("/"),
@@ -37,7 +57,16 @@ export default defineConfig({
   mdx: {
     rehypePlugins: [
       rehypeSlug,
-      [rehypePrettyCode, { theme: "github-dark" }],
+      [
+        rehypePrettyCode,
+        {
+          // Dual theme: light by default, dark under the `.dark` class.
+          // keepBackground:false lets the <Pre> card control the background.
+          theme: { light: "github-light", dark: "github-dark" },
+          keepBackground: false,
+        },
+      ],
+      rehypeCodeLineNumbers,
       [
         rehypeAutolinkHeadings,
         {

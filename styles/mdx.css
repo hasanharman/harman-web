@@ -1,11 +1,24 @@
 @reference "../app/globals.css";
 
 [data-rehype-pretty-code-figure] pre {
-  @apply px-0;
+  /* Drop the dark background @tailwindcss/typography forces on `pre` so the
+     <Pre> card's theme-aware background shows through. */
+  @apply px-0 bg-transparent!;
 }
 
 [data-rehype-pretty-code-figure] code {
   @apply text-sm leading-loose! md:text-base border-0 p-0;
+}
+
+/* Dual Shiki theme: token colors follow the light theme by default and switch
+   to the dark theme under the `.dark` class. Only spans carrying the shiki
+   color variables are targeted, so line wrappers are left untouched. */
+[data-rehype-pretty-code-figure] span[style*="--shiki-light"] {
+  color: var(--shiki-light);
+}
+
+.dark [data-rehype-pretty-code-figure] span[style*="--shiki-dark"] {
+  color: var(--shiki-dark) !important;
 }
 
 [data-rehype-pretty-code-figure] code[data-line-numbers] {
@@ -40,6 +53,10 @@
   @apply no-underline hover:underline;
 }
 
-img {
+/* Scope full-width images to article content only. A bare `img` rule here is
+   global once this stylesheet loads and leaks across client-side navigation
+   (e.g. stretching the avatar on the home page). */
+.prose img {
   width: 100%;
+  height: auto;
 }

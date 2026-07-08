@@ -37,13 +37,13 @@ export default function TableOfContents({ tocList }: TableOfContentsProps) {
                   className="flex flex-col items-end space-y-2"
                   key={item.title}
                 >
-                  <div className="w-7 flex flex-col items-end h-0.5 bg-slate-400 hover:bg-black rounded-xl" />
+                  <div className="w-7 flex flex-col items-end h-0.5 bg-muted-foreground/50 hover:bg-foreground rounded-xl transition-colors" />
                   {item.items && item.items.length > 0 && (
                     <div className="flex flex-col space-y-2">
                       {item.items.map((subItem, subIndex) => (
                         <div
                           key={subItem.title}
-                          className="w-5 flex flex-col items-end h-0.5 bg-slate-400 hover:bg-black rounded-xl"
+                          className="w-5 flex flex-col items-end h-0.5 bg-muted-foreground/50 hover:bg-foreground rounded-xl transition-colors"
                         />
                       ))}
                     </div>

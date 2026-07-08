@@ -11,15 +11,13 @@ Last weekend, while scrolling through Twitter, I came across a video of a spinni
 
 I still feel a pang of sadness whenever I think of Chester 💔, but I’m also grateful that Emily continues to carry the torch. Their music has always been a source of inspiration for me.
 
-Anyway, back to the topic! Inspired by that CD animation, I decided to create a spinning vinyl record component in React using **Framer Motion**. Let’s build it together!
+Anyway, back to the topic! Inspired by that CD animation, I decided to create a spinning vinyl record component in React using **Motion** (the library formerly known as Framer Motion — it's now published as `motion` and imported from `motion/react`). Let’s build it together!
 
 ### Getting Started
 
 This will be a simple component, so we’ll only need to install one package.
 
-```js
-npm i framer-motion
-```
+<InstallTabs pkg="motion" />
 
 1. Create a new file in the `components` folder and name it `vinyl-record.tsx`.
 2. Copy the code below into your new file.
@@ -28,7 +26,7 @@ npm i framer-motion
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 
 const DiscVariants = {

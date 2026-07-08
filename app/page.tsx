@@ -195,18 +195,20 @@ export default function Home() {
           <HoverCard key={id}>
             <Link href={item.url} target="_blank">
               <HoverCardTrigger asChild>
-                <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card transition-colors hover:border-foreground/30">
                   <Image
                     src={item.logo}
                     alt={item.company}
                     width="80"
                     height="80"
                     className={cn(
-                      "w-10 h-10  hover:scale-110 transition-all duration-150",
-                      {
-                        "rounded-lg": !item.isRounded,
-                        "object-contain": item.isSquare,
-                      }
+                      "h-10 w-10 object-contain transition-transform duration-150 hover:scale-110",
+                      item.isRounded && "rounded-lg",
+                      // monochrome dark line-art logo (form-builder) — invert it
+                      // in dark mode so it isn't lost on the dark tile.
+                      typeof item.logo === "string" &&
+                        item.logo.includes("form-builder") &&
+                        "dark:invert"
                     )}
                   />
                 </div>
@@ -283,18 +285,20 @@ export default function Home() {
           <HoverCard key={id}>
             <Link href={item.url} target="_blank">
               <HoverCardTrigger asChild>
-                <div className="border-2 border-white hover:border-muted rounded-3xl p-5">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-card transition-colors hover:border-foreground/30">
                   <Image
                     src={item.logo}
                     alt={item.company}
                     width="80"
                     height="80"
                     className={cn(
-                      "w-10 h-10  hover:scale-110 transition-all duration-150",
-                      {
-                        "rounded-lg": !item.isRounded,
-                        "object-contain": item.isSquare,
-                      }
+                      "h-10 w-10 object-contain transition-transform duration-150 hover:scale-110",
+                      item.isRounded && "rounded-lg",
+                      // monochrome dark line-art logo (form-builder) — invert it
+                      // in dark mode so it isn't lost on the dark tile.
+                      typeof item.logo === "string" &&
+                        item.logo.includes("form-builder") &&
+                        "dark:invert"
                     )}
                   />
                 </div>

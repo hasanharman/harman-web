@@ -1,0 +1,80 @@
+---
+title: Why I Built OpenSS, a Long Screenshot App for macOS
+description: Claude made me something great, I couldn't share it, and a Windows habit I missed turned into a free, open-source menu bar app.
+date: 2026-07-08
+published: true
+---
+
+![OpenSS — long screenshots from your Mac menu bar](/static/openss-preview.png "OpenSS home page")
+
+It started with a screenshot I couldn't take.
+
+I was working with Claude and it generated a genuinely useful artifact for something I was building. I wanted to send it to a colleague and get feedback, nothing fancy. But I don't have a Claude Team plan, so I couldn't share it natively. The obvious move was to screenshot it and drop it in a DM.
+
+Except the thing was long. Taller than my screen. And macOS's built-in screenshot tool stops at the viewport, every time.
+
+### The habit I didn't know I missed
+
+Back in my Windows days, long screenshots were muscle memory. The flow was three steps:
+
+1. Capture the full page.
+2. Send it to someone.
+3. Done. ✅
+
+No cropping, no stitching five images together in Figma, no "let me screen-record it instead." You grabbed the whole thing and moved on. I used it constantly and never thought about it, which is exactly how you know a tool is good.
+
+On macOS I kept reaching for that same reflex and hitting a wall. The screenshot ends where the screen ends. Everything below the fold just isn't there. For a threaded conversation, a long doc, or a tall AI artifact, that's useless.
+
+So I had two options: keep being annoyed forever, or build the thing.
+
+### Building it
+
+I built **OpenSS** as a native macOS menu bar app in Swift 6. No Electron, no web view pretending to be a desktop app. Just a small icon that lives in your menu bar and does one job well.
+
+Two parts turned out to be the real work.
+
+#### The capture and stitching logic
+
+This is the part that actually had to be solved. A "long screenshot" isn't one capture, it's many. You scroll the window a bit, grab a frame, scroll again, grab another, and keep going until you reach the bottom. Then you stitch every slice into one tall PNG.
+
+The tricky question is: **how do you know when you've hit the end?**
+
+You can't trust scroll position — some apps report it, most don't, and web content lies. So instead of asking the window where it is, OpenSS just watches the pixels. It auto-scrolls, and after each step it compares the new frame against the previous one. When a fresh capture looks basically identical to the last, there's nothing left to scroll and it stops.
+
+Comparing full-resolution frames on every step would be slow and eat memory, so each capture gets reduced to a small fingerprint and those are what get compared:
+
+```txt
+capture frame  →  shrink to a tiny fingerprint  →  compare to last fingerprint
+   ↑                                                        │
+   └──────────── scroll & repeat while different ───────────┘
+```
+
+That one decision — compare fingerprints, not full frames — is what keeps the pipeline memory-efficient and lets it work across apps that have no idea it's happening. There's also a "content only" mode that trims browser chrome so you get the page, not the toolbar.
+
+#### The menu bar UX
+
+The second half was making it feel like a Mac app, not a script with a UI bolted on. You hit `⌘⇧L` (or click the menu bar icon) and a popover drops down with live thumbnails of your open windows. You hover to preview, click the one you want, and capture starts automatically. The finished PNG lands on your Desktop, ready to send.
+
+Getting that to feel instant and obvious took more iteration than the capture engine did. Permissions, thumbnail rendering, the hover-then-click rhythm — the invisible polish is most of what makes a menu bar app feel native instead of clunky.
+
+### Shipping it free and open source
+
+I didn't want this to be another app with a locked feature behind a paywall. The whole reason it exists is that a simple thing was missing, so the fix should be simple to get too. No complicated setup. No account. No pro tier.
+
+- **Free.** Download the DMG, drag it to Applications, done.
+- **Native.** macOS 14+, universal build for Apple Silicon and Intel.
+- **Open source.** The whole thing is on GitHub — read it, fork it, send a PR.
+
+<GitHubCard
+  repo="hasanharman/open-ss"
+  title="hasanharman/open-ss"
+  description="A minimal macOS menu bar app for long screenshots — Swift 6, free and open source."
+/>
+
+It's great for exactly the things that don't fit on a screen: Twitter threads, Medium articles, Notion docs, GitHub repos, and yes — AI artifacts you want a second opinion on.
+
+### Try it
+
+If you've ever hit that "the screenshot stops halfway" wall on your Mac, [OpenSS](https://open-ss.vercel.app/) is for you. Grab it, capture something tall, and send it to someone.
+
+Three steps. Just like I remembered.

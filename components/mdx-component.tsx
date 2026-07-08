@@ -3,6 +3,7 @@ import * as runtime from "react/jsx-runtime";
 
 import { Callout } from "@/components/callout";
 import VinylRecord from "@/components/vinyl-record";
+import { GitHubCard } from "@/components/github-card";
 
 const useMDXComponent = (code: string) => {
   const fn = new Function(code);
@@ -13,6 +14,7 @@ const components = {
   Image,
   Callout,
   VinylRecord,
+  GitHubCard,
 };
 
 interface MdxProps {

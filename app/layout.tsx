@@ -7,6 +7,8 @@ import NextTopLoader from "nextjs-toploader";
 import { Questrial } from "next/font/google";
 
 import Header from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
+import { PullCord } from "@/components/pull-cord";
 
 import "./globals.css";
 
@@ -33,11 +35,19 @@ export default function RootLayout({
 }>) {
   return (
     <ViewTransitions>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className="max-w-3xl mx-auto space-y-6 my-5 px-2 md:px-0">
-          <NextTopLoader color="#2F7B70" />
-          <Header fontClass={font.className} />
-          <main className={font.className}>{children}</main>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <NextTopLoader color="#2F7B70" />
+            <PullCord />
+            <Header fontClass={font.className} />
+            <main className={font.className}>{children}</main>
+          </ThemeProvider>
         </body>
       </html>
       <Analytics />

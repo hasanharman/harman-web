@@ -1,6 +1,8 @@
 import { posts } from "#site/content";
 import { MDXContent } from "@/components/mdx-component";
 import { notFound } from "next/navigation";
+import { Link } from "next-view-transitions";
+import { ArrowLeft } from "lucide-react";
 
 import "@/styles/mdx.css";
 import { Metadata } from "next";
@@ -80,6 +82,13 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <article className="prose dark:prose-invert max-w-none">
+      <Link
+        href="/writings"
+        className="not-prose mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Writings
+      </Link>
       <h1 className="text-3xl font-semibold">{post?.title}</h1>
       {post.description ? (
         <p className="text-lg text-muted-foreground">{post.description}</p>

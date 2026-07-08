@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { StaticImageData } from "next/image";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 import SightImage from "@/assets/sight.webp";
 import HabitImage from "@/assets/habit.webp";

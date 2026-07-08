@@ -92,25 +92,26 @@
 }
 
 .dark {
-  --background: hsl(222.2 84% 4.9%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222.2 84% 4.9%);
-  --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(222.2 84% 4.9%);
-  --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(210 40% 98%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
+  /* Neutral gray dark palette (was slate/blue-tinted). */
+  --background: hsl(0 0% 5%);
+  --foreground: hsl(0 0% 96%);
+  --card: hsl(0 0% 8%);
+  --card-foreground: hsl(0 0% 96%);
+  --popover: hsl(0 0% 8%);
+  --popover-foreground: hsl(0 0% 96%);
+  --primary: hsl(0 0% 96%);
+  --primary-foreground: hsl(0 0% 9%);
+  --secondary: hsl(0 0% 15%);
+  --secondary-foreground: hsl(0 0% 96%);
+  --muted: hsl(0 0% 14%);
+  --muted-foreground: hsl(0 0% 63%);
+  --accent: hsl(0 0% 18%);
+  --accent-foreground: hsl(0 0% 96%);
   --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(212.7 26.8% 83.9%);
+  --destructive-foreground: hsl(0 0% 96%);
+  --border: hsl(0 0% 17%);
+  --input: hsl(0 0% 20%);
+  --ring: hsl(0 0% 72%);
   --chart-1: hsl(220 70% 50%);
   --chart-2: hsl(160 60% 45%);
   --chart-3: hsl(30 80% 55%);
@@ -535,4 +536,19 @@ circle {
   text-align: center;
   margin-bottom: 20px;
 }
+}
+
+/* Pull-cord theme reveal: a circular clip wipe driven by the View Transition
+   API. Scoped to [data-theme-reveal] so it never touches the page-navigation
+   transitions handled by next-view-transitions. */
+:root[data-theme-reveal]::view-transition-old(root),
+:root[data-theme-reveal]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root[data-theme-reveal]::view-transition-old(root) {
+  z-index: 0;
+}
+:root[data-theme-reveal]::view-transition-new(root) {
+  z-index: 1;
 }

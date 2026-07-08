@@ -1,3 +1,27 @@
+// Runs Velite to compile content/ (MDX) into .velite/ on every build.
+// In dev (`next dev --webpack`) it watches and recompiles automatically, so new
+// articles show up without a manual `velite` run.
+class VeliteWebpackPlugin {
+  static started = false;
+  constructor(/** @type {import('velite').Options} */ options = {}) {
+    this.options = options;
+  }
+  apply(/** @type {import('webpack').Compiler} */ compiler) {
+    // beforeCompile runs multiple times in Next (server + edge + client); the
+    // static `started` guard makes sure Velite only boots once per process.
+    compiler.hooks.beforeCompile.tapPromise("VeliteWebpackPlugin", async () => {
+      if (VeliteWebpackPlugin.started) return;
+      VeliteWebpackPlugin.started = true;
+      const dev = compiler.options.mode === "development";
+      this.options.watch = this.options.watch ?? dev;
+      this.options.clean = this.options.clean ?? !dev;
+      // velite is ESM-only, so load it via dynamic import from this CJS config.
+      const { build } = await import("velite");
+      await build(this.options);
+    });
+  }
+}
+
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
@@ -76,6 +100,9 @@ module.exports = {
 
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
+
+    // Compile MDX content via Velite as part of the webpack build.
+    config.plugins.push(new VeliteWebpackPlugin());
 
     return config;
   },

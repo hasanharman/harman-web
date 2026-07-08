@@ -34,8 +34,8 @@ export default function Header({ fontClass }: HeaderProps) {
       isDisabled: false,
     },
     {
-      label: "Components",
-      href: "/components",
+      label: "Lab",
+      href: "/lab",
       isDisabled: false,
     },
     {

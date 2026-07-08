@@ -7,11 +7,27 @@ import VinylRecord from "@/components/vinyl-record";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
+import { PullCord } from "@/components/pull-cord";
+import TableOfContents from "@/components/table-of-contents";
+
+const sampleToc = [
+  { title: "Getting started", url: "#getting-started" },
+  {
+    title: "Installation",
+    url: "#installation",
+    items: [
+      { title: "Requirements", url: "#requirements" },
+      { title: "Setup", url: "#setup" },
+    ],
+  },
+  { title: "Usage", url: "#usage" },
+  { title: "API reference", url: "#api-reference" },
+];
 
 export const metadata: Metadata = {
-  title: "Hasan Harman - Components",
+  title: "Hasan Harman - Lab",
   description:
-    "A showcase of interactive React components I've built — animations, motion, and small UI experiments.",
+    "A lab of interactive React components I've built — animations, motion, and small UI experiments.",
 };
 
 type Showcase = {
@@ -26,9 +42,17 @@ type Showcase = {
 
 const showcases: Showcase[] = [
   {
+    title: "Pull-Cord Theme Switcher",
+    description:
+      "A light-switch cord that hangs from the top — give it a pull to flip the site theme with a circular reveal. 2D spring physics, no 3D libraries.",
+    hint: "Pull the cord",
+    previewClassName: "min-h-[280px] items-start bg-muted/30",
+    preview: <PullCord className="absolute inset-x-0 top-0 z-10 mx-auto" />,
+  },
+  {
     title: "Vinyl Record",
     description:
-      "A record sleeve that slides its disc out on hover, built with Framer Motion variants.",
+      "A record sleeve that slides its disc out on hover, built with Motion variants.",
     hint: "Hover the cover",
     writing:
       "/writings/creating-a-vinyl-record-animation-in-react-using-framer-motion",
@@ -42,6 +66,20 @@ const showcases: Showcase[] = [
     preview: <WorldClocks />,
   },
   {
+    title: "Table of Contents",
+    description:
+      "The Notion-style floating ToC from my writeups — collapsed tick marks that expand into the full outline on hover.",
+    previewClassName: "min-h-[240px] items-center justify-center bg-muted/30",
+    preview: (
+      <>
+        <span className="text-xs text-muted-foreground">
+          Hover the marks →
+        </span>
+        <TableOfContents tocList={sampleToc} />
+      </>
+    ),
+  },
+  {
     title: "Photo Frames",
     description:
       "A polaroid-style stack of framed photos that straighten and pop on hover — the set from my homepage.",
@@ -53,7 +91,7 @@ const showcases: Showcase[] = [
   {
     title: "3D Photo Carousel",
     description:
-      "A draggable, cylindrical photo carousel driven by Framer Motion's rotate3d transforms.",
+      "A draggable, cylindrical photo carousel driven by Motion's rotate3d transforms.",
     hint: "Drag to spin",
     fullWidth: true,
     previewClassName: "h-[420px] overflow-hidden bg-muted/30",
@@ -61,10 +99,10 @@ const showcases: Showcase[] = [
   },
 ];
 
-export default function Components() {
+export default function Lab() {
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-semibold">Components</h1>
+      <h1 className="text-2xl font-semibold">Lab</h1>
       <p className="text-muted-foreground font-light">
         A showcase of interactive components I&apos;ve built along the way —
         animations, motion experiments, and small UI pieces. Play with them

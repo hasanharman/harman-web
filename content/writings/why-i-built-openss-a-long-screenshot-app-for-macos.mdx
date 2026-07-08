@@ -44,9 +44,14 @@ You can't trust scroll position — some apps report it, most don't, and web con
 Comparing full-resolution frames on every step would be slow and eat memory, so each capture gets reduced to a small fingerprint and those are what get compared:
 
 ```txt
-capture frame  →  shrink to a tiny fingerprint  →  compare to last fingerprint
-   ↑                                                        │
-   └──────────── scroll & repeat while different ───────────┘
+capture a frame
+      ↓
+shrink it to a tiny fingerprint
+      ↓
+compare with the previous fingerprint
+      ↓
+ different? → scroll down and capture again
+ same?      → reached the end, stitch the slices
 ```
 
 That one decision — compare fingerprints, not full frames — is what keeps the pipeline memory-efficient and lets it work across apps that have no idea it's happening. There's also a "content only" mode that trims browser chrome so you get the page, not the toolbar.

@@ -7,7 +7,7 @@ import {
   useAnimation,
   useMotionValue,
   useTransform,
-} from "framer-motion";
+} from "motion/react";
 import { useMediaQuery } from "@react-hook/media-query";
 
 const IMGS = [

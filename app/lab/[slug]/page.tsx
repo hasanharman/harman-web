@@ -2,22 +2,32 @@ import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BookOpen, Package } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 
-import { LAB_ITEMS, getLabItem, installCommand } from "@/config/lab";
+import {
+  LAB_ITEMS,
+  getLabItem,
+  installCommand,
+  usageSnippet,
+} from "@/config/lab";
 import { getRegistryItem } from "@/lib/registry";
-import { InstallTabs } from "@/components/install-tabs";
 import { PreviewTabs } from "@/components/lab/preview-tabs";
-import { Badge } from "@/components/ui/badge";
+import { Installation } from "@/components/lab/installation";
+import { CodeBlock } from "@/components/lab/code-block";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+const INSTALLABLE = LAB_ITEMS.filter((item) => item.installable);
+
+/** Strip a version specifier from a dependency string, keeping scopes intact. */
+function depName(dep: string) {
+  return dep.replace(/@[\^~\d][^@]*$/, "");
+}
+
 export function generateStaticParams() {
-  return LAB_ITEMS.filter((item) => item.installable).map((item) => ({
-    slug: item.slug,
-  }));
+  return INSTALLABLE.map((item) => ({ slug: item.slug }));
 }
 
 export async function generateMetadata({
@@ -39,28 +49,29 @@ export default async function LabComponentPage({ params }: PageProps) {
 
   const registryItem = getRegistryItem(slug);
   const code = registryItem?.files?.[0]?.content ?? "";
-  const dependencies = registryItem?.dependencies ?? [];
+  const filename = registryItem?.files?.[0]?.path;
+  const dependencies = (registryItem?.dependencies ?? []).map(depName);
   const registryDependencies = registryItem?.registryDependencies ?? [];
 
-  return (
-    <div className="space-y-6">
-      <Link
-        href="/lab"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to Lab
-      </Link>
+  const index = INSTALLABLE.findIndex((i) => i.slug === slug);
+  const prev = index > 0 ? INSTALLABLE[index - 1] : null;
+  const next =
+    index < INSTALLABLE.length - 1 ? INSTALLABLE[index + 1] : null;
 
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold">{item.title}</h1>
-          <Badge variant="secondary" className="gap-1">
-            <Package className="h-3 w-3" />
-            Installable
-          </Badge>
-        </div>
-        <p className="text-muted-foreground font-light">{item.description}</p>
+  return (
+    <div className="space-y-8">
+      <div className="space-y-3">
+        <Link
+          href="/lab"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Lab
+        </Link>
+        <h1 className="text-3xl font-semibold tracking-tight">{item.title}</h1>
+        <p className="text-lg font-light text-muted-foreground">
+          {item.description}
+        </p>
         {item.writing ? (
           <Link
             href={item.writing}
@@ -75,35 +86,61 @@ export default async function LabComponentPage({ params }: PageProps) {
       <PreviewTabs
         preview={item.preview}
         code={code}
+        filename={filename}
         hint={item.hint}
         previewClassName={item.previewClassName}
       />
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Installation</h2>
-        <p className="text-sm font-light text-muted-foreground">
-          Add this component to your project with the shadcn CLI.
-        </p>
-        <InstallTabs exec={installCommand(slug)} />
+      <section className="space-y-4">
+        <h2
+          id="installation"
+          className="scroll-mt-20 text-2xl font-semibold tracking-tight"
+        >
+          Installation
+        </h2>
+        <Installation
+          command={installCommand(slug)}
+          dependencies={dependencies}
+          registryDependencies={registryDependencies}
+          code={code}
+          filename={filename}
+        />
       </section>
 
-      {dependencies.length || registryDependencies.length ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Dependencies</h2>
-          <div className="flex flex-wrap gap-2">
-            {registryDependencies.map((dep) => (
-              <Badge key={dep} variant="outline">
-                {dep}
-              </Badge>
-            ))}
-            {dependencies.map((dep) => (
-              <Badge key={dep} variant="secondary">
-                {dep}
-              </Badge>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <section className="space-y-4">
+        <h2
+          id="usage"
+          className="scroll-mt-20 text-2xl font-semibold tracking-tight"
+        >
+          Usage
+        </h2>
+        <CodeBlock code={usageSnippet(item)} />
+      </section>
+
+      <nav className="flex items-center justify-between border-t pt-6 text-sm">
+        {prev ? (
+          <Link
+            href={`/lab/${prev.slug}`}
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            {prev.title}
+          </Link>
+        ) : (
+          <span />
+        )}
+        {next ? (
+          <Link
+            href={`/lab/${next.slug}`}
+            className="inline-flex items-center gap-1 text-right text-muted-foreground hover:text-foreground"
+          >
+            {next.title}
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        ) : (
+          <span />
+        )}
+      </nav>
     </div>
   );
 }

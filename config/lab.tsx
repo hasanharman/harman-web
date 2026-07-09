@@ -41,7 +41,22 @@ export type LabItem = {
   previewClassName?: string;
   /** Whether this component is published to the shadcn registry. */
   installable?: boolean;
+  /** Exported symbol used in the Usage snippet, e.g. "VinylRecord". */
+  importName: string;
+  /** True when the component is a named (not default) export. */
+  named?: boolean;
+  /** Optional full Usage snippet override (for components that need props). */
+  usage?: string;
 };
+
+/** The import + basic JSX shown in the Usage section. */
+export function usageSnippet(item: LabItem) {
+  if (item.usage) return item.usage;
+  const importLine = item.named
+    ? `import { ${item.importName} } from "@/components/${item.slug}";`
+    : `import ${item.importName} from "@/components/${item.slug}";`;
+  return `${importLine}\n\nexport default function Example() {\n  return <${item.importName} />;\n}`;
+}
 
 export const LAB_ITEMS: LabItem[] = [
   {
@@ -51,6 +66,8 @@ export const LAB_ITEMS: LabItem[] = [
       "A light-switch cord that hangs from the top — give it a pull to flip the site theme with a circular reveal. 2D spring physics, no 3D libraries.",
     hint: "Pull the cord",
     installable: true,
+    importName: "PullCord",
+    named: true,
     previewClassName: "min-h-[280px] items-start bg-muted/30",
     preview: <PullCord className="absolute inset-x-0 top-0 z-10 mx-auto" />,
   },
@@ -61,6 +78,7 @@ export const LAB_ITEMS: LabItem[] = [
       "A record sleeve that slides its disc out on hover, built with Motion variants.",
     hint: "Hover the cover",
     installable: true,
+    importName: "VinylRecord",
     writing:
       "/writings/creating-a-vinyl-record-animation-in-react-using-framer-motion",
     preview: <VinylRecord />,
@@ -71,6 +89,7 @@ export const LAB_ITEMS: LabItem[] = [
     description:
       "Live clocks across time zones, plus the current Star Trek stardate via my trekdate package.",
     installable: true,
+    importName: "WorldClocks",
     previewClassName: "min-h-[240px] items-center bg-muted/30 p-6",
     preview: <WorldClocks />,
   },
@@ -80,6 +99,17 @@ export const LAB_ITEMS: LabItem[] = [
     description:
       "The Notion-style floating ToC from my writeups — collapsed tick marks that expand into the full outline on hover.",
     installable: true,
+    importName: "TableOfContents",
+    usage: `import TableOfContents from "@/components/table-of-contents";
+
+const toc = [
+  { title: "Getting started", url: "#getting-started" },
+  { title: "Usage", url: "#usage" },
+];
+
+export default function Example() {
+  return <TableOfContents tocList={toc} />;
+}`,
     previewClassName: "min-h-[240px] items-center justify-center bg-muted/30",
     preview: (
       <>
@@ -95,6 +125,7 @@ export const LAB_ITEMS: LabItem[] = [
       "A polaroid-style stack of framed photos that straighten and pop on hover — the set from my homepage.",
     hint: "Hover a photo",
     installable: true,
+    importName: "PhotoFrames",
     fullWidth: true,
     previewClassName:
       "min-h-[260px] items-center bg-muted/30 p-6 overflow-hidden",
@@ -107,6 +138,7 @@ export const LAB_ITEMS: LabItem[] = [
       "A draggable, cylindrical photo carousel driven by Motion's rotate3d transforms.",
     hint: "Drag to spin",
     installable: true,
+    importName: "ThreeDPhotoCarousel",
     fullWidth: true,
     previewClassName: "h-[420px] overflow-hidden bg-muted/30",
     preview: <ThreeDPhotoCarousel />,

@@ -23,7 +23,8 @@ export default function HomeClocks() {
         <WallSwitch checked={analog} onCheckedChange={setAnalog} size={44} />
       </div>
 
-      <div className="flex min-h-[88px] items-center">
+      {/* Fixed width stops the row re-centering (and the switch shifting) on swap. */}
+      <div className="flex min-h-[88px] w-[550px] max-w-full items-center justify-center">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={analog ? "analog" : "digital"}

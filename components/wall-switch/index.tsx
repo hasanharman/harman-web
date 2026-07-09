@@ -84,41 +84,41 @@ export default function WallSwitch({
           <button
             type="button"
             role="switch"
-          aria-checked={on}
-          aria-label="Toggle switch"
-          onClick={toggle}
-          className="relative flex items-center justify-center rounded-lg border bg-card shadow-sm transition-transform active:scale-[0.98]"
-          style={{ width: plateW, height: size }}
-        >
-          {/* Mounting screws */}
-          <span
-            className="absolute left-1/2 -translate-x-1/2 rounded-full bg-muted-foreground/25"
-            style={{ top: inset, width: screw, height: screw }}
-          />
-          <span
-            className="absolute left-1/2 -translate-x-1/2 rounded-full bg-muted-foreground/25"
-            style={{ bottom: inset, width: screw, height: screw }}
-          />
-
-          {/* Recessed slot — tinted by on/off color when set. */}
-          <span
-            className="relative overflow-hidden rounded-[4px] bg-muted shadow-[inset_0_1px_3px_rgba(0,0,0,0.35)]"
-            style={{ width: slotW, height: slotH, background: slotTint, perspective: 320 }}
+            aria-checked={on}
+            aria-label="Toggle switch"
+            onClick={toggle}
+            className="relative flex items-center justify-center rounded-lg border bg-card shadow-sm transition-transform active:scale-[0.98]"
+            style={{ width: plateW, height: size }}
           >
-            {/* The toggle lever — a glossy plastic tab that pivots between halves. */}
+            {/* Mounting screws */}
             <span
-              className="absolute inset-x-0 top-0 h-1/2 rounded-[3px] bg-gradient-to-b from-white to-neutral-300 shadow-[0_2px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-[cubic-bezier(0.34,1.4,0.64,1)] motion-reduce:transition-none"
-              style={{
-                transformOrigin: "center",
-                transform: on
-                  ? "translateY(0%) rotateX(16deg)"
-                  : "translateY(100%) rotateX(-16deg)",
-              }}
+              className="absolute left-1/2 -translate-x-1/2 rounded-full bg-muted-foreground/25"
+              style={{ top: inset, width: screw, height: screw }}
+            />
+            <span
+              className="absolute left-1/2 -translate-x-1/2 rounded-full bg-muted-foreground/25"
+              style={{ bottom: inset, width: screw, height: screw }}
+            />
+
+            {/* Recessed slot — tinted by on/off color when set. */}
+            <span
+              className="relative overflow-hidden rounded-[4px] bg-muted shadow-[inset_0_1px_3px_rgba(0,0,0,0.35)]"
+              style={{ width: slotW, height: slotH, background: slotTint, perspective: 320 }}
             >
-              {/* Grip ridge across the lever. */}
-              <span className="absolute inset-x-1 top-1/2 h-px -translate-y-1/2 bg-black/10" />
+              {/* The toggle lever — a glossy plastic tab that pivots between halves. */}
+              <span
+                className="absolute inset-x-0 top-0 h-1/2 rounded-[3px] bg-gradient-to-b from-white to-neutral-300 shadow-[0_2px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-[cubic-bezier(0.34,1.4,0.64,1)] motion-reduce:transition-none"
+                style={{
+                  transformOrigin: "center",
+                  transform: on
+                    ? "translateY(0%) rotateX(16deg)"
+                    : "translateY(100%) rotateX(-16deg)",
+                }}
+              >
+                {/* Grip ridge across the lever. */}
+                <span className="absolute inset-x-1 top-1/2 h-px -translate-y-1/2 bg-black/10" />
+              </span>
             </span>
-          </span>
           </button>
         </div>
       </div>

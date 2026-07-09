@@ -31,7 +31,7 @@ export default function Lab() {
             }`}
           >
             <div
-              className={`relative flex items-stretch justify-center ${
+              className={`relative flex flex-1 items-stretch justify-center ${
                 item.previewClassName ?? ""
               }`}
             >
@@ -42,7 +42,7 @@ export default function Lab() {
               ) : null}
               {item.preview}
             </div>
-            <div className="flex flex-1 flex-col space-y-2 border-t p-4">
+            <div className="flex h-44 flex-col space-y-2 border-t p-4">
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-lg font-semibold">{item.title}</h2>
                 {item.installable ? (
@@ -52,7 +52,7 @@ export default function Lab() {
                   </Badge>
                 ) : null}
               </div>
-              <p className="text-sm font-light text-muted-foreground">
+              <p className="line-clamp-3 text-sm font-light text-muted-foreground">
                 {item.description}
               </p>
               <div className="mt-auto flex flex-wrap items-center gap-4 pt-2">

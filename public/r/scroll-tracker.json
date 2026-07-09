@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scroll-tracker",
+  "title": "Scroll Tracker",
+  "description": "Top-of-page progress bar tracking scroll position.",
+  "dependencies": [
+    "motion@^12.42.2"
+  ],
+  "files": [
+    {
+      "path": "components/scroll-tracker/index.tsx",
+      "content": "\"use client\";\n\nimport { motion, useScroll, useSpring } from \"motion/react\";\n\nexport default function ScrollTracker() {\n  const { scrollYProgress } = useScroll();\n  const scaleX = useSpring(scrollYProgress);\n\n  return (\n    // <motion.div className=\"progress-bar\" style={{ scaleX: scrollYProgress }} />\n    <svg\n      className=\"fixed bottom-[10px] right-[10px] rotate-[-90deg]\"\n      // id=\"progress\"\n      width=\"100\"\n      height=\"100\"\n      viewBox=\"0 0 50 50\"\n    >\n      <circle\n        cx=\"30\"\n        cy=\"30\"\n        r=\"10\"\n        pathLength=\"1\"\n        className=\"stroke-[#818181] opacity-30\"\n        style={{ strokeDashoffset: 0, strokeWidth: \"8%\", fill: \"none\" }}\n      />{\" \"}\n      <motion.circle\n        cx=\"30\"\n        cy=\"30\"\n        r=\"10\"\n        pathLength=\"1\"\n        className=\"stroke-[#141414]\"\n        style={{\n          pathLength: scaleX,\n          strokeDashoffset: 0,\n          strokeWidth: \"8%\",\n          fill: \"none\",\n        }}\n      />\n    </svg>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/scroll-tracker/index.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

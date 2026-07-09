@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "photo-frames",
+  "title": "Photo Frames",
+  "description": "Scattered, rotated photo frames that straighten and pop on hover.",
+  "dependencies": [
+    "motion@^12.42.2"
+  ],
+  "files": [
+    {
+      "path": "components/photo-frames/index.tsx",
+      "content": "\"use client\";\n\nimport Image, { StaticImageData } from \"next/image\";\nimport { motion } from \"motion/react\";\n\nconst DEFAULT_IMAGES: (string | StaticImageData)[] = [\n  \"https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800&auto=format&fit=crop\",\n  \"https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=800&auto=format&fit=crop\",\n  \"https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop\",\n  \"https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?q=80&w=800&auto=format&fit=crop\",\n];\n\nconst ROTATIONS = [-7, 4, -3, 8];\n\ninterface PhotoFramesProps {\n  images?: (string | StaticImageData)[];\n}\n\nexport default function PhotoFrames({\n  images = DEFAULT_IMAGES,\n}: PhotoFramesProps) {\n  return (\n    <div className=\"flex justify-center items-center\">\n      {images.map((image, idx) => (\n        <motion.div\n          key={\"frame\" + idx}\n          style={{\n            rotate: ROTATIONS[idx % ROTATIONS.length],\n          }}\n          whileHover={{\n            scale: 1.1,\n            rotate: 0,\n            zIndex: 100,\n          }}\n          whileTap={{\n            scale: 1.1,\n            rotate: 0,\n            zIndex: 100,\n          }}\n          className=\"rounded-xl -mr-4 mt-4 p-1.5 bg-white dark:bg-neutral-800 dark:border-neutral-700 border border-neutral-200 shadow-lg ring-1 ring-black/5 flex-shrink-0 overflow-hidden\"\n        >\n          <Image\n            src={image}\n            alt=\"personal images\"\n            width=\"500\"\n            height=\"500\"\n            className=\"rounded-lg h-20 w-20 md:h-40 md:w-56 object-cover flex-shrink-0\"\n          />\n        </motion.div>\n      ))}\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/photo-frames/index.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

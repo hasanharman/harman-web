@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "table-of-contents",
+  "title": "Table of Contents",
+  "description": "Article table of contents with hover-card previews.",
+  "dependencies": [
+    "next-view-transitions@^0.3.5"
+  ],
+  "registryDependencies": [
+    "card",
+    "hover-card"
+  ],
+  "files": [
+    {
+      "path": "components/table-of-contents/index.tsx",
+      "content": "import { Link } from \"next-view-transitions\";\nimport React from \"react\";\n\nimport {\n  HoverCard,\n  HoverCardContent,\n  HoverCardTrigger,\n} from \"@/components/ui/hover-card\";\nimport {\n  Card,\n  CardContent,\n  CardDescription,\n  CardFooter,\n  CardHeader,\n  CardTitle,\n} from \"@/components/ui/card\";\n\ninterface TocItem {\n  title: string;\n  url: string;\n  items?: TocItem[];\n}\n\ninterface TableOfContentsProps {\n  tocList: TocItem[];\n}\n\nexport default function TableOfContents({ tocList }: TableOfContentsProps) {\n  return (\n    <>\n      <div className=\"hidden md:block\">\n        <HoverCard>\n          <HoverCardTrigger asChild>\n            <div className=\"absolute right-1 space-y-2\">\n              {tocList.map((item, index) => (\n                <div\n                  className=\"flex flex-col items-end space-y-2\"\n                  key={item.title}\n                >\n                  <div className=\"w-7 flex flex-col items-end h-0.5 bg-muted-foreground/50 hover:bg-foreground rounded-xl transition-colors\" />\n                  {item.items && item.items.length > 0 && (\n                    <div className=\"flex flex-col space-y-2\">\n                      {item.items.map((subItem, subIndex) => (\n                        <div\n                          key={subItem.title}\n                          className=\"w-5 flex flex-col items-end h-0.5 bg-muted-foreground/50 hover:bg-foreground rounded-xl transition-colors\"\n                        />\n                      ))}\n                    </div>\n                  )}\n                </div>\n              ))}\n            </div>\n          </HoverCardTrigger>\n          <HoverCardContent className=\"w-fit p-3 space-y-2 \">\n            {tocList.map((item, index) => (\n              <div className=\"space-y-2\" key={item.title}>\n                <Link\n                  href={item.url}\n                  className=\"text-sm no-underline hover:underline\"\n                >\n                  {item.title}\n                </Link>\n                {item.items && item.items.length > 0 && (\n                  <div className=\"flex flex-col space-y-2\">\n                    {item.items.map((subItem, subIndex) => (\n                      <Link\n                        href={subItem.url}\n                        key={subItem.title}\n                        className=\"text-xs ml-3 no-underline hover:underline\"\n                      >\n                        {subItem.title}\n                      </Link>\n                    ))}\n                  </div>\n                )}\n              </div>\n            ))}\n          </HoverCardContent>\n        </HoverCard>\n      </div>\n      <Card className=\"md:hidden\">\n        <CardHeader className=\"pb-3\">\n          <CardTitle className=\"m-0\">Table of Contents</CardTitle>\n        </CardHeader>\n        <CardContent>\n          {tocList.map((item, index) => (\n            <div className=\"space-y-2\" key={item.title}>\n              <Link\n                href={item.url}\n                className=\"text-sm no-underline hover:underline\"\n              >\n                {item.title}\n              </Link>\n              {item.items && item.items.length > 0 && (\n                <div className=\"flex flex-col space-y-2\">\n                  {item.items.map((subItem, subIndex) => (\n                    <Link\n                      href={subItem.url}\n                      key={subItem.title}\n                      className=\"text-xs ml-3 no-underline hover:underline\"\n                    >\n                      {subItem.title}\n                    </Link>\n                  ))}\n                </div>\n              )}\n            </div>\n          ))}\n        </CardContent>\n      </Card>\n    </>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/table-of-contents/index.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

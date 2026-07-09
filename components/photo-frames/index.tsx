@@ -3,22 +3,17 @@
 import Image, { StaticImageData } from "next/image";
 import { motion } from "motion/react";
 
-import SightImage from "@/assets/sight.webp";
-import HabitImage from "@/assets/habit.webp";
-import HomeImage from "@/assets/home.webp";
-import AstroImage from "@/assets/astro.webp";
-
-const DEFAULT_IMAGES: StaticImageData[] = [
-  SightImage,
-  HabitImage,
-  HomeImage,
-  AstroImage,
+const DEFAULT_IMAGES: (string | StaticImageData)[] = [
+  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?q=80&w=800&auto=format&fit=crop",
 ];
 
 const ROTATIONS = [-7, 4, -3, 8];
 
 interface PhotoFramesProps {
-  images?: StaticImageData[];
+  images?: (string | StaticImageData)[];
 }
 
 export default function PhotoFrames({

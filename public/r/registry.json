@@ -114,6 +114,19 @@
       ]
     },
     {
+      "name": "wall-switch",
+      "type": "registry:component",
+      "title": "Wall Switch",
+      "description": "An old-school electrical light switch as a toggle. Controlled or uncontrolled, vertical or horizontal, with optional labels and on/off slot colors. Zero dependencies.",
+      "files": [
+        {
+          "path": "components/wall-switch/index.tsx",
+          "type": "registry:component",
+          "target": "components/wall-switch/index.tsx"
+        }
+      ]
+    },
+    {
       "name": "world-clocks",
       "type": "registry:component",
       "title": "World Clocks",

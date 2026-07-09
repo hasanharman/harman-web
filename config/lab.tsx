@@ -2,6 +2,7 @@ import React from "react";
 
 import VinylRecord from "@/components/vinyl-record";
 import AnalogClock from "@/components/analog-clock";
+import WallSwitch from "@/components/wall-switch";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
@@ -491,6 +492,118 @@ export default function Example() {
         type: "number",
         default: "256",
         description: "Edge length of the square sleeve, in pixels.",
+      },
+      {
+        name: "className",
+        type: "string",
+        default: "—",
+        description: "Extra classes on the outer wrapper.",
+      },
+    ],
+  },
+  {
+    slug: "wall-switch",
+    title: "Wall Switch",
+    description:
+      "An old-school electrical light switch as a toggle. Clean and label-free by default — flip it up or down. Runs controlled or uncontrolled, goes vertical or horizontal, and the slot can glow a color for on/off. No dependencies.",
+    hint: "Flip it",
+    installable: true,
+    importName: "WallSwitch",
+    previewClassName:
+      "min-h-[240px] items-center justify-center bg-muted/30",
+    preview: <WallSwitch defaultChecked />,
+    examples: [
+      {
+        title: "With labels",
+        description:
+          "Pass a two-part labels prop to flank the switch — the active side brightens.",
+        hint: "Flip it",
+        previewClassName:
+          "min-h-[240px] items-center justify-center bg-muted/30",
+        preview: <WallSwitch defaultChecked labels={["On", "Off"]} />,
+        code: `<WallSwitch labels={["On", "Off"]} />`,
+      },
+      {
+        title: "Colored slot",
+        description:
+          "Give onColor and offColor to fill the exposed slot — green when on, red when off — for an at-a-glance status tell.",
+        hint: "Flip it",
+        previewClassName:
+          "min-h-[240px] items-center justify-center bg-muted/30",
+        preview: (
+          <WallSwitch defaultChecked onColor="#22c55e" offColor="#ef4444" />
+        ),
+        code: `<WallSwitch onColor="#22c55e" offColor="#ef4444" />`,
+      },
+      {
+        title: "Horizontal",
+        description:
+          "Set orientation to horizontal to flip the switch on its side — right for on, left for off.",
+        hint: "Flip it",
+        previewClassName:
+          "min-h-[240px] items-center justify-center bg-muted/30",
+        preview: (
+          <WallSwitch defaultChecked orientation="horizontal" labels={["On", "Off"]} />
+        ),
+        code: `<WallSwitch orientation="horizontal" labels={["On", "Off"]} />`,
+      },
+    ],
+    usage: `import WallSwitch from "@/components/wall-switch";
+
+export default function Example() {
+  return <WallSwitch defaultChecked labels={["On", "Off"]} />;
+}`,
+    props: [
+      {
+        name: "checked",
+        type: "boolean",
+        default: "—",
+        description:
+          "Controlled on/off state (on = lever up). Omit to run uncontrolled.",
+      },
+      {
+        name: "defaultChecked",
+        type: "boolean",
+        default: "false",
+        description: "Initial state when uncontrolled.",
+      },
+      {
+        name: "onCheckedChange",
+        type: "(checked: boolean) => void",
+        default: "—",
+        description: "Fired with the next state on every flip.",
+      },
+      {
+        name: "orientation",
+        type: '"vertical" | "horizontal"',
+        default: '"vertical"',
+        description:
+          "vertical flips up/down; horizontal flips right/left.",
+      },
+      {
+        name: "size",
+        type: "number",
+        default: "80",
+        description: "Plate height in pixels; everything else scales from it.",
+      },
+      {
+        name: "onColor",
+        type: "string",
+        default: "—",
+        description: 'Color filling the slot when on, e.g. "#22c55e".',
+      },
+      {
+        name: "offColor",
+        type: "string",
+        default: "—",
+        description: 'Color filling the slot when off, e.g. "#ef4444".',
+      },
+      {
+        name: "labels",
+        type: "[string, string]",
+        default: "—",
+        description:
+          "Optional [on, off] labels flanking the switch. Omit for a clean switch.",
       },
       {
         name: "className",

@@ -5,67 +5,38 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import WatchRow from "@/components/watch-row";
 import WorldClocks from "@/components/world-clocks";
-import { cn } from "@/lib/utils";
+import WallSwitch from "@/components/wall-switch";
 
-/** Homepage clocks with an analog/digital switcher — same time zones, two faces. */
+/** Homepage clocks flipped between analog and digital by an old-school wall switch. */
 
-const MODES = ["analog", "digital"] as const;
-type Mode = (typeof MODES)[number];
-
-// Strong ease-out curve shared by the content swap and the CSS thumb slide.
+// Strong ease-out for the content crossfade.
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
 export default function HomeClocks() {
-  const [mode, setMode] = useState<Mode>("analog");
+  const [analog, setAnalog] = useState(true);
   const reduce = useReducedMotion();
-  const index = MODES.indexOf(mode);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative flex rounded-full border p-0.5 text-xs">
-        {/* Sliding thumb — one tab wide, glides between tabs on transform (GPU, CSS). */}
-        <span
-          aria-hidden
-          className="absolute bottom-0.5 left-0.5 top-0.5 rounded-full bg-foreground"
-          style={{
-            width: "calc(50% - 2px)",
-            transform: `translateX(${index * 100}%)`,
-            transition: reduce
-              ? "none"
-              : "transform 260ms cubic-bezier(0.23, 1, 0.32, 1)",
-          }}
-        />
-        {MODES.map((m) => {
-          const active = mode === m;
-          return (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              aria-pressed={active}
-              className={cn(
-                "relative z-10 flex-1 rounded-full px-4 py-1 capitalize",
-                "transition-[color,transform] duration-150 active:scale-95",
-                active ? "text-background" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {m}
-            </button>
-          );
-        })}
+    <div className="flex items-start justify-center gap-4">
+      {/* Match the clock-face height so the small switch centers on the dials. */}
+      <div className="flex h-[88px] items-center">
+        <WallSwitch checked={analog} onCheckedChange={setAnalog} size={44} />
       </div>
 
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={mode}
-          initial={{ opacity: 0, y: reduce ? 0 : 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: reduce ? 0 : -4 }}
-          transition={{ duration: 0.18, ease: EASE_OUT }}
-        >
-          {mode === "analog" ? <WatchRow /> : <WorldClocks />}
-        </motion.div>
-      </AnimatePresence>
+      {/* Fixed width stops the row re-centering (and the switch shifting) on swap. */}
+      <div className="flex min-h-[88px] w-[550px] max-w-full items-center justify-center">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={analog ? "analog" : "digital"}
+            initial={{ opacity: 0, y: reduce ? 0 : 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: reduce ? 0 : -4 }}
+            transition={{ duration: 0.18, ease: EASE_OUT }}
+          >
+            {analog ? <WatchRow /> : <WorldClocks />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

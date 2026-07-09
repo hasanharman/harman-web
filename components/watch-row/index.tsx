@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { toStardate } from "trekdate";
 
 import AnalogClock from "@/components/analog-clock";
 
-/** A row of live analog watches — one per time zone, plus a space watch for the Enterprise. */
+/** A row of live analog watches — one per time zone. */
 
 const ZONES = [
   { label: "NY", timeZone: "America/New_York" },
@@ -18,20 +17,11 @@ const ZONES = [
 const WATCH_SIZE = 88;
 
 export default function WatchRow() {
-  const [stardate, setStardate] = useState("");
   const [mounted, setMounted] = useState(false);
   const reduce = useReducedMotion();
 
-  // Time zones render on the AnalogClock itself; only the stardate needs its own tick.
-  useEffect(() => {
-    setMounted(true);
-    const tick = () => setStardate(toStardate());
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  // Avoid an SSR/client mismatch — the clocks read the current time on the client.
+  // Render on the client only — the clocks read the current time there.
+  useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
   // Each watch fades up in sequence so the row reveals rather than hard-popping.
@@ -63,30 +53,6 @@ export default function WatchRow() {
           </span>
         </motion.div>
       ))}
-
-      {/* Space watch — the USS Enterprise on stardate time. */}
-      <motion.div variants={item} className="flex flex-col items-center gap-2">
-        <AnalogClock
-          size={WATCH_SIZE}
-          movement="sweep"
-          numerals="ticks"
-          minuteTrack={false}
-          dialColor="#0a0a1a"
-          caseColor="#2b2b40"
-          handColor="#e0e7ff"
-          secondColor="#22d3ee"
-          markerColor="#818cf8"
-          brand=""
-          caption=""
-          glow="#22d3ee"
-        />
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          USS Enterprise 🖖
-        </span>
-        <span className="-mt-1 font-mono text-[10px] tabular-nums text-muted-foreground/70">
-          {stardate}
-        </span>
-      </motion.div>
     </motion.div>
   );
 }

@@ -4,12 +4,23 @@ import Link from "next/link";
 import { ExternalLink, BookOpen, ArrowUpRight, Package } from "lucide-react";
 
 import { LAB_ITEMS } from "@/config/lab";
+import { cn } from "@/lib/utils";
+import { ogImageUrl } from "@/config/site";
 import { Badge } from "@/components/ui/badge";
+
+const labDescription =
+  "A lab of interactive React components I've built — animations, motion, and small UI experiments.";
+const labOg = ogImageUrl({ title: "Lab", label: "Lab", desc: labDescription });
 
 export const metadata: Metadata = {
   title: "Hasan Harman - Lab",
-  description:
-    "A lab of interactive React components I've built — animations, motion, and small UI experiments.",
+  description: labDescription,
+  openGraph: {
+    title: "Lab",
+    description: labDescription,
+    images: [{ url: labOg, width: 1200, height: 630, alt: "Lab" }],
+  },
+  twitter: { card: "summary_large_image", images: [labOg] },
 };
 
 export default function Lab() {
@@ -31,9 +42,10 @@ export default function Lab() {
             }`}
           >
             <div
-              className={`relative flex flex-1 items-stretch justify-center ${
-                item.previewClassName ?? ""
-              }`}
+              className={cn(
+                "relative flex flex-1 items-center justify-center overflow-hidden",
+                item.previewClassName
+              )}
             >
               {item.hint ? (
                 <span className="absolute right-3 top-3 z-20 rounded-full bg-black/70 px-2 py-0.5 text-xs font-light text-white">

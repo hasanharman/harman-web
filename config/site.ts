@@ -13,3 +13,17 @@ export const siteConfig = {
 };
 
 export type SiteConfig = typeof siteConfig;
+
+/** Build the dynamic OG image URL for a page. */
+export function ogImageUrl(params: {
+  title: string;
+  label?: string;
+  desc?: string;
+  meta?: string;
+}) {
+  const search = new URLSearchParams({ title: params.title });
+  if (params.label) search.set("label", params.label);
+  if (params.desc) search.set("desc", params.desc);
+  if (params.meta) search.set("meta", params.meta);
+  return `/api/og?${search.toString()}`;
+}

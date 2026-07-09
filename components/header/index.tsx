@@ -51,7 +51,7 @@ export default function Header({ fontClass }: HeaderProps) {
   ];
 
   return (
-    <header className="flex justify-between items-center">
+    <header className="relative z-[70] flex justify-between items-center">
       <Link
         href="/"
         className={cn("text-base md:text-xl hover:text-slate-700", {

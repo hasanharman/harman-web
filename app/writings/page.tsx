@@ -2,12 +2,26 @@ import { posts } from "#site/content";
 import { PostItem } from "@/components/post-item";
 import { QueryPagination } from "@/components/query-pagination";
 import { sortPosts } from "@/lib/utils";
+import { ogImageUrl } from "@/config/site";
 import { Metadata } from "next";
+
+const writingsDescription =
+  "I write about things I learn, things I build, and things I think about. I hope you find something useful here.";
+const writingsOg = ogImageUrl({
+  title: "Writings",
+  label: "Writings",
+  desc: writingsDescription,
+});
 
 export const metadata: Metadata = {
   title: "Hasan Harman - Writings",
-  description:
-    "I write about things I learn, things I build, and things I think about. I hope you find something useful here.",
+  description: writingsDescription,
+  openGraph: {
+    title: "Writings",
+    description: writingsDescription,
+    images: [{ url: writingsOg, width: 1200, height: 630, alt: "Writings" }],
+  },
+  twitter: { card: "summary_large_image", images: [writingsOg] },
 };
 
 const POSTS_PER_PAGE = 5;

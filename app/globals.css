@@ -552,3 +552,39 @@ circle {
 :root[data-theme-reveal]::view-transition-new(root) {
   z-index: 1;
 }
+
+/* Shiki code blocks in the Lab (server-highlighted, dual github-light/dark). */
+.code-shiki .shiki,
+.code-shiki .shiki span {
+  background-color: transparent !important;
+}
+.dark .code-shiki .shiki,
+.dark .code-shiki .shiki span {
+  color: var(--shiki-dark, inherit) !important;
+}
+.code-shiki pre.shiki {
+  margin: 0;
+  padding: 1rem 1rem 1rem 0;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.code-shiki code {
+  display: grid;
+  counter-reset: line;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+.code-shiki.with-line-numbers .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2.5rem;
+  margin-right: 1rem;
+  padding-right: 0.5rem;
+  text-align: right;
+  color: color-mix(in srgb, currentColor 35%, transparent);
+  user-select: none;
+}
+.code-shiki .line {
+  padding-right: 1rem;
+}

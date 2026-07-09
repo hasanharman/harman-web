@@ -4,30 +4,37 @@ import * as React from "react";
 import { File } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { CopyButton } from "@/components/copy-button";
 
 interface CodeBlockProps {
+  /** Raw code — used for the copy button. */
   code: string;
-  /** Optional filename shown in a header bar, e.g. "components/vinyl-record/index.tsx". */
+  /** Server-highlighted Shiki HTML. Falls back to plain text when absent. */
+  html?: string;
+  /** Optional filename shown in a header bar. */
   filename?: string;
-  language?: string;
   className?: string;
+  showLineNumbers?: boolean;
   /** Max height before the block scrolls. Defaults to a roomy 24rem. */
   maxHeight?: string;
+  /** Drop the outer border/background — used when embedded in ComponentPreview. */
+  bare?: boolean;
 }
 
 export function CodeBlock({
   code,
+  html,
   filename,
-  language = "tsx",
   className,
+  showLineNumbers = true,
   maxHeight = "24rem",
+  bare = false,
 }: CodeBlockProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-lg border bg-muted/30",
+        "relative",
+        !bare && "overflow-hidden rounded-lg border bg-muted/30",
         className
       )}
     >
@@ -43,16 +50,27 @@ export function CodeBlock({
       ) : (
         <CopyButton
           value={code}
-          className="absolute right-3 top-3 z-10 size-8 border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="absolute right-2 top-2 z-10 size-8 border-0 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
         />
       )}
-      <ScrollArea style={{ maxHeight }} className="w-full">
-        <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
-          <code className="font-mono" data-language={language}>
-            {code}
-          </code>
-        </pre>
-      </ScrollArea>
+      <div
+        className="w-full overflow-auto"
+        style={maxHeight && maxHeight !== "none" ? { maxHeight } : undefined}
+      >
+        {html ? (
+          <div
+            className={cn(
+              "code-shiki",
+              showLineNumbers && "with-line-numbers"
+            )}
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        ) : (
+          <pre className="overflow-x-auto p-4 text-[12.5px] leading-relaxed">
+            <code className="font-mono">{code}</code>
+          </pre>
+        )}
+      </div>
     </div>
   );
 }

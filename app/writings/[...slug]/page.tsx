@@ -6,7 +6,8 @@ import { ArrowLeft } from "lucide-react";
 
 import "@/styles/mdx.css";
 import { Metadata } from "next";
-import { siteConfig } from "@/config/site";
+import { siteConfig, ogImageUrl } from "@/config/site";
+import { formatDate } from "@/lib/utils";
 import TableOfContents from "@/components/table-of-contents";
 import ScrollTracker from "@/components/scroll-tracker";
 
@@ -33,8 +34,12 @@ export async function generateMetadata({
     return {};
   }
 
-  const ogSearchParams = new URLSearchParams();
-  ogSearchParams.set("title", post.title);
+  const og = ogImageUrl({
+    title: post.title,
+    label: "Writing",
+    desc: post.description,
+    meta: post.date ? formatDate(post.date) : undefined,
+  });
 
   return {
     title: post.title,
@@ -45,20 +50,13 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       url: post.slug,
-      images: [
-        {
-          url: `/api/og?${ogSearchParams.toString()}`,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
+      images: [{ url: og, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: [`/api/og?${ogSearchParams.toString()}`],
+      images: [og],
     },
   };
 }

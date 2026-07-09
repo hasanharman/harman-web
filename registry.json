@@ -21,7 +21,7 @@
       "name": "vinyl-record",
       "type": "registry:component",
       "title": "Vinyl Record",
-      "description": "Album cover that slides out a spinning vinyl disc on hover.",
+      "description": "Album sleeve that slides one or more colored vinyl discs out on hover. Cover, disc colors, count, direction and size are all props.",
       "dependencies": ["motion@^12.42.2"],
       "files": [
         {

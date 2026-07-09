@@ -1,0 +1,162 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "harman",
+  "homepage": "https://hasanharman.dev",
+  "items": [
+    {
+      "name": "pull-cord",
+      "type": "registry:component",
+      "title": "Pull-Cord Theme Switcher",
+      "description": "A light-switch cord you pull to flip the theme with a circular reveal, using 2D spring physics.",
+      "dependencies": ["motion@^12.42.2", "next-themes"],
+      "files": [
+        {
+          "path": "components/pull-cord.tsx",
+          "type": "registry:component",
+          "target": "components/pull-cord.tsx"
+        }
+      ]
+    },
+    {
+      "name": "vinyl-record",
+      "type": "registry:component",
+      "title": "Vinyl Record",
+      "description": "Album cover that slides out a spinning vinyl disc on hover.",
+      "dependencies": ["motion@^12.42.2"],
+      "files": [
+        {
+          "path": "components/vinyl-record/index.tsx",
+          "type": "registry:component",
+          "target": "components/vinyl-record/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "photo-frames",
+      "type": "registry:component",
+      "title": "Photo Frames",
+      "description": "Scattered, rotated photo frames that straighten and pop on hover.",
+      "dependencies": ["motion@^12.42.2"],
+      "files": [
+        {
+          "path": "components/photo-frames/index.tsx",
+          "type": "registry:component",
+          "target": "components/photo-frames/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "background-grid",
+      "type": "registry:component",
+      "title": "Background Grid",
+      "description": "Decorative grid background layer.",
+      "files": [
+        {
+          "path": "components/background-grid/index.tsx",
+          "type": "registry:component",
+          "target": "components/background-grid/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "parallax-scroll",
+      "type": "registry:component",
+      "title": "Parallax Scroll",
+      "description": "Three-column image grid with parallax scroll motion.",
+      "dependencies": ["motion@^12.42.2"],
+      "files": [
+        {
+          "path": "components/parallax-scroll/index.tsx",
+          "type": "registry:component",
+          "target": "components/parallax-scroll/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "scroll-mixed-text",
+      "type": "registry:component",
+      "title": "Scroll Mixed Text",
+      "description": "Text whose words reveal as you scroll through the section.",
+      "dependencies": ["motion@^12.42.2"],
+      "files": [
+        {
+          "path": "components/scroll-mixed-text/index.tsx",
+          "type": "registry:component",
+          "target": "components/scroll-mixed-text/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "three-d-carousel",
+      "type": "registry:component",
+      "title": "3D Carousel",
+      "description": "Draggable 3D image carousel with responsive layout.",
+      "dependencies": ["motion@^12.42.2", "@react-hook/media-query@^1.1.1"],
+      "files": [
+        {
+          "path": "components/three-d-carousel/index.tsx",
+          "type": "registry:component",
+          "target": "components/three-d-carousel/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "world-clocks",
+      "type": "registry:component",
+      "title": "World Clocks",
+      "description": "Live clocks across time zones, including a stardate readout.",
+      "dependencies": ["trekdate@^1.0.2"],
+      "files": [
+        {
+          "path": "components/world-clocks/index.tsx",
+          "type": "registry:component",
+          "target": "components/world-clocks/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "scroll-tracker",
+      "type": "registry:component",
+      "title": "Scroll Tracker",
+      "description": "Top-of-page progress bar tracking scroll position.",
+      "dependencies": ["motion@^12.42.2"],
+      "files": [
+        {
+          "path": "components/scroll-tracker/index.tsx",
+          "type": "registry:component",
+          "target": "components/scroll-tracker/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "social-media-buttons",
+      "type": "registry:component",
+      "title": "Social Media Buttons",
+      "description": "Row of social links rendered as icon buttons.",
+      "dependencies": ["react-icons@^5.7.0"],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "components/social-media-buttons/index.tsx",
+          "type": "registry:component",
+          "target": "components/social-media-buttons/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "table-of-contents",
+      "type": "registry:component",
+      "title": "Table of Contents",
+      "description": "Article table of contents with hover-card previews.",
+      "dependencies": ["next-view-transitions@^0.3.5"],
+      "registryDependencies": ["card", "hover-card"],
+      "files": [
+        {
+          "path": "components/table-of-contents/index.tsx",
+          "type": "registry:component",
+          "target": "components/table-of-contents/index.tsx"
+        }
+      ]
+    }
+  ]
+}

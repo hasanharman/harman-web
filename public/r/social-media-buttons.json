@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "social-media-buttons",
+  "title": "Social Media Buttons",
+  "description": "Row of social links rendered as icon buttons.",
+  "dependencies": [
+    "react-icons@^5.7.0"
+  ],
+  "registryDependencies": [
+    "button"
+  ],
+  "files": [
+    {
+      "path": "components/social-media-buttons/index.tsx",
+      "content": "import React from \"react\";\nimport Link from \"next/link\";\n\nimport { Button } from \"@/components/ui/button\";\n\nimport {\n  FaXTwitter,\n  FaInstagram,\n  FaGithub,\n  FaUnsplash,\n  FaRegEnvelope,\n} from \"react-icons/fa6\";\n\nexport default function SocialMediaButtons() {\n  return (\n    <div className=\"space-x-2\">\n      <Link href=\"https://x.com/strad3r\" target=\"_blank\" aria-label=\"Twitter\">\n        <Button size=\"icon\" variant=\"outline\">\n          <FaXTwitter className=\"text-muted-foreground\" />\n        </Button>\n      </Link>\n      <Link\n        href=\"https://www.instagram.com/haskup/\"\n        target=\"_blank\"\n        aria-label=\"Instagram\"\n      >\n        <Button size=\"icon\" variant=\"outline\">\n          <FaInstagram className=\"text-muted-foreground\" />\n        </Button>\n      </Link>\n      <Link\n        href=\"https://github.com/hasanharman\"\n        target=\"_blank\"\n        aria-label=\"Github\"\n      >\n        <Button size=\"icon\" variant=\"outline\">\n          <FaGithub className=\"text-muted-foreground\" />\n        </Button>\n      </Link>\n      <Link\n        href=\"https://unsplash.com/@haskup\"\n        target=\"_blank\"\n        aria-label=\"Unsplash\"\n      >\n        <Button size=\"icon\" variant=\"outline\">\n          <FaUnsplash className=\"text-muted-foreground\" />\n        </Button>\n      </Link>\n      <Link\n        href=\"mailto:hasanharman33@gmail.com\"\n        target=\"_blank\"\n        aria-label=\"E-mail\"\n      >\n        <Button size=\"icon\" variant=\"outline\">\n          <FaRegEnvelope className=\"text-muted-foreground\" />\n        </Button>\n      </Link>\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/social-media-buttons/index.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

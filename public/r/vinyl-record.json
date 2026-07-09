@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "vinyl-record",
+  "title": "Vinyl Record",
+  "description": "Album cover that slides out a spinning vinyl disc on hover.",
+  "dependencies": [
+    "motion@^12.42.2"
+  ],
+  "files": [
+    {
+      "path": "components/vinyl-record/index.tsx",
+      "content": "\"use client\";\n\nimport { useState } from \"react\";\nimport { motion, AnimatePresence } from \"motion/react\";\nimport Image from \"next/image\";\n\nconst DiscVariants = {\n  hidden: {\n    top: \"-10%\",\n    x: \"-50%\",\n    opacity: 0.9,\n  },\n  visible: {\n    top: \"-50%\",\n    x: \"-50%\",\n    opacity: 1,\n  },\n};\n\nconst CoverVariants = {\n  initial: { scale: 1 },\n  hover: {\n    scale: 1.05,\n    transition: {\n      type: \"spring\" as const,\n      stiffness: 300,\n      damping: 30,\n    },\n  },\n};\n\nexport default function VinylRecord() {\n  const [isHovered, setIsHovered] = useState(false);\n\n  return (\n    <div className=\"flex items-end justify-center min-h-[500px] bg-gray-100 rounded p-4\">\n      <div className=\"relative w-64 h-64\">\n        <AnimatePresence>\n          {/* Vinyl Disc */}\n          <motion.div\n            className=\"absolute left-1/2 rounded-full z-0 w-60 h-60\"\n            variants={DiscVariants}\n            initial=\"hidden\"\n            animate={isHovered ? \"visible\" : \"hidden\"}\n            transition={{\n              type: \"spring\" as const,\n              stiffness: 300,\n              damping: 30,\n            }}\n            style={{\n              background:\n                \"radial-gradient(circle at center, #0a0a0a 0%, #000000 80%)\",\n              boxShadow: \"inset 0 0 10px rgba(255, 255, 255, 0.5)\",\n            }}\n          >\n            {/* Grooves Pattern */}\n            <div\n              className=\"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 rounded-full\"\n              style={{\n                background:\n                  \"repeating-radial-gradient(circle at center, #333 0, #333 1px, transparent 1px, transparent 4px)\",\n              }}\n            />\n            {/* Center Label */}\n            <div className=\"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/4 h-1/4 bg-gray-400 rounded-full flex items-center justify-center\">\n              <motion.div\n                className=\"w-1/3 h-1/3 bg-white rounded-full\"\n                animate={{ rotate: isHovered ? 360 : 0 }}\n                transition={{\n                  duration: 3,\n                  ease: \"linear\",\n                  repeat: Infinity,\n                }}\n              />\n            </div>\n          </motion.div>\n        </AnimatePresence>\n\n        {/* Record Cover */}\n        <motion.div\n          className=\"relative w-full h-full rounded shadow-xl z-10 overflow-hidden\"\n          variants={CoverVariants}\n          initial=\"initial\"\n          whileHover=\"hover\"\n          onMouseEnter={() => setIsHovered(true)}\n          onMouseLeave={() => setIsHovered(false)}\n        >\n          <Image\n            src=\"https://linkinpedia.com/w/images/thumb/f/fe/Album-From_Zero.png/800px-Album-From_Zero.png\"\n            alt=\"Album Cover\"\n            fill\n            sizes=\"(max-width: 256px) 100vw, 256px\"\n            className=\"object-cover\"\n            priority\n          />\n        </motion.div>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/vinyl-record/index.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "world-clocks",
+  "title": "World Clocks",
+  "description": "Live clocks across time zones, including a stardate readout.",
+  "dependencies": [
+    "trekdate@^1.0.2"
+  ],
+  "files": [
+    {
+      "path": "components/world-clocks/index.tsx",
+      "content": "\"use client\";\n\nimport { useEffect, useState } from \"react\";\nimport { toStardate } from \"trekdate\";\n\nconst ZONES = [\n  { label: \"NY\", timezone: \"America/New_York\" },\n  { label: \"London\", timezone: \"Europe/London\" },\n  { label: \"Istanbul\", timezone: \"Europe/Istanbul\" },\n  { label: \"Tokyo\", timezone: \"Asia/Tokyo\" },\n] as const;\n\nfunction formatTime(timezone: string) {\n  return new Date().toLocaleTimeString(\"en-US\", {\n    timeZone: timezone,\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    second: \"2-digit\",\n    hour12: false,\n  });\n}\n\nexport default function WorldClocks() {\n  const [times, setTimes] = useState<Record<string, string>>({});\n  const [stardate, setStardate] = useState(\"\");\n  const [mounted, setMounted] = useState(false);\n\n  useEffect(() => {\n    setMounted(true);\n\n    function tick() {\n      const now: Record<string, string> = {};\n      for (const z of ZONES) {\n        now[z.label] = formatTime(z.timezone);\n      }\n      setTimes(now);\n      setStardate(toStardate());\n    }\n\n    tick();\n    const id = setInterval(tick, 1000);\n    return () => clearInterval(id);\n  }, []);\n\n  if (!mounted) return null;\n\n  return (\n    <div className=\"flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-muted-foreground font-mono\">\n      {ZONES.map((z) => (\n        <div key={z.label} className=\"flex flex-col items-center\">\n          <span className=\"text-[10px] opacity-60 uppercase tracking-wider\">{z.label}</span>\n          <span className=\"text-sm tabular-nums\">{times[z.label]}</span>\n        </div>\n      ))}\n      <div className=\"flex flex-col items-center\">\n        <span className=\"text-[10px] opacity-60 uppercase tracking-wider\">USS Enterprise 🖖</span>\n        <span className=\"text-sm tabular-nums\">{stardate}</span>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/world-clocks/index.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

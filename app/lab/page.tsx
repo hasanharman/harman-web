@@ -1,103 +1,16 @@
 import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, BookOpen } from "lucide-react";
+import { ExternalLink, BookOpen, ArrowUpRight, Package } from "lucide-react";
 
-import VinylRecord from "@/components/vinyl-record";
-import WorldClocks from "@/components/world-clocks";
-import ThreeDPhotoCarousel from "@/components/three-d-carousel";
-import PhotoFrames from "@/components/photo-frames";
-import { PullCord } from "@/components/pull-cord";
-import TableOfContents from "@/components/table-of-contents";
-
-const sampleToc = [
-  { title: "Getting started", url: "#getting-started" },
-  {
-    title: "Installation",
-    url: "#installation",
-    items: [
-      { title: "Requirements", url: "#requirements" },
-      { title: "Setup", url: "#setup" },
-    ],
-  },
-  { title: "Usage", url: "#usage" },
-  { title: "API reference", url: "#api-reference" },
-];
+import { LAB_ITEMS } from "@/config/lab";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Hasan Harman - Lab",
   description:
     "A lab of interactive React components I've built — animations, motion, and small UI experiments.",
 };
-
-type Showcase = {
-  title: string;
-  description: string;
-  preview: React.ReactNode;
-  hint?: string;
-  writing?: string;
-  fullWidth?: boolean;
-  previewClassName?: string;
-};
-
-const showcases: Showcase[] = [
-  {
-    title: "Pull-Cord Theme Switcher",
-    description:
-      "A light-switch cord that hangs from the top — give it a pull to flip the site theme with a circular reveal. 2D spring physics, no 3D libraries.",
-    hint: "Pull the cord",
-    previewClassName: "min-h-[280px] items-start bg-muted/30",
-    preview: <PullCord className="absolute inset-x-0 top-0 z-10 mx-auto" />,
-  },
-  {
-    title: "Vinyl Record",
-    description:
-      "A record sleeve that slides its disc out on hover, built with Motion variants.",
-    hint: "Hover the cover",
-    writing:
-      "/writings/creating-a-vinyl-record-animation-in-react-using-framer-motion",
-    preview: <VinylRecord />,
-  },
-  {
-    title: "World Clocks",
-    description:
-      "Live clocks across time zones, plus the current Star Trek stardate via my trekdate package.",
-    previewClassName: "min-h-[240px] items-center bg-muted/30 p-6",
-    preview: <WorldClocks />,
-  },
-  {
-    title: "Table of Contents",
-    description:
-      "The Notion-style floating ToC from my writeups — collapsed tick marks that expand into the full outline on hover.",
-    previewClassName: "min-h-[240px] items-center justify-center bg-muted/30",
-    preview: (
-      <>
-        <span className="text-xs text-muted-foreground">
-          Hover the marks →
-        </span>
-        <TableOfContents tocList={sampleToc} />
-      </>
-    ),
-  },
-  {
-    title: "Photo Frames",
-    description:
-      "A polaroid-style stack of framed photos that straighten and pop on hover — the set from my homepage.",
-    hint: "Hover a photo",
-    fullWidth: true,
-    previewClassName: "min-h-[260px] items-center bg-muted/30 p-6 overflow-hidden",
-    preview: <PhotoFrames />,
-  },
-  {
-    title: "3D Photo Carousel",
-    description:
-      "A draggable, cylindrical photo carousel driven by Motion's rotate3d transforms.",
-    hint: "Drag to spin",
-    fullWidth: true,
-    previewClassName: "h-[420px] overflow-hidden bg-muted/30",
-    preview: <ThreeDPhotoCarousel />,
-  },
-];
 
 export default function Lab() {
   return (
@@ -106,13 +19,13 @@ export default function Lab() {
       <p className="text-muted-foreground font-light">
         A showcase of interactive components I&apos;ve built along the way —
         animations, motion experiments, and small UI pieces. Play with them
-        below.
+        below, then install any one with a single command.
       </p>
       <hr />
       <div className="grid gap-6 sm:grid-cols-2">
-        {showcases.map((item) => (
+        {LAB_ITEMS.map((item) => (
           <div
-            key={item.title}
+            key={item.slug}
             className={`flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm ${
               item.fullWidth ? "sm:col-span-2" : ""
             }`}
@@ -129,20 +42,39 @@ export default function Lab() {
               ) : null}
               {item.preview}
             </div>
-            <div className="space-y-2 border-t p-4">
-              <h2 className="text-lg font-semibold">{item.title}</h2>
-              <p className="text-sm font-light text-muted-foreground">
+            <div className="flex h-44 flex-col space-y-2 border-t p-4">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-lg font-semibold">{item.title}</h2>
+                {item.installable ? (
+                  <Badge variant="secondary" className="gap-1 shrink-0">
+                    <Package className="h-3 w-3" />
+                    Installable
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="line-clamp-3 text-sm font-light text-muted-foreground">
                 {item.description}
               </p>
-              {item.writing ? (
-                <Link
-                  href={item.writing}
-                  className="inline-flex items-center gap-1 text-sm hover:underline underline-offset-2"
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Read the writeup
-                </Link>
-              ) : null}
+              <div className="mt-auto flex flex-wrap items-center gap-4 pt-2">
+                {item.installable ? (
+                  <Link
+                    href={`/lab/${item.slug}`}
+                    className="inline-flex items-center gap-1 text-sm font-medium hover:underline underline-offset-2"
+                  >
+                    View &amp; install
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </Link>
+                ) : null}
+                {item.writing ? (
+                  <Link
+                    href={item.writing}
+                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:underline underline-offset-2"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Read the writeup
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </div>
         ))}

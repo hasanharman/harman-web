@@ -101,6 +101,19 @@
       ]
     },
     {
+      "name": "analog-clock",
+      "type": "registry:component",
+      "title": "Analog Clock",
+      "description": "A Braun-inspired analog clock rendered in SVG. Dial, case, hand and marker colors, numerals, movement (quartz/mechanical/sweep), time zone and brand text are all props. Ticks live or freezes at a fixed time. Zero dependencies.",
+      "files": [
+        {
+          "path": "components/analog-clock/index.tsx",
+          "type": "registry:component",
+          "target": "components/analog-clock/index.tsx"
+        }
+      ]
+    },
+    {
       "name": "world-clocks",
       "type": "registry:component",
       "title": "World Clocks",

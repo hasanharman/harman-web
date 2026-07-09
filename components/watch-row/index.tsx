@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { toStardate } from "trekdate";
 
 import AnalogClock from "@/components/analog-clock";
@@ -19,6 +20,7 @@ const WATCH_SIZE = 88;
 export default function WatchRow() {
   const [stardate, setStardate] = useState("");
   const [mounted, setMounted] = useState(false);
+  const reduce = useReducedMotion();
 
   // Time zones render on the AnalogClock itself; only the stardate needs its own tick.
   useEffect(() => {
@@ -32,10 +34,21 @@ export default function WatchRow() {
   // Avoid an SSR/client mismatch — the clocks read the current time on the client.
   if (!mounted) return null;
 
+  // Each watch fades up in sequence so the row reveals rather than hard-popping.
+  const item = {
+    hidden: { opacity: 0, y: reduce ? 0 : 8 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] as const } },
+  };
+
   return (
-    <div className="flex flex-wrap items-start justify-center gap-x-6 gap-y-4">
+    <motion.div
+      className="flex flex-wrap items-start justify-center gap-x-6 gap-y-4"
+      initial="hidden"
+      animate="show"
+      transition={{ staggerChildren: reduce ? 0 : 0.05 }}
+    >
       {ZONES.map((z) => (
-        <div key={z.label} className="flex flex-col items-center gap-2">
+        <motion.div key={z.label} variants={item} className="flex flex-col items-center gap-2">
           <AnalogClock
             size={WATCH_SIZE}
             timeZone={z.timeZone}
@@ -48,11 +61,11 @@ export default function WatchRow() {
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
             {z.label}
           </span>
-        </div>
+        </motion.div>
       ))}
 
       {/* Space watch — the USS Enterprise on stardate time. */}
-      <div className="flex flex-col items-center gap-2">
+      <motion.div variants={item} className="flex flex-col items-center gap-2">
         <AnalogClock
           size={WATCH_SIZE}
           movement="sweep"
@@ -73,7 +86,7 @@ export default function WatchRow() {
         <span className="-mt-1 font-mono text-[10px] tabular-nums text-muted-foreground/70">
           {stardate}
         </span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

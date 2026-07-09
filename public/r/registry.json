@@ -4,6 +4,20 @@
   "homepage": "https://hasanharman.dev",
   "items": [
     {
+      "name": "pull-cord",
+      "type": "registry:component",
+      "title": "Pull-Cord Theme Switcher",
+      "description": "A light-switch cord you pull to flip the theme with a circular reveal, using 2D spring physics.",
+      "dependencies": ["motion@^12.42.2", "next-themes"],
+      "files": [
+        {
+          "path": "components/pull-cord.tsx",
+          "type": "registry:component",
+          "target": "components/pull-cord.tsx"
+        }
+      ]
+    },
+    {
       "name": "vinyl-record",
       "type": "registry:component",
       "title": "Vinyl Record",

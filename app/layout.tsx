@@ -9,6 +9,7 @@ import { Questrial } from "next/font/google";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PullCord } from "@/components/pull-cord";
+import { ogImageUrl } from "@/config/site";
 
 import "./globals.css";
 
@@ -19,12 +20,25 @@ const font = Questrial({
   preload: true,
 });
 
+const defaultOg = ogImageUrl({
+  title: "Curious engineer & frontend developer",
+  label: "Portfolio",
+  desc: "Animations, writings, and interactive UI experiments from Mersin.",
+});
+
 export const metadata: Metadata = {
   title: "Hasan Harman",
   description: "Curious engineer & Frontend developer from Mersin 🌴 🇹🇷",
   metadataBase: new URL("https://www.hasanharman.dev/"),
   openGraph: {
-    images: "https://www.hasanharman.dev/meta.png",
+    title: "Hasan Harman",
+    description: "Curious engineer & Frontend developer from Mersin.",
+    type: "website",
+    images: [{ url: defaultOg, width: 1200, height: 630, alt: "Hasan Harman" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [defaultOg],
   },
 };
 

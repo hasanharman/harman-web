@@ -15,6 +15,8 @@ interface InstallationProps {
   registryDependencies: string[];
   /** Component source. */
   code: string;
+  /** Server-highlighted source. */
+  codeHtml?: string;
   /** Target path for the manual copy step. */
   filename?: string;
 }
@@ -24,6 +26,7 @@ export function Installation({
   dependencies,
   registryDependencies,
   code,
+  codeHtml,
   filename,
 }: InstallationProps) {
   return (
@@ -72,7 +75,7 @@ export function Installation({
           <p className="text-sm font-medium">
             Copy and paste the following into your project.
           </p>
-          <CodeBlock code={code} filename={filename} />
+          <CodeBlock code={code} html={codeHtml} filename={filename} />
         </div>
       </TabsContent>
     </Tabs>

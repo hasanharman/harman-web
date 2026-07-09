@@ -1,6 +1,7 @@
 import React from "react";
 
 import VinylRecord from "@/components/vinyl-record";
+import AnalogClock from "@/components/analog-clock";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
@@ -89,6 +90,250 @@ const COVERS = {
 };
 
 export const LAB_ITEMS: LabItem[] = [
+  {
+    slug: "analog-clock",
+    title: "Analog Clock",
+    description:
+      "A Braun-inspired analog clock drawn in SVG. Dial, case, hand and marker colors, numerals, movement, time zone and brand text are all props — ticks live or freezes at a fixed time. No dependencies.",
+    installable: true,
+    importName: "AnalogClock",
+    previewClassName:
+      "min-h-[360px] items-center justify-center bg-muted/30",
+    preview: <AnalogClock size={240} />,
+    examples: [
+      {
+        title: "White dial",
+        description:
+          "The classic white Braun — a white dial, brushed-steel case, black hands and numerals, and the signature yellow second hand. Same props as the black dial, recolored.",
+        previewClassName:
+          "min-h-[340px] items-center justify-center bg-white",
+        preview: (
+          <AnalogClock
+            size={230}
+            dialColor="#ffffff"
+            caseColor="#c4c7ca"
+            handColor="#111111"
+            markerColor="#111111"
+            secondColor="#e8a800"
+          />
+        ),
+        code: `<AnalogClock
+  dialColor="#ffffff"
+  caseColor="#c4c7ca"
+  handColor="#111111"
+  markerColor="#111111"
+  secondColor="#e8a800"
+/>`,
+      },
+      {
+        title: "Mechanical sweep",
+        description:
+          "The movement prop changes how the second hand advances. \"mechanical\" gives the high-frequency stutter of an automatic; \"sweep\" glides continuously; \"quartz\" steps once per second.",
+        hint: "Watch the seconds",
+        previewClassName:
+          "min-h-[340px] items-center justify-center bg-muted/30",
+        preview: (
+          <AnalogClock
+            size={230}
+            movement="mechanical"
+            caption="automatic"
+          />
+        ),
+        code: `<AnalogClock movement="mechanical" caption="automatic" />`,
+      },
+      {
+        title: "Fixed time & minimal markers",
+        description:
+          "Pass a time as a Date or \"HH:MM\" string to freeze the clock — handy for stills. Set numerals to \"ticks\" for a marker-only dial.",
+        previewClassName:
+          "min-h-[340px] items-center justify-center bg-muted/30",
+        preview: (
+          <AnalogClock
+            size={230}
+            time="10:09"
+            live={false}
+            numerals="ticks"
+            brand=""
+            caption=""
+          />
+        ),
+        code: `<AnalogClock time="10:09" live={false} numerals="ticks" />`,
+      },
+      {
+        title: "Other time zone",
+        description:
+          "Give it an IANA timeZone and it renders that city's live time — build a wall of them for a world clock.",
+        previewClassName:
+          "min-h-[340px] items-center justify-center bg-muted/30",
+        preview: (
+          <AnalogClock
+            size={230}
+            timeZone="Asia/Tokyo"
+            caption="Tokyo"
+          />
+        ),
+        code: `<AnalogClock timeZone="Asia/Tokyo" caption="Tokyo" />`,
+      },
+      {
+        title: "Space watch",
+        description:
+          "Give it a cosmic palette and a glow color and it turns into a space watch — the halo hugs the case. This is the one on the USS Enterprise line of my homepage.",
+        previewClassName:
+          "min-h-[340px] items-center justify-center bg-black",
+        preview: (
+          <AnalogClock
+            size={230}
+            movement="sweep"
+            numerals="ticks"
+            minuteTrack={false}
+            dialColor="#0a0a1a"
+            caseColor="#2b2b40"
+            handColor="#e0e7ff"
+            secondColor="#22d3ee"
+            markerColor="#818cf8"
+            brand="STARFLEET"
+            caption="stardate"
+            glow="#22d3ee"
+          />
+        ),
+        code: `<AnalogClock
+  movement="sweep"
+  numerals="ticks"
+  dialColor="#0a0a1a"
+  handColor="#e0e7ff"
+  secondColor="#22d3ee"
+  markerColor="#818cf8"
+  glow="#22d3ee"
+/>`,
+      },
+    ],
+    usage: `import AnalogClock from "@/components/analog-clock";
+
+export default function Example() {
+  return (
+    <AnalogClock
+      size={240}
+      movement="quartz"
+      brand="BRAUN"
+      caption="quartz"
+    />
+  );
+}`,
+    props: [
+      {
+        name: "time",
+        type: "Date | string",
+        default: "—",
+        description:
+          'Freeze the clock at a fixed time (Date, or "HH:MM" / "HH:MM:SS"). Omit to tick live.',
+      },
+      {
+        name: "live",
+        type: "boolean",
+        default: "true",
+        description: "Tick in real time. Ignored when a fixed time is provided.",
+      },
+      {
+        name: "timeZone",
+        type: "string",
+        default: "local",
+        description:
+          'IANA time zone for live mode, e.g. "Europe/Istanbul".',
+      },
+      {
+        name: "movement",
+        type: '"quartz" | "mechanical" | "sweep"',
+        default: '"quartz"',
+        description:
+          "How the second hand advances — quartz steps each second, mechanical stutters at ~8 beats/s, sweep glides continuously.",
+      },
+      {
+        name: "size",
+        type: "number",
+        default: "240",
+        description: "Diameter of the clock, in pixels.",
+      },
+      {
+        name: "numerals",
+        type: '"arabic" | "roman" | "ticks" | "none"',
+        default: '"arabic"',
+        description: "Style of the hour markers around the dial.",
+      },
+      {
+        name: "minuteTrack",
+        type: "boolean",
+        default: "true",
+        description: "Show the thin minute ticks between the hour markers.",
+      },
+      {
+        name: "showSeconds",
+        type: "boolean",
+        default: "true",
+        description: "Show the second hand.",
+      },
+      {
+        name: "dialColor",
+        type: "string",
+        default: '"#0b0b0c"',
+        description: "Dial (face) background — any CSS color.",
+      },
+      {
+        name: "caseColor",
+        type: "string",
+        default: '"#1c1c1e"',
+        description: "Case / bezel ring color.",
+      },
+      {
+        name: "handColor",
+        type: "string",
+        default: '"#f4f4f5"',
+        description: "Hour & minute hand color.",
+      },
+      {
+        name: "secondColor",
+        type: "string",
+        default: '"#f5a623"',
+        description: "Second hand accent color.",
+      },
+      {
+        name: "markerColor",
+        type: "string",
+        default: '"#d4d4d8"',
+        description: "Markers, numerals and minute-track color.",
+      },
+      {
+        name: "brand",
+        type: "string",
+        default: '"BRAUN"',
+        description: "Brand name printed on the upper dial (empty string hides it).",
+      },
+      {
+        name: "caption",
+        type: "string",
+        default: '"quartz"',
+        description: 'Small line under the brand, e.g. "quartz".',
+      },
+      {
+        name: "footer",
+        type: "[string, string]",
+        default: "—",
+        description: 'Two-part footer near 6 o\'clock, e.g. ["Made in", "Germany"].',
+      },
+      {
+        name: "glow",
+        type: "string",
+        default: "—",
+        description:
+          'A CSS color to cast a glowing halo around the case — the "space watch" look.',
+      },
+      {
+        name: "className",
+        type: "string",
+        default: "—",
+        description: "Extra classes on the outer wrapper.",
+      },
+    ],
+  },
   {
     slug: "pull-cord",
     title: "Pull-Cord Theme Switcher",

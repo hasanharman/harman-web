@@ -56,7 +56,7 @@
 /* Scope full-width images to article content only. A bare `img` rule here is
    global once this stylesheet loads and leaks across client-side navigation
    (e.g. stretching the avatar on the home page). */
-.prose img {
+.typeset img {
   width: 100%;
   height: auto;
 }

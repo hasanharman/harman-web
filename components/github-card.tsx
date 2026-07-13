@@ -13,7 +13,7 @@ export function GitHubCard({ repo, title, description }: GitHubCardProps) {
       href={`https://github.com/${repo}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="not-prose group my-8 flex items-center gap-4 rounded-xl border border-neutral-200 bg-neutral-50 p-5 no-underline transition-colors hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900/60 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+      className="not-typeset group my-8 flex items-center gap-4 rounded-xl border border-neutral-200 bg-neutral-50 p-5 no-underline transition-colors hover:border-neutral-300 hover:bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900/60 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
     >
       <FaGithub className="h-9 w-9 shrink-0 text-neutral-800 dark:text-neutral-100" />
       <div className="flex-1">

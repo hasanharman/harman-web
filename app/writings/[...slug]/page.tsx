@@ -79,10 +79,10 @@ export default async function PostPage({ params }: PostPageProps) {
   }
 
   return (
-    <article className="prose dark:prose-invert max-w-none">
+    <article className="typeset max-w-none">
       <Link
         href="/writings"
-        className="not-prose mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground"
+        className="not-typeset mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Writings

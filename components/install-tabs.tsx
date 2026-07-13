@@ -46,7 +46,7 @@ export function InstallTabs(props: InstallTabsProps) {
   const [active, setActive] = React.useState<Manager>(MANAGERS[0]);
 
   return (
-    <div className="not-prose relative my-6 overflow-hidden rounded-lg border bg-muted/30">
+    <div className="not-typeset relative my-6 overflow-hidden rounded-lg border bg-muted/30">
       <Tabs
         value={active}
         onValueChange={(v) => setActive(v as Manager)}

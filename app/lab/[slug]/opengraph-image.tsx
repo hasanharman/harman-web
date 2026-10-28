@@ -20,8 +20,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   };
   const still = item?.og ? await labStill(slug) : null;
 
-  return new ImageResponse(still ? <StageCard {...card} image={still} /> : <TextCard {...card} />, {
-    ...OG_SIZE,
-    fonts: await ogFonts(),
-  });
+  return new ImageResponse(
+    still && item ? <StageCard {...card} code={`<${item.importName} />`} image={still} /> : <TextCard {...card} />,
+    {
+      ...OG_SIZE,
+      fonts: await ogFonts(),
+    }
+  );
 }

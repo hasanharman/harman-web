@@ -11,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 
 import SocialMediaButtons from "@/components/social-media-buttons";
-import HomeClocks from "@/components/home-clocks";
 import PhotoFrames from "@/components/photo-frames";
 
 import Avatar from "@/assets/avatar.webp";
@@ -184,7 +183,6 @@ export default function Home() {
         <p className="text-muted-foreground ">
           Curious engineer & Frontend developer from Mersin 🌴 🇹🇷
         </p>
-        <HomeClocks />
         <SocialMediaButtons />
         <PhotoFrames images={images} />
       </div>

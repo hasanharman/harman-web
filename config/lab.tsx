@@ -10,6 +10,7 @@ import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
 import { PullCord } from "@/components/pull-cord";
 import TableOfContents from "@/components/table-of-contents";
+import { SoundToggle } from "@/components/lab/sound-toggle";
 
 /** Base URL each registry item is served from once deployed. */
 export const REGISTRY_BASE_URL = "https://hasanharman.dev/r";
@@ -112,7 +113,6 @@ export const LAB_ITEMS: LabItem[] = [
       "A retro split-flap alarm clock for React. Leaves fall with a bounce, with seven-segment or printed numerals, optional flip and tick sounds.",
     inspiration: [
       { label: "Zara Flip Saat", href: "https://www.zara.com/tr/tr/flip-saat-p46677060.html" },
-      { label: "Nergis on X", href: "https://x.com/heynergis/status/1883826985430139336" },
     ],
     og: { preview: <FlipClock size={450} time="10:08" />, stage: "#f4f2ee" },
     hint: "Wait for the minute",
@@ -136,7 +136,11 @@ export const LAB_ITEMS: LabItem[] = [
           "flipSound clacks as each leaf falls and lands, and tickSound adds a quartz tick every second. Both are synthesized with the Web Audio API, so there are no audio files. Browsers start audio only after you click or press a key on the page.",
         hint: "Click to hear it",
         previewClassName: FLIP_STAGE,
-        preview: <FlipClock size={380} showSeconds flipSound tickSound />,
+        preview: (
+          <SoundToggle>
+            <FlipClock size={380} showSeconds flipSound tickSound />
+          </SoundToggle>
+        ),
         code: `<FlipClock showSeconds flipSound tickSound volume={0.5} />`,
       },
       {
@@ -279,7 +283,11 @@ export default function Example() {
           "tickSound ticks every second, flipSound clacks when a wheel turns, and alarmSound beeps while the alarm goes off. All three are synthesized, so there are no audio files. Browsers start audio only after you click or press a key on the page.",
         hint: "Click to hear it",
         previewClassName: CALENDAR_STAGE,
-        preview: <CalendarClock size={360} alarm="07:30" tickSound flipSound alarmSound />,
+        preview: (
+          <SoundToggle>
+            <CalendarClock size={360} alarm="07:30" tickSound flipSound alarmSound />
+          </SoundToggle>
+        ),
         code: `<CalendarClock alarm="07:30" tickSound flipSound alarmSound />`,
       },
       {

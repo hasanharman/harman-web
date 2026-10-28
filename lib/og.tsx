@@ -5,10 +5,11 @@ export const OG_SIZE = { width: 1200, height: 630 };
 /** Component still size on StageCard; scripts/capture-og.mjs shoots at this size. */
 export const OG_STAGE = { width: 560, height: 534 };
 
+const FONT_URL = "https://cdn.jsdelivr.net/fontsource/fonts";
 const FONTS = [
-  { name: "Pacifico", weight: 400, url: "https://cdn.jsdelivr.net/fontsource/fonts/pacifico@latest/latin-400-normal.ttf" },
-  { name: "Questrial", weight: 400, url: "https://cdn.jsdelivr.net/fontsource/fonts/questrial@latest/latin-400-normal.ttf" },
-  { name: "Inter", weight: 600, url: "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.ttf" },
+  { name: "Geist", weight: 400, url: `${FONT_URL}/geist@latest/latin-400-normal.ttf` },
+  { name: "Geist", weight: 600, url: `${FONT_URL}/geist@latest/latin-600-normal.ttf` },
+  { name: "Geist Mono", weight: 400, url: `${FONT_URL}/geist-mono@latest/latin-400-normal.ttf` },
 ] as const;
 
 let fontsPromise: ReturnType<typeof fetchFonts> | null = null;
@@ -52,234 +53,120 @@ export async function labStill(slug: string) {
 
 type CardProps = { title: string; label: string; description: string | null; meta: string | null };
 
-export function TextCard({ title, label, description, meta }: CardProps) {
-  const titleSize = title.length > 64 ? 60 : title.length > 40 ? 72 : 84;
+const INSET = 48;
+const LINE = "rgba(255,255,255,0.14)";
+const MUTED = "#a1a1a1";
+
+/** Black canvas with shadcn-style hairline guides; `split` adds a vertical guide at that x. */
+function Frame({ split, children }: { split?: number; children: React.ReactNode }) {
+  const guides = [
+    { left: 0, right: 0, top: INSET, height: 1 },
+    { left: 0, right: 0, bottom: INSET, height: 1 },
+    { top: 0, bottom: 0, left: INSET, width: 1 },
+    { top: 0, bottom: 0, right: INSET, width: 1 },
+    ...(split ? [{ top: 0, bottom: 0, left: split, width: 1 }] : []),
+  ];
   return (
     <div
       style={{
         height: "100%",
         width: "100%",
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        background: "#0b0b0c",
-        padding: "72px",
         position: "relative",
-        fontFamily: "Questrial",
+        background: "#000",
+        fontFamily: "Geist",
+        color: "#fff",
       }}
     >
-      {/* Brand glow */}
-      <div
-        style={{
-          position: "absolute",
-          top: -200,
-          right: -140,
-          width: 560,
-          height: 560,
-          display: "flex",
-          background:
-            "radial-gradient(circle, rgba(47,123,112,0.55) 0%, rgba(47,123,112,0) 70%)",
-        }}
-      />
-      {/* Top row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", fontFamily: "Pacifico", fontSize: 42, color: "#ffffff" }}>
-          Hasan Harman
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "10px 24px",
-            border: "1px solid rgba(255,255,255,0.16)",
-            borderRadius: 999,
-            fontSize: 22,
-            letterSpacing: 3,
-            color: "#7fded0",
-          }}
-        >
-          {label.toUpperCase()}
-        </div>
-      </div>
-
-      {/* Title + description */}
-      <div style={{ display: "flex", flexDirection: "column", maxWidth: 960 }}>
-        <div
-          style={{
-            display: "flex",
-            fontFamily: "Inter",
-            fontWeight: 600,
-            fontSize: titleSize,
-            lineHeight: 1.05,
-            letterSpacing: -1.5,
-            color: "#fafafa",
-          }}
-        >
-          {title}
-        </div>
-        {description ? (
-          <div
-            style={{
-              display: "flex",
-              marginTop: 28,
-              fontSize: 32,
-              lineHeight: 1.35,
-              color: "#a1a1aa",
-            }}
-          >
-            {description}
-          </div>
-        ) : null}
-      </div>
-
-      {/* Bottom row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          fontSize: 24,
-          color: "#71717a",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: 999,
-              background: "#2F7B70",
-              display: "flex",
-              marginRight: 14,
-            }}
-          />
-          hasanharman.dev
-        </div>
-        {meta ? <div style={{ display: "flex" }}>{meta}</div> : null}
-      </div>
+      {children}
+      {guides.map((style, i) => (
+        <div key={i} style={{ position: "absolute", display: "flex", background: LINE, ...style }} />
+      ))}
     </div>
   );
 }
 
-/** Text on the left, the component itself on a lit stage to the right. */
-export function StageCard({
-  title,
-  label,
-  description,
-  meta,
-  image,
-}: CardProps & { image: string }) {
-  // Two-line titles shrink so the footer keeps its room.
-  const long = title.length > 12;
-  const titleSize = long ? 64 : 76;
+const mono = { display: "flex", fontFamily: "Geist Mono", fontSize: 20, color: MUTED } as const;
+
+export function TextCard({ title, label, description, meta }: CardProps) {
+  const titleSize = title.length > 64 ? 60 : title.length > 40 ? 68 : 80;
   return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        // Satori clips radial glows, so the brand tint is linear.
-        background: "linear-gradient(135deg, #12302b 0%, #0d1716 28%, #0b0b0c 55%)",
-        padding: 48,
-        position: "relative",
-        fontFamily: "Questrial",
-      }}
-    >
+    <Frame>
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          width: 520,
-          height: "100%",
-          padding: "12px 40px 12px 16px",
+          position: "absolute",
+          left: INSET,
+          top: INSET,
+          right: INSET,
+          bottom: INSET,
+          padding: "40px 48px",
         }}
       >
-        <div style={{ display: "flex", fontFamily: "Pacifico", fontSize: 34, color: "#ffffff" }}>
-          Hasan Harman
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex" }}>
-            <div
-              style={{
-                display: "flex",
-                padding: "8px 20px",
-                border: "1px solid rgba(127,222,208,0.35)",
-                borderRadius: 999,
-                fontSize: 18,
-                letterSpacing: 3,
-                color: "#7fded0",
-              }}
-            >
-              {label.toUpperCase()}
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              marginTop: 24,
-              fontFamily: "Inter",
-              fontWeight: 600,
-              fontSize: titleSize,
-              lineHeight: 1.02,
-              letterSpacing: -2,
-              color: "#fafafa",
-            }}
-          >
+        <div style={mono}>hasanharman.dev / {label.toLowerCase()}</div>
+        <div style={{ display: "flex", flexDirection: "column", maxWidth: 900 }}>
+          <div style={{ display: "flex", fontWeight: 600, fontSize: titleSize, lineHeight: 1.05, letterSpacing: -2.5 }}>
             {title}
           </div>
           {description ? (
-            <div
-              style={{
-                display: "flex",
-                marginTop: long ? 18 : 22,
-                fontSize: long ? 23 : 25,
-                lineHeight: 1.42,
-                color: "#a1a1aa",
-              }}
-            >
+            <div style={{ display: "flex", marginTop: 24, fontSize: 30, lineHeight: 1.4, color: MUTED }}>
               {description}
             </div>
           ) : null}
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", fontSize: 20, color: "#71717a" }}>
-          <div
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 999,
-              background: "#2F7B70",
-              display: "flex",
-              marginRight: 12,
-            }}
-          />
-          {meta ?? "hasanharman.dev"}
-        </div>
+        <div style={mono}>{meta ?? ""}</div>
       </div>
+    </Frame>
+  );
+}
 
+/** Text in the left cell, the component still filling the right cell. */
+export function StageCard({
+  title,
+  label,
+  description,
+  code,
+  image,
+}: Omit<CardProps, "meta"> & { code: string; image: string }) {
+  const split = OG_SIZE.width - INSET - OG_STAGE.width;
+  return (
+    <Frame split={split}>
       <div
         style={{
           display: "flex",
-          width: OG_STAGE.width,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          position: "absolute",
+          left: INSET,
+          top: INSET,
+          width: split - INSET,
           height: OG_STAGE.height,
-          borderRadius: 28,
-          overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.12)",
-          boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
+          padding: "40px 48px",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- Satori renders plain <img>. */}
-        <img src={image} width={OG_STAGE.width} height={OG_STAGE.height} alt="" style={{ objectFit: "cover" }} />
+        <div style={mono}>hasanharman.dev / {label.toLowerCase()}</div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", fontWeight: 600, fontSize: 64, lineHeight: 1.05, letterSpacing: -2.5 }}>
+            {title}
+          </div>
+          {description ? (
+            <div style={{ display: "flex", marginTop: 20, fontSize: 24, lineHeight: 1.45, color: MUTED }}>
+              {description}
+            </div>
+          ) : null}
+        </div>
+        <div style={{ ...mono, color: "#fff" }}>{code}</div>
       </div>
-    </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- Satori renders plain <img>. */}
+      <img
+        src={image}
+        width={OG_STAGE.width}
+        height={OG_STAGE.height}
+        alt=""
+        style={{ position: "absolute", left: split, top: INSET, objectFit: "cover" }}
+      />
+    </Frame>
   );
 }

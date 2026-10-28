@@ -618,70 +618,90 @@ export default function Example() {
     slug: "flip-clock",
     title: "Flip Clock",
     description:
-      "A retro split-flap desk clock in molded plastic. Each leaf falls over with a little bounce when the number changes. Case, card and digit colors, 12/24-hour, seconds, time zone and flip speed are all props. No dependencies.",
+      "A retro split-flap alarm clock: a molded plastic case with an alarm bar, side knob and foot, LCD-gray cards with outlined seven-segment numerals, and an am/pm dot. Each leaf falls over with a little bounce when the number changes. Colors, numeral style, 12/24-hour, seconds, time zone and flip speed are all props. No dependencies.",
     hint: "Wait for the minute",
     installable: true,
     importName: "FlipClock",
-    previewClassName: "min-h-[320px] items-center justify-center bg-muted/30",
-    preview: <FlipClock size={320} />,
+    previewClassName: "min-h-[320px] items-center justify-center bg-white",
+    preview: <FlipClock size={340} />,
     examples: [
       {
         title: "With seconds",
         description:
           "showSeconds adds a third card so you can watch a leaf fall every second.",
         hint: "Watch it flip",
-        previewClassName: "min-h-[300px] items-center justify-center bg-muted/30",
-        preview: <FlipClock size={320} showSeconds />,
+        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        preview: <FlipClock size={380} showSeconds />,
         code: `<FlipClock showSeconds />`,
+      },
+      {
+        title: "Printed cards",
+        description:
+          'digits="print" swaps the segments for solid printed numerals. Color the hour and minute cards apart and drop the hardware for a clean desk clock.',
+        previewClassName: "min-h-[300px] items-center justify-center bg-[#d9d6d0]",
+        preview: (
+          <FlipClock
+            size={320}
+            digits="print"
+            hour12={false}
+            hardware={false}
+            caseColor="#c4352b"
+            faceColor="#eadfce"
+            hourColor="#79a6c9"
+            minuteColor="#20785a"
+            digitColor="#e8c36a"
+          />
+        ),
+        code: `<FlipClock
+  digits="print"
+  hour12={false}
+  hardware={false}
+  caseColor="#c4352b"
+  faceColor="#eadfce"
+  hourColor="#79a6c9"
+  minuteColor="#20785a"
+  digitColor="#e8c36a"
+/>`,
       },
       {
         title: "Colorways",
         description:
-          "Recolor the case, backplate, cards and digits to make a different finish.",
+          "caseColor shades the shell, inner ring and foot from one value. Pair it with face and card colors for a different finish.",
         previewClassName:
-          "min-h-[300px] flex-wrap items-center justify-center gap-8 bg-muted/30",
+          "min-h-[300px] flex-wrap items-center justify-center gap-10 bg-white",
         preview: (
           <>
             <FlipClock
-              size={220}
-              caseColor="#1c1c1c"
-              backplateColor="#2a2a2a"
-              hourColor="#f2f0eb"
-              minuteColor="#f2f0eb"
-              digitColor="#111111"
+              size={240}
+              caseColor="#262626"
+              faceColor="#3a3a3a"
+              cardColor="#f1eee8"
+              labelColor="#e6e3dd"
             />
-            <FlipClock
-              size={220}
-              caseColor="#9fc9b4"
-              backplateColor="#f4efe6"
-              hourColor="#e86f3c"
-              minuteColor="#2f4f7a"
-              digitColor="#fdf6e3"
-            />
+            <FlipClock size={240} caseColor="#8cc3a9" cardColor="#d9d3c4" />
           </>
         ),
         code: `<FlipClock
-  caseColor="#1c1c1c"
-  backplateColor="#2a2a2a"
-  hourColor="#f2f0eb"
-  minuteColor="#f2f0eb"
-  digitColor="#111111"
+  caseColor="#262626"
+  faceColor="#3a3a3a"
+  cardColor="#f1eee8"
+  labelColor="#e6e3dd"
 />`,
       },
       {
-        title: "Time zone, 12-hour",
+        title: "Time zone, 24-hour",
         description:
-          "Pass an IANA timeZone to show another city, and hour12 for 1–12 hours.",
-        previewClassName: "min-h-[300px] items-center justify-center bg-muted/30",
-        preview: <FlipClock size={300} timeZone="America/New_York" hour12 />,
-        code: `<FlipClock timeZone="America/New_York" hour12 />`,
+          "Pass an IANA timeZone to show another city. hour12={false} drops the am/pm indicator.",
+        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        preview: <FlipClock size={320} timeZone="Asia/Tokyo" hour12={false} />,
+        code: `<FlipClock timeZone="Asia/Tokyo" hour12={false} />`,
       },
       {
         title: "Fixed time",
         description: "Give a time to freeze the clock, like a product shot.",
-        previewClassName: "min-h-[300px] items-center justify-center bg-muted/30",
-        preview: <FlipClock size={300} time="17:45" />,
-        code: `<FlipClock time="17:45" />`,
+        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        preview: <FlipClock size={320} time="07:30" />,
+        code: `<FlipClock time="07:30" />`,
       },
     ],
     usage: `import FlipClock from "@/components/flip-clock";
@@ -693,15 +713,19 @@ export default function Example() {
       { name: "time", type: "Date | string", default: "—", description: 'Freeze at a fixed time (Date or "HH:MM" / "HH:MM:SS"); omit to tick live.' },
       { name: "live", type: "boolean", default: "true", description: "Tick in real time. Ignored when a fixed time is provided." },
       { name: "timeZone", type: "string", default: "local", description: 'IANA time zone for live mode, e.g. "Europe/Istanbul".' },
-      { name: "hour12", type: "boolean", default: "false", description: "Show 1–12 hours instead of 00–23." },
+      { name: "hour12", type: "boolean", default: "true", description: "01–12 hours with an am/pm dot; false shows 00–23." },
       { name: "showSeconds", type: "boolean", default: "false", description: "Add a third card for seconds." },
-      { name: "size", type: "number", default: "300", description: "Case width in pixels; everything else scales from it." },
-      { name: "caseColor", type: "string", default: '"#c4352b"', description: "Plastic case color." },
-      { name: "backplateColor", type: "string", default: '"#eadfce"', description: "Panel behind the cards, seen through the clear front." },
-      { name: "hourColor", type: "string", default: '"#79a6c9"', description: "Hour card color." },
-      { name: "minuteColor", type: "string", default: '"#20785a"', description: "Minute card color." },
-      { name: "secondColor", type: "string", default: '"#2b2b2b"', description: "Seconds card color (when showSeconds)." },
-      { name: "digitColor", type: "string", default: '"#e8c36a"', description: "Numeral color printed on the cards." },
+      { name: "digits", type: '"segment" | "print"', default: '"segment"', description: "Outlined seven-segment numerals, or solid printed type." },
+      { name: "hardware", type: "boolean", default: "true", description: "Show the alarm bar, side knob and foot." },
+      { name: "size", type: "number", default: "320", description: "Case width in pixels; everything else scales from it." },
+      { name: "caseColor", type: "string", default: '"#e2302c"', description: "Plastic case color. The inner ring and foot are shaded from it." },
+      { name: "faceColor", type: "string", default: '"#e6dcc6"', description: "Face plate around the cards." },
+      { name: "cardColor", type: "string", default: '"#7f8683"', description: "Color for every card." },
+      { name: "hourColor", type: "string", default: "cardColor", description: "Hour card color." },
+      { name: "minuteColor", type: "string", default: "cardColor", description: "Minute card color." },
+      { name: "secondColor", type: "string", default: "cardColor", description: "Seconds card color (when showSeconds)." },
+      { name: "digitColor", type: "string", default: '"#0d0f0f"', description: "Numeral color on the cards." },
+      { name: "labelColor", type: "string", default: '"#2b2b2b"', description: "am/pm label and dot color." },
       { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds. Reduced motion skips the flip." },
       { name: "className", type: "string", default: "—", description: "Extra classes on the outer wrapper." },
     ],

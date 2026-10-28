@@ -130,7 +130,7 @@
       "name": "flip-clock",
       "type": "registry:component",
       "title": "Flip Clock",
-      "description": "A retro split-flap desk clock. Leaves fall over to show each new number. Case, card and digit colors, 12/24-hour, seconds, time zone and flip speed are props. Zero dependencies.",
+      "description": "A retro split-flap alarm clock with outlined seven-segment (or printed) numerals, am/pm dot, alarm bar, knob and foot. Leaves fall over to show each new number. Zero dependencies.",
       "files": [
         {
           "path": "components/flip-clock/index.tsx",

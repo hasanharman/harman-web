@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
-/** A retro split-flap desk clock — leaves fall over to show each new number. */
+/** A retro split-flap alarm clock — leaves fall over to show each new number. */
+
+type Digits = "segment" | "print";
 
 export type FlipClockProps = {
   /** Freeze at a fixed time (Date or "HH:MM" / "HH:MM:SS"); omit to tick live. */
@@ -11,24 +13,32 @@ export type FlipClockProps = {
   live?: boolean;
   /** IANA time zone for live mode, e.g. "Europe/Istanbul". Defaults to local. */
   timeZone?: string;
-  /** Show 1–12 hours instead of 00–23. */
+  /** Show 01–12 hours with an am/pm indicator instead of 00–23. */
   hour12?: boolean;
   /** Add a third card for seconds — handy for watching the flip. */
   showSeconds?: boolean;
+  /** "segment" draws outlined seven-segment numerals; "print" uses solid printed type. */
+  digits?: Digits;
+  /** Show the alarm bar on top, the setting knob and the foot. */
+  hardware?: boolean;
   /** Case width in pixels; everything else scales from it. */
   size?: number;
-  /** Plastic case color. */
+  /** Plastic case color. The inner ring and foot are shaded from it. */
   caseColor?: string;
-  /** Panel behind the cards, seen through the clear front. */
-  backplateColor?: string;
-  /** Hour card color. */
+  /** Face plate around the cards. */
+  faceColor?: string;
+  /** Card color for every card; override per card below. */
+  cardColor?: string;
+  /** Hour card color. Defaults to cardColor. */
   hourColor?: string;
-  /** Minute card color. */
+  /** Minute card color. Defaults to cardColor. */
   minuteColor?: string;
-  /** Seconds card color (when showSeconds). */
+  /** Seconds card color. Defaults to cardColor. */
   secondColor?: string;
   /** Numeral color printed on the cards. */
   digitColor?: string;
+  /** am/pm label and dot color. */
+  labelColor?: string;
   /** One full flip, in milliseconds. */
   flipDuration?: number;
   /** Extra classes on the outer wrapper. */
@@ -107,26 +117,125 @@ function useReducedMotion() {
   );
 }
 
+/* ---------- Seven-segment numerals ---------- */
+
+// Segment order: a (top), b (top right), c (bottom right), d (bottom), e (bottom left), f (top left), g (middle).
+const SEGMENTS: Record<string, string> = {
+  "0": "abcdef",
+  "1": "bc",
+  "2": "abged",
+  "3": "abgcd",
+  "4": "fgbc",
+  "5": "afgcd",
+  "6": "afgedc",
+  "7": "abc",
+  "8": "abcdefg",
+  "9": "abcdfg",
+};
+
+const DW = 52; // digit viewBox width
+const DH = 100; // digit viewBox height
+const T = 11; // segment thickness
+const GAP = 1.6; // clearance between segment tips
+const HT = T / 2; // inset of a segment centerline from the digit edge
+
+/** A hexagonal bar with beveled tips, horizontal or vertical, between two points. */
+function bar(x1: number, y1: number, x2: number, y2: number) {
+  const h = T / 2;
+  if (y1 === y2) {
+    const [a, b] = [x1 + GAP, x2 - GAP];
+    return `${a},${y1} ${a + h},${y1 - h} ${b - h},${y1 - h} ${b},${y1} ${b - h},${y1 + h} ${a + h},${y1 + h}`;
+  }
+  const [a, b] = [y1 + GAP, y2 - GAP];
+  return `${x1},${a} ${x1 + h},${a + h} ${x1 + h},${b - h} ${x1},${b} ${x1 - h},${b - h} ${x1 - h},${a + h}`;
+}
+
+const SEGMENT_POINTS: Record<string, string> = {
+  a: bar(HT, HT, DW - HT, HT),
+  b: bar(DW - HT, HT, DW - HT, DH / 2),
+  c: bar(DW - HT, DH / 2, DW - HT, DH - HT),
+  d: bar(HT, DH - HT, DW - HT, DH - HT),
+  e: bar(HT, DH / 2, HT, DH - HT),
+  f: bar(HT, HT, HT, DH / 2),
+  g: bar(HT, DH / 2, DW - HT, DH / 2),
+};
+
+/** One LCD-style numeral: lit segments outlined in ink, unlit ones as faint ghosts. */
+function SegmentDigit({ char, color, height }: { char: string; color: string; height: number }) {
+  const lit = SEGMENTS[char] ?? "";
+  return (
+    <svg
+      viewBox={`-3 -3 ${DW + 6} ${DH + 6}`}
+      height={height}
+      width={(height * (DW + 6)) / (DH + 6)}
+      aria-hidden
+      className="overflow-visible"
+    >
+      {Object.entries(SEGMENT_POINTS).map(([seg, points]) => {
+        const on = lit.includes(seg);
+        return (
+          <polygon
+            key={seg}
+            points={points}
+            fill={color}
+            fillOpacity={on ? 0.72 : 0}
+            stroke={color}
+            strokeOpacity={on ? 1 : 0.1}
+            strokeWidth={on ? 2.6 : 1.4}
+            strokeLinejoin="round"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+/* ---------- Flip card ---------- */
+
 type CardProps = {
   value: string | null;
   width: number;
   height: number;
   color: string;
   digitColor: string;
+  digits: Digits;
   duration: number;
 };
 
-/** One half of a leaf. The text is card-tall and clipped so each half shows its slice. */
+/** The numerals printed on a leaf, laid out at full card size. */
+function Face({ text, digits, digitColor, height }: { text: string; digits: Digits; digitColor: string; height: number }) {
+  if (digits === "print") {
+    return (
+      <span
+        className="font-semibold tabular-nums leading-none"
+        style={{ color: digitColor, fontSize: height * 0.62, letterSpacing: "-0.02em" }}
+      >
+        {text}
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center" style={{ gap: height * 0.07 }}>
+      {text.split("").map((char, i) => (
+        <SegmentDigit key={i} char={char} color={digitColor} height={height * 0.6} />
+      ))}
+    </span>
+  );
+}
+
+/** One half of a leaf. The face is card-tall and clipped so each half shows its slice. */
 function Half({
-  text,
+  children,
   half,
   color,
+  radius,
   style,
   ref,
 }: {
-  text: string;
+  children: React.ReactNode;
   half: "top" | "bottom";
   color: string;
+  radius: number;
   style?: React.CSSProperties;
   ref?: React.Ref<HTMLDivElement>;
 }) {
@@ -138,27 +247,32 @@ function Half({
       style={{
         top: top ? 0 : "50%",
         height: "50%",
-        background: color,
-        backgroundImage: top
-          ? "linear-gradient(to bottom, rgba(255,255,255,0.10), rgba(255,255,255,0.02))"
-          : "linear-gradient(to bottom, rgba(0,0,0,0.06), rgba(0,0,0,0.12))",
-        borderRadius: top ? "6% 6% 0 0 / 12% 12% 0 0" : "0 0 6% 6% / 0 0 12% 12%",
+        backgroundColor: color,
+        // A light falloff on the upper leaf, a darker belly below, and a fine LCD dot screen.
+        backgroundImage: [
+          top
+            ? "linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.03))"
+            : "linear-gradient(to bottom, rgba(0,0,0,0.07), rgba(0,0,0,0.16))",
+          "radial-gradient(rgba(0,0,0,0.07) 0.6px, transparent 0.8px)",
+        ].join(", "),
+        backgroundSize: "100% 100%, 3px 3px",
+        borderRadius: top ? `${radius}px ${radius}px 0 0` : `0 0 ${radius}px ${radius}px`,
         transformOrigin: top ? "bottom" : "top",
         backfaceVisibility: "hidden",
         ...style,
       }}
     >
-      <span
-        className="absolute inset-x-0 flex items-center justify-center leading-none"
+      <div
+        className="absolute inset-x-0 flex items-center justify-center"
         style={{ height: "200%", top: top ? 0 : "-100%" }}
       >
-        {text}
-      </span>
+        {children}
+      </div>
     </div>
   );
 }
 
-function FlipCard({ value, width, height, color, digitColor, duration }: CardProps) {
+function FlipCard({ value, width, height, color, digitColor, digits, duration }: CardProps) {
   const reduced = useReducedMotion();
   // `settled` is the number fully on show; while it trails `value`, a leaf is falling.
   const [settled, setSettled] = useState(value);
@@ -172,14 +286,20 @@ function FlipCard({ value, width, height, color, digitColor, duration }: CardPro
   useEffect(() => {
     if (!flipping || !topFlap.current || !bottomFlap.current) return;
     const half = duration / 2;
-    // Upper leaf falls toward you, accelerating like it's under gravity…
+    // Upper leaf falls toward you, accelerating and darkening as it tips away from the light…
     const fall = topFlap.current.animate(
-      [{ transform: "rotateX(0deg)" }, { transform: "rotateX(-90deg)" }],
+      [
+        { transform: "rotateX(0deg)", filter: "brightness(1)" },
+        { transform: "rotateX(-90deg)", filter: "brightness(0.6)" },
+      ],
       { duration: half, easing: "cubic-bezier(0.55, 0, 0.9, 0.45)", fill: "forwards" }
     );
     // …and its back lands on the lower half with a small bounce.
     const land = bottomFlap.current.animate(
-      [{ transform: "rotateX(90deg)" }, { transform: "rotateX(0deg)" }],
+      [
+        { transform: "rotateX(90deg)", filter: "brightness(1.35)" },
+        { transform: "rotateX(0deg)", filter: "brightness(1)" },
+      ],
       { duration: half, delay: half, easing: "cubic-bezier(0.2, 0.9, 0.3, 1.25)", fill: "both" }
     );
     land.finished.then(() => setSettled(value)).catch(() => {});
@@ -189,60 +309,81 @@ function FlipCard({ value, width, height, color, digitColor, duration }: CardPro
     };
   }, [flipping, value, duration]);
 
-  const next = value ?? "";
-  const prev = settled ?? "";
-  const pinW = Math.max(2, width * 0.035);
-  const pinH = height * 0.14;
+  const radius = width * 0.09;
+  const face = (text: string | null) => (
+    <Face text={text ?? ""} digits={digits} digitColor={digitColor} height={height} />
+  );
 
   return (
     <div
-      className="relative font-semibold tabular-nums"
+      className="relative"
       style={{
         width,
         height,
-        color: digitColor,
-        fontSize: height * 0.62,
-        letterSpacing: "-0.02em",
         perspective: height * 4,
-        filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.25))",
+        filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.3))",
       }}
     >
-      <Half text={next} half="top" color={color} />
-      <Half text={flipping ? prev : next} half="bottom" color={color} />
+      <Half half="top" color={color} radius={radius}>
+        {face(value)}
+      </Half>
+      <Half half="bottom" color={color} radius={radius}>
+        {face(flipping ? settled : value)}
+      </Half>
       {flipping && (
         <>
-          <Half ref={topFlap} text={prev} half="top" color={color} style={{ zIndex: 2 }} />
+          <Half ref={topFlap} half="top" color={color} radius={radius} style={{ zIndex: 2 }}>
+            {face(settled)}
+          </Half>
           <Half
             ref={bottomFlap}
-            text={next}
             half="bottom"
             color={color}
+            radius={radius}
             style={{ zIndex: 2, transform: "rotateX(90deg)" }}
-          />
+          >
+            {face(value)}
+          </Half>
         </>
       )}
 
-      {/* The seam between leaves. */}
+      {/* The seam between leaves: a dark gap with a lit lip under it. */}
       <span
-        className="pointer-events-none absolute inset-x-0 z-10 -translate-y-1/2 bg-black/40"
-        style={{ top: "50%", height: Math.max(1, height * 0.012) }}
+        className="pointer-events-none absolute inset-x-0 z-10"
+        style={{
+          top: "50%",
+          height: Math.max(1, height * 0.014),
+          background: "rgba(0,0,0,0.32)",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.18)",
+          transform: "translateY(-50%)",
+        }}
       />
-      {/* Hinge pins the leaves pivot on. */}
-      {(["left", "right"] as const).map((side) => (
-        <span
-          key={side}
-          className="pointer-events-none absolute z-10 -translate-y-1/2 rounded-[1px] bg-neutral-800"
-          style={{ top: "50%", [side]: -pinW * 0.4, width: pinW, height: pinH }}
-        />
-      ))}
-      {/* Index notch at the top of the card. */}
+      {/* Inner rim so the card reads as a recessed window. */}
       <span
-        className="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 rounded-b-[1px] bg-white/70"
-        style={{ top: 0, width: width * 0.03, height: height * 0.05 }}
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{
+          borderRadius: radius,
+          boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25)",
+        }}
       />
+      {digits === "print" &&
+        (["left", "right"] as const).map((side) => (
+          <span
+            key={side}
+            className="pointer-events-none absolute z-10 -translate-y-1/2 rounded-[1px] bg-neutral-800"
+            style={{
+              top: "50%",
+              [side]: -Math.max(2, width * 0.035) * 0.4,
+              width: Math.max(2, width * 0.035),
+              height: height * 0.14,
+            }}
+          />
+        ))}
     </div>
   );
 }
+
+/* ---------- Clock ---------- */
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -250,88 +391,220 @@ export default function FlipClock({
   time,
   live = true,
   timeZone,
-  hour12 = false,
+  hour12 = true,
   showSeconds = false,
-  size = 300,
-  caseColor = "#c4352b",
-  backplateColor = "#eadfce",
-  hourColor = "#79a6c9",
-  minuteColor = "#20785a",
-  secondColor = "#2b2b2b",
-  digitColor = "#e8c36a",
+  digits = "segment",
+  hardware = true,
+  size = 320,
+  caseColor = "#e2302c",
+  faceColor = "#e6dcc6",
+  cardColor = "#7f8683",
+  hourColor,
+  minuteColor,
+  secondColor,
+  digitColor = "#0d0f0f",
+  labelColor = "#2b2b2b",
   flipDuration = 600,
   className,
 }: FlipClockProps) {
   const parts = useFlipTime(time, live, timeZone);
 
-  const hours = parts
-    ? hour12
-      ? String(parts.h % 12 || 12)
-      : pad(parts.h)
-    : null;
+  const hours = parts ? pad(hour12 ? parts.h % 12 || 12 : parts.h) : null;
   const minutes = parts ? pad(parts.m) : null;
   const seconds = parts ? pad(parts.s) : null;
+  const pm = parts ? parts.h >= 12 : false;
 
-  const height = size * 0.56;
-  const bezel = size * 0.045;
-  const cardW = showSeconds ? size * 0.235 : size * 0.29;
-  const cardH = showSeconds ? size * 0.24 : size * 0.28;
-  const gap = showSeconds ? size * 0.045 : size * 0.1;
+  // Case geometry, all scaled from the width.
+  const W = size;
+  const H = W * 0.44;
+  const rim = W * 0.034; // bright outer shell
+  const ring = W * 0.014; // darker inner ring
+  const groove = Math.max(1, W * 0.006);
+  const btnH = W * 0.022;
+  const knobW = W * 0.03;
+  const footH = W * 0.05;
+
+  const meridiem = hour12;
+  const labelW = meridiem ? W * 0.085 : 0;
+  const n = showSeconds ? 3 : 2;
+  const innerW = W - 2 * (rim + ring + groove);
+  const gap = W * 0.012;
+  const sidePad = W * 0.03;
+  const cardW = Math.min(
+    (innerW - labelW - sidePad * 2 - gap * (n - 1)) / n,
+    W * 0.3
+  );
+  const cardH = Math.min(cardW * 0.84, H - 2 * (rim + ring + groove) - W * 0.05);
+
+  // Shades derived from the case color so a single prop recolors the whole shell.
+  const shadeDark = `color-mix(in srgb, ${caseColor} 78%, black)`;
+  const shadeDeep = `color-mix(in srgb, ${caseColor} 42%, black)`;
+  const shadeLight = `color-mix(in srgb, ${caseColor} 82%, white)`;
 
   const cards = [
-    { key: "h", value: hours, color: hourColor },
-    { key: "m", value: minutes, color: minuteColor },
-    ...(showSeconds ? [{ key: "s", value: seconds, color: secondColor }] : []),
+    { key: "h", value: hours, color: hourColor ?? cardColor },
+    { key: "m", value: minutes, color: minuteColor ?? cardColor },
+    ...(showSeconds ? [{ key: "s", value: seconds, color: secondColor ?? cardColor }] : []),
   ];
+
+  const label = parts
+    ? `${hours}:${minutes}${showSeconds ? `:${seconds}` : ""}${meridiem ? (pm ? " pm" : " am") : ""}`
+    : "Flip clock";
 
   return (
     <div
       role="img"
-      aria-label={parts ? `${hours}:${minutes}${showSeconds ? `:${seconds}` : ""}` : "Flip clock"}
+      aria-label={label}
       className={`relative shrink-0 select-none ${className ?? ""}`}
       style={{
-        width: size,
-        height,
-        padding: bezel,
-        borderRadius: height * 0.17,
-        background: caseColor,
-        // Molded plastic: a lit top lip, a darker belly and a soft contact shadow.
-        boxShadow: [
-          `inset 0 ${size * 0.006}px ${size * 0.01}px rgba(255,255,255,0.35)`,
-          `inset 0 -${size * 0.012}px ${size * 0.02}px rgba(0,0,0,0.25)`,
-          `0 ${size * 0.03}px ${size * 0.05}px -${size * 0.01}px rgba(0,0,0,0.35)`,
-        ].join(", "),
+        width: W + (hardware ? knobW : 0),
+        paddingTop: hardware ? btnH : 0,
+        paddingBottom: hardware ? footH : W * 0.02,
       }}
     >
-      {/* Clear polycarbonate window over the backplate. */}
-      <div
-        className="relative flex h-full w-full items-center justify-center overflow-hidden"
+      {/* Contact shadow on the surface it stands on. */}
+      <span
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-[50%]"
         style={{
-          gap,
-          background: backplateColor,
-          borderRadius: height * 0.08,
-          boxShadow: `inset 0 0 0 ${Math.max(1, size * 0.005)}px rgba(255,255,255,0.55), inset 0 ${size * 0.008}px ${size * 0.02}px rgba(0,0,0,0.22)`,
+          bottom: -W * 0.02,
+          width: W * 0.92,
+          height: W * 0.06,
+          background: "radial-gradient(closest-side, rgba(0,0,0,0.28), rgba(0,0,0,0))",
+          filter: `blur(${W * 0.008}px)`,
+        }}
+      />
+
+      {hardware && (
+        <>
+          {/* Alarm / snooze bar on top. */}
+          <span
+            className="absolute"
+            style={{
+              top: 0,
+              right: knobW + W * 0.09,
+              width: W * 0.2,
+              height: btnH + W * 0.01,
+              borderRadius: `${W * 0.01}px ${W * 0.01}px 0 0`,
+              background: "linear-gradient(to bottom, #3a3a3a, #121212)",
+            }}
+          />
+          {/* Setting knob on the right side, with grip ridges. */}
+          <span
+            className="absolute"
+            style={{
+              right: 0,
+              top: (hardware ? btnH : 0) + H * 0.3,
+              width: knobW + W * 0.01,
+              height: H * 0.4,
+              borderRadius: `0 ${W * 0.012}px ${W * 0.012}px 0`,
+              background:
+                "repeating-linear-gradient(to bottom, rgba(255,255,255,0.08) 0 1px, transparent 1px 3px), linear-gradient(to right, #0d0d0d, #2e2e2e 55%, #111)",
+            }}
+          />
+          {/* The foot it stands on. */}
+          <span
+            className="absolute"
+            style={{
+              bottom: 0,
+              left: W * 0.09,
+              width: W * 0.72,
+              height: footH + W * 0.02,
+              borderRadius: `0 0 ${W * 0.012}px ${W * 0.012}px`,
+              background: `linear-gradient(to bottom, ${shadeDeep}, color-mix(in srgb, ${caseColor} 30%, black))`,
+            }}
+          />
+        </>
+      )}
+
+      {/* Outer shell: molded plastic with a lit top lip and a shaded belly. */}
+      <div
+        className="relative"
+        style={{
+          width: W,
+          height: H,
+          padding: rim,
+          borderRadius: H * 0.2,
+          background: `linear-gradient(to bottom, ${shadeLight} 0%, ${caseColor} 22%, ${caseColor} 70%, ${shadeDark} 100%)`,
+          boxShadow: [
+            `inset 0 ${W * 0.004}px ${W * 0.004}px rgba(255,255,255,0.35)`,
+            `inset 0 -${W * 0.006}px ${W * 0.01}px rgba(0,0,0,0.25)`,
+            `0 ${W * 0.006}px ${W * 0.012}px rgba(0,0,0,0.18)`,
+          ].join(", "),
         }}
       >
-        {cards.map((card) => (
-          <FlipCard
-            key={card.key}
-            value={card.value}
-            width={cardW}
-            height={cardH}
-            color={card.color}
-            digitColor={digitColor}
-            duration={flipDuration}
-          />
-        ))}
-        {/* Glare across the front. */}
-        <span
-          className="pointer-events-none absolute inset-0 z-20"
+        {/* Inner ring, a step down from the shell. */}
+        <div
+          className="h-full w-full"
           style={{
-            background:
-              "linear-gradient(115deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.06) 28%, rgba(255,255,255,0) 45%, rgba(255,255,255,0.08) 80%)",
+            padding: ring,
+            borderRadius: H * 0.2 - rim,
+            background: `linear-gradient(to bottom, ${shadeDark}, ${caseColor} 40%, ${caseColor})`,
+            boxShadow: `inset 0 ${W * 0.003}px ${W * 0.006}px rgba(0,0,0,0.35)`,
           }}
-        />
+        >
+          {/* Dark groove, then the face plate. */}
+          <div
+            className="h-full w-full"
+            style={{
+              padding: groove,
+              borderRadius: H * 0.2 - rim - ring,
+              background: shadeDeep,
+            }}
+          >
+            <div
+              className="relative flex h-full w-full items-center justify-center overflow-hidden"
+              style={{
+                gap,
+                paddingInline: sidePad,
+                borderRadius: H * 0.2 - rim - ring - groove,
+                background: `linear-gradient(to bottom, color-mix(in srgb, ${faceColor} 88%, white), ${faceColor} 30%, color-mix(in srgb, ${faceColor} 92%, black))`,
+                boxShadow: `inset 0 ${W * 0.006}px ${W * 0.01}px rgba(0,0,0,0.22)`,
+              }}
+            >
+              {meridiem && (
+                <div
+                  className="relative flex shrink-0 flex-col justify-center leading-none"
+                  style={{ width: labelW, height: cardH, color: labelColor, gap: W * 0.012, fontSize: W * 0.034 }}
+                >
+                  {(["am", "pm"] as const).map((m) => (
+                    <span key={m} className="flex items-center justify-between" style={{ paddingRight: W * 0.008 }}>
+                      {m}
+                      <span
+                        className="rounded-full transition-opacity duration-300"
+                        style={{
+                          width: W * 0.016,
+                          height: W * 0.016,
+                          background: labelColor,
+                          opacity: parts && (m === "pm") === pm ? 1 : 0,
+                        }}
+                      />
+                    </span>
+                  ))}
+                </div>
+              )}
+              {cards.map((card) => (
+                <FlipCard
+                  key={card.key}
+                  value={card.value}
+                  width={cardW}
+                  height={cardH}
+                  color={card.color}
+                  digitColor={digitColor}
+                  digits={digits}
+                  duration={flipDuration}
+                />
+              ))}
+              {/* Glare across the clear front. */}
+              <span
+                className="pointer-events-none absolute inset-0 z-20"
+                style={{
+                  background:
+                    "linear-gradient(115deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 26%, rgba(255,255,255,0) 42%, rgba(255,255,255,0.06) 82%)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,12 @@ const useMDXComponent = (code: string) => {
 const components = {
   Image,
   Callout,
-  VinylRecord,
+  // Opt out of article typography, whose img margin would shift the cover off its sleeve.
+  VinylRecord: (props: React.ComponentProps<typeof VinylRecord>) => (
+    <div className="not-typeset">
+      <VinylRecord {...props} />
+    </div>
+  ),
   GitHubCard,
   InstallTabs,
   pre: Pre,

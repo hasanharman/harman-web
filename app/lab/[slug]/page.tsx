@@ -1,6 +1,4 @@
 import React from "react";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,7 +10,6 @@ import {
   installCommand,
   usageSnippet,
 } from "@/config/lab";
-import { ogImageUrl } from "@/config/site";
 import { getRegistryItem } from "@/lib/registry";
 import { highlightCode } from "@/lib/highlight";
 import { ComponentPreview } from "@/components/lab/component-preview";
@@ -41,34 +38,13 @@ export async function generateMetadata({
   const item = getLabItem(slug);
   if (!item) return {};
   const description = item.summary ?? item.description;
-  // A captured still of the component (scripts/capture-og.mjs), when one exists.
-  const stage = `/og/lab/${slug}.png`;
-  const hasStage = existsSync(path.join(process.cwd(), "public", stage));
-  const og = ogImageUrl({
-    title: item.title,
-    label: "Lab",
-    desc: description,
-    meta: `hasanharman.dev/lab/${slug}`,
-    image: hasStage ? stage : undefined,
-  });
-  const image = { url: og, width: 1200, height: 630, alt: `${item.title} — ${description}` };
+  // Share images come from opengraph-image.tsx / twitter-image.tsx next to this page.
   return {
     title: `${item.title} - Lab`,
     description,
     alternates: { canonical: `/lab/${slug}` },
-    openGraph: {
-      title: item.title,
-      description,
-      type: "article",
-      url: `/lab/${slug}`,
-      images: [image],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: item.title,
-      description,
-      images: [image],
-    },
+    openGraph: { title: item.title, description, type: "article", url: `/lab/${slug}` },
+    twitter: { card: "summary_large_image", title: item.title, description },
   };
 }
 

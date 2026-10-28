@@ -1,35 +1,38 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { FlipCard, clockSound, useClockAudio } from "@/components/flip-clock";
-
-/** A retro calendar alarm clock: flip day and date wheels beside an analog dial. */
+import {
+  ContactShadow,
+  FlipCard,
+  WEEKDAYS,
+  clockSound,
+  pad,
+  parseTimeString,
+  shade,
+  useClockAudio,
+  useClockMoment,
+  useReducedMotion,
+  type Moment,
+} from "@/components/flip-clock";
 
 export type CalendarClockProps = {
-  /** Freeze at a fixed moment; omit to tick live. A string is a time ("HH:MM[:SS]") on today's date. */
+  /** Freeze the clock; a string is "HH:MM[:SS]" on today's date. */
   time?: Date | string;
-  /** Tick in real time. Ignored when a fixed `time` is provided. */
-  live?: boolean;
   /** IANA time zone, e.g. "Europe/Istanbul". Defaults to local. */
   timeZone?: string;
-  /** BCP 47 locale for the weekday names, e.g. "tr-TR". */
+  /** BCP 47 locale for weekday names, e.g. "tr-TR". */
   locale?: string;
-  /** Show the second hand. */
   showSeconds?: boolean;
-  /** Alarm time "HH:MM". Draws the alarm hand while the alarm is on. */
+  /** Alarm time "HH:MM"; its hand shows while the alarm is on. */
   alarm?: string;
-  /** Start with the alarm switched on (uncontrolled). */
   defaultAlarmOn?: boolean;
   /** Controlled alarm state. */
   alarmOn?: boolean;
   /** Fired when the top-right button switches the alarm. */
   onAlarmChange?: (on: boolean) => void;
-  /** Let the top buttons wind the day and date wheels and switch the alarm. */
-  interactive?: boolean;
-  /** Case width in pixels; everything else scales from it. */
+  /** Case width in px; everything scales from it. */
   size?: number;
-  /** Outer shell color. */
   caseColor?: string;
   /** Groove, window frames and foot. */
   trimColor?: string;
@@ -37,119 +40,29 @@ export type CalendarClockProps = {
   panelColor?: string;
   /** Day/date leaves and the dial face. */
   cardColor?: string;
-  /** Type, ticks, hands and the top buttons. */
+  /** Type, ticks, hands and buttons. */
   inkColor?: string;
-  /** Alarm hand color. */
   alarmColor?: string;
-  /** One full flip, in milliseconds. */
+  /** Flip duration (ms). */
   flipDuration?: number;
-  /** Clack when a wheel turns. Audio starts after the visitor's first click or key press. */
+  /** Clack when a wheel turns; audio starts after the first click or key press. */
   flipSound?: boolean;
-  /** Tick every second, like a quartz movement. */
+  /** Quartz tick every second. */
   tickSound?: boolean;
-  /** Beep while the alarm is going off. */
+  /** Beep while the alarm goes off. */
   alarmSound?: boolean;
-  /** Sound volume, 0–1. */
+  /** 0–1. */
   volume?: number;
-  /** Extra classes on the outer wrapper. */
   className?: string;
 };
 
-type Moment = { h: number; m: number; s: number; weekday: number; day: number };
-
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-function parseTimeString(value: string) {
-  const match = value.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  if (!match) return null;
-  return { h: Number(match[1]), m: Number(match[2]), s: match[3] ? Number(match[3]) : 0 };
-}
-
-function localMoment(d: Date): Moment {
-  return { h: d.getHours(), m: d.getMinutes(), s: d.getSeconds(), weekday: d.getDay(), day: d.getDate() };
-}
-
-// One formatter per zone — building Intl formatters every second adds up.
-const zoneFormatters = new Map<string, Intl.DateTimeFormat>();
-function zonedMoment(date: Date, timeZone: string): Moment {
-  let fmt = zoneFormatters.get(timeZone);
-  if (!fmt) {
-    fmt = new Intl.DateTimeFormat("en-US", {
-      timeZone,
-      hourCycle: "h23",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      weekday: "short",
-      day: "numeric",
-    });
-    zoneFormatters.set(timeZone, fmt);
-  }
-  const parts = fmt.formatToParts(date);
-  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
-  return {
-    h: Number(get("hour")),
-    m: Number(get("minute")),
-    s: Number(get("second")),
-    weekday: Math.max(0, WEEKDAYS.indexOf(get("weekday"))),
-    day: Number(get("day")),
-  };
-}
-
-/** Short, uppercase weekday names for a locale, Sunday first. */
+/** Short uppercase weekday names for a locale, Sunday first. */
 function weekdayNames(locale: string) {
   const fmt = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
   // 2023-01-01 was a Sunday.
   return WEEKDAYS.map((_, i) =>
     fmt.format(new Date(Date.UTC(2023, 0, 1 + i))).replace(/\.$/, "").toLocaleUpperCase(locale)
   );
-}
-
-/** Resolve the props into a moment. Null until mounted so SSR and hydration agree. */
-function useMoment(time: CalendarClockProps["time"], live: boolean, timeZone?: string) {
-  const [now, setNow] = useState<Date | null>(null);
-  const fixedDate = time instanceof Date ? time : null;
-  const fixedTime = typeof time === "string" ? parseTimeString(time) : null;
-  const frozen = Boolean(fixedDate || fixedTime);
-
-  useEffect(() => {
-    let id: ReturnType<typeof setTimeout>;
-    // Re-arm on each second boundary so hands and leaves move with the real tick.
-    const tick = () => {
-      const d = new Date();
-      setNow(d);
-      if (live && !frozen) id = setTimeout(tick, 1000 - d.getMilliseconds());
-    };
-    id = setTimeout(tick, 0);
-    return () => clearTimeout(id);
-  }, [live, frozen]);
-
-  if (fixedDate) return timeZone ? zonedMoment(fixedDate, timeZone) : localMoment(fixedDate);
-  if (!now) return null;
-  const current = timeZone ? zonedMoment(now, timeZone) : localMoment(now);
-  return fixedTime ? { ...current, ...fixedTime } : current;
-}
-
-function subscribeReducedMotion(cb: () => void) {
-  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
-}
-
-function useReducedMotion() {
-  return useSyncExternalStore(
-    subscribeReducedMotion,
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => false
-  );
-}
-
-/** Cartesian point on the 100×100 dial for a radius and clock angle (deg, 12 o'clock = 0). */
-function point(radius: number, deg: number): [number, number] {
-  const a = (deg * Math.PI) / 180;
-  // Rounded so server and browser trig agree and hydration matches.
-  const round = (n: number) => Math.round(n * 1000) / 1000;
-  return [round(50 + radius * Math.sin(a)), round(50 - radius * Math.cos(a))];
 }
 
 function Dial({
@@ -167,10 +80,6 @@ function Dial({
   face: string;
   alarmColor: string;
 }) {
-  const hour = moment ? ((moment.h % 12) + moment.m / 60) * 30 : 0;
-  const minute = moment ? (moment.m + moment.s / 60) * 6 : 0;
-  const second = moment ? moment.s * 6 : 0;
-  const alarmDeg = alarm ? ((alarm.h % 12) + alarm.m / 60) * 30 : 0;
   const vignette = `cc-vignette-${useId()}`;
 
   return (
@@ -182,42 +91,52 @@ function Dial({
         </radialGradient>
       </defs>
       <rect width="100" height="100" fill={face} />
-      {/* Paper falloff toward the edges. */}
       <rect width="100" height="100" fill={`url(#${vignette})`} />
 
-      {Array.from({ length: 12 }, (_, i) => {
-        const long = i % 3 === 0;
-        const [x1, y1] = point(long ? 31 : 34, i * 30);
-        const [x2, y2] = point(41, i * 30);
-        return (
-          <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={ink} strokeWidth={long ? 2.6 : 2} strokeLinecap="round" />
-        );
-      })}
+      {/* Ticks are rotated, not placed with trig, so server and client markup match exactly. */}
+      {Array.from({ length: 12 }, (_, i) => (
+        <line
+          key={i}
+          x1="50"
+          y1={i % 3 === 0 ? 19 : 16}
+          x2="50"
+          y2="9"
+          stroke={ink}
+          strokeWidth={i % 3 === 0 ? 2.6 : 2}
+          strokeLinecap="round"
+          transform={`rotate(${i * 30} 50 50)`}
+        />
+      ))}
 
       {moment && (
         <>
           {alarm && (
-            <g transform={`rotate(${alarmDeg} 50 50)`}>
+            <g transform={`rotate(${((alarm.h % 12) + alarm.m / 60) * 30} 50 50)`}>
               <line x1="50" y1="50" x2="50" y2="28" stroke={alarmColor} strokeWidth="1.6" strokeLinecap="round" />
               <path d="M50 24 l3 5 h-6 z" fill={alarmColor} />
             </g>
           )}
-          {/* Hour hand: a short, broad lozenge. */}
           <path
             d="M50 56 L47.6 50 L50 25 L52.4 50 Z"
             fill={ink}
-            transform={`rotate(${hour} 50 50)`}
+            transform={`rotate(${((moment.h % 12) + moment.m / 60) * 30} 50 50)`}
           />
-          {/* Minute hand. */}
           <path
             d="M50 57 L48.2 50 L50 12 L51.8 50 Z"
             fill={ink}
-            transform={`rotate(${minute} 50 50)`}
+            transform={`rotate(${(moment.m + moment.s / 60) * 6} 50 50)`}
           />
           {showSeconds && (
-            <g transform={`rotate(${second} 50 50)`}>
-              <line x1="50" y1="60" x2="50" y2="13" stroke={ink} strokeWidth="0.9" strokeLinecap="round" />
-            </g>
+            <line
+              x1="50"
+              y1="60"
+              x2="50"
+              y2="13"
+              stroke={ink}
+              strokeWidth="0.9"
+              strokeLinecap="round"
+              transform={`rotate(${moment.s * 6} 50 50)`}
+            />
           )}
           <circle cx="50" cy="50" r="4.6" fill={ink} />
           <circle cx="50" cy="50" r="2.2" fill="white" fillOpacity="0.35" />
@@ -229,7 +148,6 @@ function Dial({
 
 export default function CalendarClock({
   time,
-  live = true,
   timeZone,
   locale = "en-US",
   showSeconds = true,
@@ -237,7 +155,6 @@ export default function CalendarClock({
   defaultAlarmOn = false,
   alarmOn,
   onAlarmChange,
-  interactive = true,
   size = 360,
   caseColor = "#efe8cd",
   trimColor = "#5a3a2c",
@@ -252,28 +169,21 @@ export default function CalendarClock({
   volume = 0.5,
   className,
 }: CalendarClockProps) {
-  const moment = useMoment(time, live, timeZone);
-  useClockAudio(flipSound || tickSound || alarmSound);
+  const moment = useClockMoment(time, timeZone, showSeconds || tickSound);
+  useClockAudio({ enabled: flipSound || tickSound || alarmSound, tick: tickSound, second: moment?.s, volume });
   const reduced = useReducedMotion();
   const names = useMemo(() => weekdayNames(locale), [locale]);
-  const alarmTime = useMemo(() => (alarm ? parseTimeString(alarm) : null), [alarm]);
+  const alarmTime = alarm ? parseTimeString(alarm) : null;
 
-  // The real clock's day/date wheels are wound by hand; these offsets are those turns.
+  // Offsets from hand-winding the day and date wheels.
   const [dayTurns, setDayTurns] = useState(0);
   const [dateTurns, setDateTurns] = useState(0);
   const [alarmInternal, setAlarmInternal] = useState(defaultAlarmOn);
   const armed = alarmOn ?? alarmInternal;
 
-  const weekday = moment ? names[(moment.weekday + dayTurns) % 7] : null;
-  const date = moment ? String(((moment.day - 1 + dateTurns) % 31) + 1) : null;
-
-  const ringing =
-    armed && alarmTime && moment ? moment.h === alarmTime.h && moment.m === alarmTime.m : false;
-
-  const second = moment?.s;
-  useEffect(() => {
-    if (tickSound && second !== undefined) clockSound.tick(volume);
-  }, [tickSound, second, volume]);
+  const weekday = moment?.weekday != null ? names[(moment.weekday + dayTurns) % 7] : null;
+  const date = moment?.day != null ? String(((moment.day - 1 + dateTurns) % 31) + 1) : null;
+  const ringing = !!(armed && alarmTime && moment && moment.h === alarmTime.h && moment.m === alarmTime.m);
 
   useEffect(() => {
     if (!ringing || !alarmSound) return;
@@ -282,7 +192,7 @@ export default function CalendarClock({
     return () => clearInterval(id);
   }, [ringing, alarmSound, volume]);
 
-  // Rattle the whole clock while the alarm is going off.
+  // Rattle while ringing.
   const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ringing || reduced || !body.current) return;
@@ -299,12 +209,10 @@ export default function CalendarClock({
   }, [ringing, reduced]);
 
   const toggleAlarm = () => {
-    const next = !armed;
-    if (alarmOn === undefined) setAlarmInternal(next);
-    onAlarmChange?.(next);
+    if (alarmOn === undefined) setAlarmInternal(!armed);
+    onAlarmChange?.(!armed);
   };
 
-  // Geometry, all scaled from the width.
   const W = size;
   const H = W * 0.5;
   const shell = W * 0.035;
@@ -317,8 +225,6 @@ export default function CalendarClock({
   const dialS = W * 0.26;
   const gap = W * 0.045;
   const radius = H * 0.22;
-
-  const shade = (c: string, pct: number, to = "black") => `color-mix(in srgb, ${c} ${pct}%, ${to})`;
 
   const windowStyle = (w: number, h: number): React.CSSProperties => ({
     width: w + frame * 2,
@@ -335,7 +241,7 @@ export default function CalendarClock({
       style={{
         color: inkColor,
         fontSize: cardH * (text.length > 2 ? 0.44 : 0.5),
-        // Condensed lettering like the printed wheels, without depending on a narrow font.
+        // Condensed like the printed wheels, without needing a narrow font.
         transform: "scaleX(0.78)",
         letterSpacing: "0.01em",
       }}
@@ -345,13 +251,13 @@ export default function CalendarClock({
   );
 
   const buttons = [
-    { key: "day", label: "Turn the day wheel", onClick: () => setDayTurns((n) => n + 1), down: false },
-    { key: "date", label: "Turn the date wheel", onClick: () => setDateTurns((n) => n + 1), down: false },
-    { key: "alarm", label: armed ? "Turn alarm off" : "Turn alarm on", onClick: toggleAlarm, down: armed },
+    { key: "day", width: cardW, label: "Turn the day wheel", onClick: () => setDayTurns((n) => n + 1) },
+    { key: "date", width: cardW, label: "Turn the date wheel", onClick: () => setDateTurns((n) => n + 1) },
+    { key: "alarm", width: dialS, label: armed ? "Turn alarm off" : "Turn alarm on", onClick: toggleAlarm, pressed: armed },
   ];
 
   const label = moment
-    ? `${weekday} ${date}, ${String(moment.h).padStart(2, "0")}:${String(moment.m).padStart(2, "0")}${armed && alarm ? `, alarm ${alarm}` : ""}`
+    ? `${weekday} ${date}, ${pad(moment.h)}:${pad(moment.m)}${armed && alarm ? `, alarm ${alarm}` : ""}`
     : "Calendar clock";
 
   return (
@@ -362,50 +268,33 @@ export default function CalendarClock({
       className={`relative shrink-0 select-none ${className ?? ""}`}
       style={{ width: W, paddingTop: btnH, paddingBottom: footH }}
     >
-      {/* Contact shadow. */}
-      <span
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-[50%]"
-        style={{
-          bottom: -W * 0.02,
-          width: W * 0.95,
-          height: W * 0.06,
-          background: "radial-gradient(closest-side, rgba(0,0,0,0.25), rgba(0,0,0,0))",
-          filter: `blur(${W * 0.008}px)`,
-        }}
-      />
+      <ContactShadow size={W} />
 
       {/* Push buttons, one above each window. */}
-      <div
-        className="absolute inset-x-0 top-0 flex justify-center"
-        style={{ gap, paddingInline: shell + groove }}
-      >
-        {[cardW, cardW, dialS].map((w, i) => {
-          const b = buttons[i];
-          const Tag = interactive ? "button" : "span";
-          return (
-            <div key={b.key} className="flex justify-center" style={{ width: w + frame * 2 }}>
-              <Tag
-                {...(interactive
-                  ? { type: "button" as const, onClick: b.onClick, "aria-label": b.label, "aria-pressed": b.key === "alarm" ? armed : undefined }
-                  : {})}
-                className="block transition-transform duration-100 ease-out active:translate-y-[18%] motion-reduce:transition-none"
-                style={{
-                  width: W * 0.085,
-                  height: btnH + W * 0.01,
-                  borderRadius: `${W * 0.03}px ${W * 0.03}px ${W * 0.006}px ${W * 0.006}px / ${W * 0.018}px ${W * 0.018}px ${W * 0.006}px ${W * 0.006}px`,
-                  // A cylinder: a lit elliptical cap over a side that rolls into shadow at the edges.
-                  background: [
-                    `radial-gradient(ellipse 50% 28% at 50% 22%, ${shade(inkColor, 72, "white")}, ${inkColor} 92%, transparent 100%)`,
-                    `linear-gradient(to right, ${shade(inkColor, 70)}, ${inkColor} 30%, ${shade(inkColor, 88, "white")} 55%, ${inkColor} 75%, ${shade(inkColor, 70)})`,
-                  ].join(", "),
-                  boxShadow: `0 ${W * 0.002}px ${W * 0.004}px rgba(0,0,0,0.25)`,
-                  transform: b.down ? "translateY(28%)" : undefined,
-                  cursor: interactive ? "pointer" : undefined,
-                }}
-              />
-            </div>
-          );
-        })}
+      <div className="absolute inset-x-0 top-0 flex justify-center" style={{ gap, paddingInline: shell + groove }}>
+        {buttons.map((b) => (
+          <div key={b.key} className="flex justify-center" style={{ width: b.width + frame * 2 }}>
+            <button
+              type="button"
+              onClick={b.onClick}
+              aria-label={b.label}
+              aria-pressed={b.pressed}
+              className="block cursor-pointer transition-transform duration-100 ease-out active:translate-y-[18%] motion-reduce:transition-none"
+              style={{
+                width: W * 0.085,
+                height: btnH + W * 0.01,
+                borderRadius: `${W * 0.03}px ${W * 0.03}px ${W * 0.006}px ${W * 0.006}px / ${W * 0.018}px ${W * 0.018}px ${W * 0.006}px ${W * 0.006}px`,
+                // Cylinder: lit cap over a side shaded at the edges.
+                background: [
+                  `radial-gradient(ellipse 50% 28% at 50% 22%, ${shade(inkColor, 72, "white")}, ${inkColor} 92%, transparent 100%)`,
+                  `linear-gradient(to right, ${shade(inkColor, 70)}, ${inkColor} 30%, ${shade(inkColor, 88, "white")} 55%, ${inkColor} 75%, ${shade(inkColor, 70)})`,
+                ].join(", "),
+                boxShadow: `0 ${W * 0.002}px ${W * 0.004}px rgba(0,0,0,0.25)`,
+                transform: b.pressed ? "translateY(28%)" : undefined,
+              }}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Foot. */}
@@ -420,7 +309,7 @@ export default function CalendarClock({
         }}
       />
 
-      {/* Shell. */}
+      {/* Shell → groove → panel. */}
       <div
         className="relative"
         style={{
@@ -435,7 +324,6 @@ export default function CalendarClock({
           ].join(", "),
         }}
       >
-        {/* Groove. */}
         <div
           className="h-full w-full"
           style={{
@@ -444,7 +332,6 @@ export default function CalendarClock({
             background: `linear-gradient(to bottom, ${shade(trimColor, 75)}, ${trimColor})`,
           }}
         >
-          {/* Panel. */}
           <div
             className="relative flex h-full w-full items-center justify-center overflow-hidden"
             style={{
@@ -454,13 +341,10 @@ export default function CalendarClock({
               boxShadow: `inset 0 ${W * 0.008}px ${W * 0.014}px rgba(0,0,0,0.3)`,
             }}
           >
-            {[
-              { key: "weekday", value: weekday },
-              { key: "date", value: date },
-            ].map((wheel) => (
-              <div key={wheel.key} className="relative" style={windowStyle(cardW, cardH)}>
+            {[weekday, date].map((value, i) => (
+              <div key={i} className="relative" style={windowStyle(cardW, cardH)}>
                 <FlipCard
-                  value={wheel.value}
+                  value={value}
                   width={cardW}
                   height={cardH}
                   color={cardColor}
@@ -469,7 +353,7 @@ export default function CalendarClock({
                   volume={volume}
                   renderFace={face}
                 />
-                {/* Edges of the leaves stacked up behind the front one. */}
+                {/* Stacked leaf edges behind the front one. */}
                 <span
                   className="pointer-events-none absolute z-20"
                   style={{
@@ -497,7 +381,7 @@ export default function CalendarClock({
               </div>
             </div>
 
-            {/* Clear front: a soft glare sweep. */}
+            {/* Glare. */}
             <span
               className="pointer-events-none absolute inset-0 z-30"
               style={{

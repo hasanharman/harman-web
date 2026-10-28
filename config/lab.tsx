@@ -55,14 +55,12 @@ export type LabItem = {
   props?: PropDoc[];
   /** Optional worked examples, each with its own preview + code (shadcn-style). */
   examples?: LabExample[];
-  /** Short (≤155 char) description for meta tags and share cards. Falls back to description. */
+  /** Meta/share description (≤155 chars); falls back to description. */
   summary?: string;
-  /** The real-world products or posts the component is modeled on. */
+  /** Products or posts the component is modeled on. */
   inspiration?: { label: string; href: string }[];
-  /** A curated still of the component for its share image (see scripts/capture-og.mjs). */
-  ogPreview?: React.ReactNode;
-  /** Stage color behind the component on its share image. */
-  ogStage?: string;
+  /** Still rendered on /og-capture for the share image, on a `stage` background. */
+  og?: { preview: React.ReactNode; stage: string };
 };
 
 export type PropDoc = {
@@ -100,6 +98,10 @@ const COVERS = {
     "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/32/0e/f8/320ef83c-5748-d558-25e9-ac595ae63cac/cover.jpg/600x600bb.jpg",
 };
 
+const FLIP_STAGE = "min-h-[320px] bg-white";
+const CALENDAR_BG = "#e4e1dc";
+const CALENDAR_STAGE = "min-h-[320px] bg-[#e4e1dc]";
+
 export const LAB_ITEMS: LabItem[] = [
   {
     slug: "flip-clock",
@@ -112,12 +114,11 @@ export const LAB_ITEMS: LabItem[] = [
       { label: "Zara Flip Saat", href: "https://www.zara.com/tr/tr/flip-saat-p46677060.html" },
       { label: "Nergis on X", href: "https://x.com/heynergis/status/1883826985430139336" },
     ],
-    ogPreview: <FlipClock size={450} time="10:08" />,
-    ogStage: "#f4f2ee",
+    og: { preview: <FlipClock size={450} time="10:08" />, stage: "#f4f2ee" },
     hint: "Wait for the minute",
     installable: true,
     importName: "FlipClock",
-    previewClassName: "min-h-[320px] items-center justify-center bg-white",
+    previewClassName: FLIP_STAGE,
     preview: <FlipClock size={300} />,
     examples: [
       {
@@ -125,7 +126,7 @@ export const LAB_ITEMS: LabItem[] = [
         description:
           "showSeconds adds a third card so you can watch a leaf fall every second.",
         hint: "Watch it flip",
-        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        previewClassName: FLIP_STAGE,
         preview: <FlipClock size={380} showSeconds />,
         code: `<FlipClock showSeconds />`,
       },
@@ -134,7 +135,7 @@ export const LAB_ITEMS: LabItem[] = [
         description:
           "flipSound clacks as each leaf falls and lands, and tickSound adds a quartz tick every second. Both are synthesized with the Web Audio API, so there are no audio files. Browsers start audio only after you click or press a key on the page.",
         hint: "Click to hear it",
-        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        previewClassName: FLIP_STAGE,
         preview: <FlipClock size={380} showSeconds flipSound tickSound />,
         code: `<FlipClock showSeconds flipSound tickSound volume={0.5} />`,
       },
@@ -142,7 +143,7 @@ export const LAB_ITEMS: LabItem[] = [
         title: "Printed cards",
         description:
           'digits="print" swaps the segments for solid printed numerals. Color the hour and minute cards apart and drop the hardware for a clean desk clock.',
-        previewClassName: "min-h-[300px] items-center justify-center bg-[#d9d6d0]",
+        previewClassName: "min-h-[300px] bg-[#d9d6d0]",
         preview: (
           <FlipClock
             size={320}
@@ -169,8 +170,7 @@ export const LAB_ITEMS: LabItem[] = [
         title: "Colorways",
         description:
           "caseColor shades the shell, inner ring and foot from one value. Pair it with face and card colors for a different finish.",
-        previewClassName:
-          "min-h-[300px] flex-wrap items-center justify-center gap-10 bg-white",
+        previewClassName: `${FLIP_STAGE} flex-wrap gap-10`,
         preview: (
           <>
             <FlipClock
@@ -194,14 +194,14 @@ export const LAB_ITEMS: LabItem[] = [
         title: "Time zone, 12-hour",
         description:
           "Pass an IANA timeZone to show another city. hour12 switches to 01–12 and shows the am/pm indicator.",
-        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        previewClassName: FLIP_STAGE,
         preview: <FlipClock size={320} timeZone="America/New_York" hour12 />,
         code: `<FlipClock timeZone="America/New_York" hour12 />`,
       },
       {
         title: "Fixed time",
         description: "Give a time to freeze the clock, like a product shot.",
-        previewClassName: "min-h-[300px] items-center justify-center bg-white",
+        previewClassName: FLIP_STAGE,
         preview: <FlipClock size={320} time="07:30" />,
         code: `<FlipClock time="07:30" />`,
       },
@@ -212,9 +212,8 @@ export default function Example() {
   return <FlipClock />;
 }`,
     props: [
-      { name: "time", type: "Date | string", default: "—", description: 'Freeze at a fixed time (Date or "HH:MM" / "HH:MM:SS"); omit to tick live.' },
-      { name: "live", type: "boolean", default: "true", description: "Tick in real time. Ignored when a fixed time is provided." },
-      { name: "timeZone", type: "string", default: "local", description: 'IANA time zone for live mode, e.g. "Europe/Istanbul".' },
+      { name: "time", type: "Date | string", default: "—", description: 'Freeze at a Date or "HH:MM[:SS]"; omit to tick live.' },
+      { name: "timeZone", type: "string", default: "local", description: 'IANA time zone, e.g. "Europe/Istanbul".' },
       { name: "hour12", type: "boolean", default: "false", description: "Show 01–12 hours with an am/pm dot instead of 00–23." },
       { name: "showSeconds", type: "boolean", default: "false", description: "Add a third card for seconds." },
       { name: "digits", type: '"segment" | "print"', default: '"segment"', description: "Outlined seven-segment numerals, or solid printed type." },
@@ -225,7 +224,6 @@ export default function Example() {
       { name: "cardColor", type: "string", default: '"#7f8683"', description: "Color for every card." },
       { name: "hourColor", type: "string", default: "cardColor", description: "Hour card color." },
       { name: "minuteColor", type: "string", default: "cardColor", description: "Minute card color." },
-      { name: "secondColor", type: "string", default: "cardColor", description: "Seconds card color (when showSeconds)." },
       { name: "digitColor", type: "string", default: '"#0d0f0f"', description: "Numeral color on the cards." },
       { name: "labelColor", type: "string", default: '"#2b2b2b"', description: "am/pm label and dot color." },
       { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds. Reduced motion skips the flip." },
@@ -248,21 +246,22 @@ export default function Example() {
         href: "https://www.zara.com/tr/tr/carkli-alarmli-takvim-saat-p41662060.html?v1=551365188",
       },
     ],
-    ogPreview: (
-      <CalendarClock
-        size={470}
-        time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
-        timeZone="UTC"
-        alarm="07:30"
-        defaultAlarmOn
-        interactive={false}
-      />
-    ),
-    ogStage: "#e4e1dc",
+    og: {
+      preview: (
+        <CalendarClock
+          size={470}
+          time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
+          timeZone="UTC"
+          alarm="07:30"
+          defaultAlarmOn
+        />
+      ),
+      stage: CALENDAR_BG,
+    },
     hint: "Press the buttons",
     installable: true,
     importName: "CalendarClock",
-    previewClassName: "min-h-[340px] items-center justify-center bg-[#e4e1dc]",
+    previewClassName: CALENDAR_STAGE,
     preview: <CalendarClock size={300} alarm="07:30" />,
     examples: [
       {
@@ -270,7 +269,7 @@ export default function Example() {
         description:
           "Give an alarm time and press the right button to arm it: the button stays down and an alarm hand appears on the dial. When the time comes, the clock rattles.",
         hint: "Press the right button",
-        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+        previewClassName: CALENDAR_STAGE,
         preview: <CalendarClock size={360} alarm="07:30" defaultAlarmOn />,
         code: `<CalendarClock alarm="07:30" defaultAlarmOn />`,
       },
@@ -279,7 +278,7 @@ export default function Example() {
         description:
           "tickSound ticks every second, flipSound clacks when a wheel turns, and alarmSound beeps while the alarm goes off. All three are synthesized, so there are no audio files. Browsers start audio only after you click or press a key on the page.",
         hint: "Click to hear it",
-        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+        previewClassName: CALENDAR_STAGE,
         preview: <CalendarClock size={360} alarm="07:30" tickSound flipSound alarmSound />,
         code: `<CalendarClock alarm="07:30" tickSound flipSound alarmSound />`,
       },
@@ -287,8 +286,7 @@ export default function Example() {
         title: "Colorways",
         description:
           "Six colors cover the whole clock: case, trim, panel, cards, ink and alarm hand.",
-        previewClassName:
-          "min-h-[320px] flex-wrap items-center justify-center gap-10 bg-[#e4e1dc]",
+        previewClassName: `${CALENDAR_STAGE} flex-wrap gap-10`,
         preview: (
           <>
             <CalendarClock
@@ -322,27 +320,25 @@ export default function Example() {
         title: "Localized weekday",
         description:
           'locale sets the weekday names, and timeZone shows another city. This one is in Turkish, on Istanbul time.',
-        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+        previewClassName: CALENDAR_STAGE,
         preview: <CalendarClock size={340} locale="tr-TR" timeZone="Europe/Istanbul" />,
         code: `<CalendarClock locale="tr-TR" timeZone="Europe/Istanbul" />`,
       },
       {
         title: "Fixed moment",
         description:
-          "Pass a Date to freeze the clock, like a product shot. interactive={false} makes the buttons decorative.",
-        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+          "Pass a Date to freeze the clock, like a product shot.",
+        previewClassName: CALENDAR_STAGE,
         preview: (
           <CalendarClock
             size={340}
             time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
             timeZone="UTC"
-            interactive={false}
           />
         ),
         code: `<CalendarClock
   time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
   timeZone="UTC"
-  interactive={false}
 />`,
       },
     ],
@@ -352,8 +348,7 @@ export default function Example() {
   return <CalendarClock alarm="07:30" />;
 }`,
     props: [
-      { name: "time", type: "Date | string", default: "—", description: 'Freeze at a fixed moment. A string is a time ("HH:MM[:SS]") on today\'s date.' },
-      { name: "live", type: "boolean", default: "true", description: "Tick in real time. Ignored when a fixed time is provided." },
+      { name: "time", type: "Date | string", default: "—", description: 'Freeze the clock; a string is "HH:MM[:SS]" on today\'s date.' },
       { name: "timeZone", type: "string", default: "local", description: 'IANA time zone, e.g. "Europe/Istanbul".' },
       { name: "locale", type: "string", default: '"en-US"', description: "BCP 47 locale for the weekday names." },
       { name: "showSeconds", type: "boolean", default: "true", description: "Show the second hand." },
@@ -361,7 +356,6 @@ export default function Example() {
       { name: "defaultAlarmOn", type: "boolean", default: "false", description: "Start with the alarm on (uncontrolled)." },
       { name: "alarmOn", type: "boolean", default: "—", description: "Controlled alarm state." },
       { name: "onAlarmChange", type: "(on: boolean) => void", default: "—", description: "Fired when the top-right button switches the alarm." },
-      { name: "interactive", type: "boolean", default: "true", description: "Let the top buttons wind the day and date wheels and switch the alarm." },
       { name: "size", type: "number", default: "360", description: "Case width in pixels; everything else scales from it." },
       { name: "caseColor", type: "string", default: '"#efe8cd"', description: "Outer shell color." },
       { name: "trimColor", type: "string", default: '"#5a3a2c"', description: "Groove, window frames and foot." },

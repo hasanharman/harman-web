@@ -130,7 +130,7 @@
       "name": "flip-clock",
       "type": "registry:component",
       "title": "Flip Clock",
-      "description": "A retro split-flap alarm clock with outlined seven-segment (or printed) numerals, am/pm dot, alarm bar, knob and foot. Leaves fall over to show each new number. Zero dependencies.",
+      "description": "A retro split-flap alarm clock with outlined seven-segment (or printed) numerals, an optional am/pm dot, alarm bar and foot, and synthesized flip/tick sounds. Zero dependencies.",
       "files": [
         {
           "path": "components/flip-clock/index.tsx",

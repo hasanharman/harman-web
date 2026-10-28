@@ -1,73 +1,66 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-
-/** A retro split-flap alarm clock — leaves fall over to show each new number. */
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 type Digits = "segment" | "print";
 
 export type FlipClockProps = {
-  /** Freeze at a fixed time (Date or "HH:MM" / "HH:MM:SS"); omit to tick live. */
+  /** Freeze at a Date or "HH:MM[:SS]"; omit to tick live. */
   time?: Date | string;
-  /** Tick in real time. Ignored when a fixed `time` is provided. */
-  live?: boolean;
-  /** IANA time zone for live mode, e.g. "Europe/Istanbul". Defaults to local. */
+  /** IANA time zone, e.g. "Europe/Istanbul". Defaults to local. */
   timeZone?: string;
-  /** Show 01–12 hours with an am/pm indicator instead of 00–23. */
+  /** 01–12 with am/pm instead of 00–23. */
   hour12?: boolean;
-  /** Add a third card for seconds — handy for watching the flip. */
+  /** Add a seconds card. */
   showSeconds?: boolean;
-  /** "segment" draws outlined seven-segment numerals; "print" uses solid printed type. */
+  /** Outlined seven-segment numerals, or solid printed type. */
   digits?: Digits;
-  /** Show the alarm bar on top and the foot. */
+  /** Show the alarm bar and foot. */
   hardware?: boolean;
-  /** Case width in pixels; everything else scales from it. */
+  /** Case width in px; everything scales from it. */
   size?: number;
-  /** Plastic case color. The inner ring and foot are shaded from it. */
+  /** Shell color; ring and foot are shaded from it. */
   caseColor?: string;
-  /** Face plate around the cards. */
   faceColor?: string;
-  /** Card color for every card; override per card below. */
+  /** Default color for every card. */
   cardColor?: string;
-  /** Hour card color. Defaults to cardColor. */
+  /** Defaults to cardColor. */
   hourColor?: string;
-  /** Minute card color. Defaults to cardColor. */
+  /** Defaults to cardColor. */
   minuteColor?: string;
-  /** Seconds card color. Defaults to cardColor. */
-  secondColor?: string;
-  /** Numeral color printed on the cards. */
   digitColor?: string;
   /** am/pm label and dot color. */
   labelColor?: string;
-  /** One full flip, in milliseconds. */
+  /** Flip duration (ms). */
   flipDuration?: number;
-  /** Clack each time a leaf falls. Audio starts after the visitor's first click or key press. */
+  /** Clack on each flip; audio starts after the first click or key press. */
   flipSound?: boolean;
-  /** Tick every second, like a quartz movement. */
+  /** Quartz tick every second. */
   tickSound?: boolean;
-  /** Sound volume, 0–1. */
+  /** 0–1. */
   volume?: number;
-  /** Extra classes on the outer wrapper. */
   className?: string;
 };
 
-type Parts = { h: number; m: number; s: number };
+/* Time */
 
-function parseTimeString(value: string): Parts | null {
+export type Moment = { h: number; m: number; s: number; weekday: number | null; day: number | null };
+
+export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export function parseTimeString(value: string) {
   const match = value.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
   if (!match) return null;
   return { h: Number(match[1]), m: Number(match[2]), s: match[3] ? Number(match[3]) : 0 };
 }
 
-function resolveFixed(time: FlipClockProps["time"]): Parts | null {
-  if (!time) return null;
-  if (typeof time === "string") return parseTimeString(time);
-  return { h: time.getHours(), m: time.getMinutes(), s: time.getSeconds() };
-}
-
-// One formatter per zone — building Intl formatters every second adds up.
+// One formatter per zone; building Intl formatters every tick adds up.
 const zoneFormatters = new Map<string, Intl.DateTimeFormat>();
-function zonedParts(date: Date, timeZone: string): Parts {
+
+function momentOf(date: Date, timeZone?: string): Moment {
+  if (!timeZone) {
+    return { h: date.getHours(), m: date.getMinutes(), s: date.getSeconds(), weekday: date.getDay(), day: date.getDate() };
+  }
   let fmt = zoneFormatters.get(timeZone);
   if (!fmt) {
     fmt = new Intl.DateTimeFormat("en-US", {
@@ -76,77 +69,97 @@ function zonedParts(date: Date, timeZone: string): Parts {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
+      weekday: "short",
+      day: "numeric",
     });
     zoneFormatters.set(timeZone, fmt);
   }
-  const get = (type: string) =>
-    Number(fmt.formatToParts(date).find((p) => p.type === type)?.value ?? 0);
-  return { h: get("hour"), m: get("minute"), s: get("second") };
+  const parts = fmt.formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return {
+    h: Number(get("hour")),
+    m: Number(get("minute")),
+    s: Number(get("second")),
+    weekday: WEEKDAYS.indexOf(get("weekday")),
+    day: Number(get("day")),
+  };
 }
 
-/** Resolve the props into h/m/s. Null until mounted so SSR and hydration agree. */
-function useFlipTime(time: FlipClockProps["time"], live: boolean, timeZone?: string) {
-  const fixed = useMemo(() => resolveFixed(time), [time]);
-  const [now, setNow] = useState<Date | null>(null);
+// One page-wide ticker on the second boundary, so every clock updates in the same commit.
+let now = 0;
+let timer: ReturnType<typeof setTimeout> | undefined;
+const listeners = new Set<() => void>();
 
-  useEffect(() => {
-    if (fixed) return;
-    let id: ReturnType<typeof setTimeout>;
-    // Re-arm on each second boundary so the flip lands with the real tick.
+function subscribeClock(listener: () => void) {
+  listeners.add(listener);
+  if (listeners.size === 1) {
     const tick = () => {
-      const d = new Date();
-      setNow(d);
-      if (live) id = setTimeout(tick, 1000 - d.getMilliseconds());
+      now = Date.now();
+      listeners.forEach((l) => l());
+      timer = setTimeout(tick, 1000 - (now % 1000));
     };
-    id = setTimeout(tick, 0);
-    return () => clearTimeout(id);
-  }, [fixed, live]);
-
-  if (fixed) return fixed;
-  if (!now) return null;
-  return timeZone
-    ? zonedParts(now, timeZone)
-    : { h: now.getHours(), m: now.getMinutes(), s: now.getSeconds() };
+    tick();
+  }
+  return () => {
+    listeners.delete(listener);
+    if (!listeners.size) clearTimeout(timer);
+  };
 }
+
+const subscribeNever = () => () => {};
+
+/** Current moment, null until mounted so SSR and hydration agree; re-renders each second, or each minute without `everySecond`. */
+export function useClockMoment(time: Date | string | undefined, timeZone?: string, everySecond = true) {
+  const fixedDate = time instanceof Date ? time : null;
+  const fixedTime = typeof time === "string" ? parseTimeString(time) : null;
+  const unit = everySecond && !fixedTime ? 1000 : 60000;
+  const tick = useSyncExternalStore(
+    fixedDate ? subscribeNever : subscribeClock,
+    // No subscribers means the ticker is stopped and `now` is stale.
+    () => (listeners.size ? Math.floor(now / unit) : null),
+    () => null
+  );
+
+  if (fixedDate) return momentOf(fixedDate, timeZone);
+  const current = tick === null ? null : momentOf(new Date(tick * unit), timeZone);
+  if (fixedTime) return { ...fixedTime, weekday: current?.weekday ?? null, day: current?.day ?? null };
+  return current;
+}
+
+let motionQuery: MediaQueryList | undefined;
+const reducedMotionQuery = () => (motionQuery ??= window.matchMedia("(prefers-reduced-motion: reduce)"));
 
 function subscribeReducedMotion(cb: () => void) {
-  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
+  reducedMotionQuery().addEventListener("change", cb);
+  return () => reducedMotionQuery().removeEventListener("change", cb);
 }
 
-function useReducedMotion() {
-  return useSyncExternalStore(
-    subscribeReducedMotion,
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => false
-  );
+export function useReducedMotion() {
+  return useSyncExternalStore(subscribeReducedMotion, () => reducedMotionQuery().matches, () => false);
 }
 
-/* ---------- Sound ---------- */
+/* Sound */
 
-// One shared context for every clock on the page. Browsers keep it suspended
-// until the visitor's first click or key press, so resume it on that gesture.
 let audioCtx: AudioContext | null = null;
 let noiseBuffer: AudioBuffer | null = null;
 
+// Browsers suspend audio until a gesture (and may again later), so every gesture resumes it.
 function getAudio() {
-  if (typeof window === "undefined") return null;
   if (!audioCtx) {
-    const Ctor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return null;
-    audioCtx = new Ctor();
+    audioCtx = new AudioContext();
     const resume = () => {
-      void audioCtx?.resume();
-      window.removeEventListener("pointerdown", resume);
-      window.removeEventListener("keydown", resume);
+      if (audioCtx?.state !== "running") void audioCtx?.resume();
     };
-    window.addEventListener("pointerdown", resume);
+    window.addEventListener("pointerdown", resume, { passive: true });
     window.addEventListener("keydown", resume);
   }
-  return audioCtx.state === "closed" ? null : audioCtx;
+  return audioCtx;
+}
+
+/** The context and start time (`delay` ms from now), or null while audio is locked. */
+function begin(delay = 0) {
+  const ctx = getAudio();
+  return ctx.state === "running" ? { ctx, at: ctx.currentTime + delay / 1000 } : null;
 }
 
 function noise(ctx: AudioContext) {
@@ -160,7 +173,7 @@ function noise(ctx: AudioContext) {
   return src;
 }
 
-/** A gain node that snaps to `peak` and decays exponentially over `decay` seconds. */
+/** Gain that snaps to `peak`, then decays over `decay` s. */
 function envelope(ctx: AudioContext, at: number, peak: number, decay: number) {
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0.0001, at);
@@ -170,13 +183,13 @@ function envelope(ctx: AudioContext, at: number, peak: number, decay: number) {
   return gain;
 }
 
-/** Synthesized clock sounds — no audio files. `delay` is in milliseconds. */
+/** Synthesized clock sounds; no audio files. */
 export const clockSound = {
-  /** A plastic leaf slapping onto the stack: a filtered noise snap over a low knock. */
-  flip(volume = 0.5, delay = 0) {
-    const ctx = getAudio();
-    if (!ctx || ctx.state !== "running") return;
-    const at = ctx.currentTime + delay / 1000;
+  /** Noise snap over a low knock. */
+  flip(volume: number, delay = 0) {
+    const start = begin(delay);
+    if (!start) return;
+    const { ctx, at } = start;
     const snap = noise(ctx);
     const band = ctx.createBiquadFilter();
     band.type = "bandpass";
@@ -192,11 +205,10 @@ export const clockSound = {
     knock.start(at);
     knock.stop(at + 0.06);
   },
-  /** A quartz movement's dry tick. */
-  tick(volume = 0.5, delay = 0) {
-    const ctx = getAudio();
-    if (!ctx || ctx.state !== "running") return;
-    const at = ctx.currentTime + delay / 1000;
+  tick(volume: number) {
+    const start = begin();
+    if (!start) return;
+    const { ctx, at } = start;
     const click = noise(ctx);
     const high = ctx.createBiquadFilter();
     high.type = "highpass";
@@ -204,13 +216,13 @@ export const clockSound = {
     click.connect(high).connect(envelope(ctx, at, volume * 0.35, 0.012));
     click.start(at, Math.random() * 0.2, 0.02);
   },
-  /** One burst of the classic four-beep digital alarm. */
-  alarm(volume = 0.5, delay = 0) {
-    const ctx = getAudio();
-    if (!ctx || ctx.state !== "running") return;
-    const start = ctx.currentTime + delay / 1000;
+  /** Four-beep alarm burst. */
+  alarm(volume: number) {
+    const start = begin();
+    if (!start) return;
+    const { ctx } = start;
     for (let i = 0; i < 4; i++) {
-      const at = start + i * 0.13;
+      const at = start.at + i * 0.13;
       const beep = ctx.createOscillator();
       beep.type = "square";
       beep.frequency.value = 2048;
@@ -229,16 +241,54 @@ export const clockSound = {
   },
 };
 
-/** Create the audio context early (while idle) so the first gesture can unlock it. */
-export function useClockAudio(enabled: boolean) {
+/** Creates the audio context early so the first gesture unlocks it, and ticks on each new `second` when `tick` is on. */
+export function useClockAudio({
+  enabled,
+  tick = false,
+  second,
+  volume,
+}: {
+  enabled: boolean;
+  tick?: boolean;
+  second?: number;
+  volume: number;
+}) {
+  const vol = useRef(volume);
+  useEffect(() => {
+    vol.current = volume;
+  });
   useEffect(() => {
     if (enabled) getAudio();
   }, [enabled]);
+  useEffect(() => {
+    if (tick && second !== undefined) clockSound.tick(vol.current);
+  }, [tick, second]);
 }
 
-/* ---------- Seven-segment numerals ---------- */
+/* Shared pieces */
 
-// Segment order: a (top), b (top right), c (bottom right), d (bottom), e (bottom left), f (top left), g (middle).
+export const pad = (n: number) => String(n).padStart(2, "0");
+
+export const shade = (color: string, pct: number, to = "black") => `color-mix(in srgb, ${color} ${pct}%, ${to})`;
+
+export function ContactShadow({ size }: { size: number }) {
+  return (
+    <span
+      className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-[50%]"
+      style={{
+        bottom: -size * 0.02,
+        width: size * 0.92,
+        height: size * 0.06,
+        background: "radial-gradient(closest-side, rgba(0,0,0,0.28), rgba(0,0,0,0))",
+        filter: `blur(${size * 0.008}px)`,
+      }}
+    />
+  );
+}
+
+/* Seven-segment numerals */
+
+// Segments: a top, b top-right, c bottom-right, d bottom, e bottom-left, f top-left, g middle.
 const SEGMENTS: Record<string, string> = {
   "0": "abcdef",
   "1": "bc",
@@ -252,15 +302,14 @@ const SEGMENTS: Record<string, string> = {
   "9": "abcdfg",
 };
 
-const DW = 52; // digit viewBox width
-const DH = 100; // digit viewBox height
-const T = 11; // segment thickness
+const DIGIT_W = 52;
+const DIGIT_H = 100;
+const HALF_T = 5.5; // half the segment thickness
 const GAP = 1.6; // clearance between segment tips
-const HT = T / 2; // inset of a segment centerline from the digit edge
 
-/** A hexagonal bar with beveled tips, horizontal or vertical, between two points. */
+/** Hexagonal segment with beveled tips between two points. */
 function bar(x1: number, y1: number, x2: number, y2: number) {
-  const h = T / 2;
+  const h = HALF_T;
   if (y1 === y2) {
     const [a, b] = [x1 + GAP, x2 - GAP];
     return `${a},${y1} ${a + h},${y1 - h} ${b - h},${y1 - h} ${b},${y1} ${b - h},${y1 + h} ${a + h},${y1 + h}`;
@@ -269,24 +318,26 @@ function bar(x1: number, y1: number, x2: number, y2: number) {
   return `${x1},${a} ${x1 + h},${a + h} ${x1 + h},${b - h} ${x1},${b} ${x1 - h},${b - h} ${x1 - h},${a + h}`;
 }
 
+const L = HALF_T;
+const R = DIGIT_W - HALF_T;
 const SEGMENT_POINTS: Record<string, string> = {
-  a: bar(HT, HT, DW - HT, HT),
-  b: bar(DW - HT, HT, DW - HT, DH / 2),
-  c: bar(DW - HT, DH / 2, DW - HT, DH - HT),
-  d: bar(HT, DH - HT, DW - HT, DH - HT),
-  e: bar(HT, DH / 2, HT, DH - HT),
-  f: bar(HT, HT, HT, DH / 2),
-  g: bar(HT, DH / 2, DW - HT, DH / 2),
+  a: bar(L, HALF_T, R, HALF_T),
+  b: bar(R, HALF_T, R, DIGIT_H / 2),
+  c: bar(R, DIGIT_H / 2, R, DIGIT_H - HALF_T),
+  d: bar(L, DIGIT_H - HALF_T, R, DIGIT_H - HALF_T),
+  e: bar(L, DIGIT_H / 2, L, DIGIT_H - HALF_T),
+  f: bar(L, HALF_T, L, DIGIT_H / 2),
+  g: bar(L, DIGIT_H / 2, R, DIGIT_H / 2),
 };
 
-/** One LCD-style numeral: lit segments outlined in ink, unlit ones as faint ghosts. */
+/** Lit segments outlined, unlit ones faint. */
 function SegmentDigit({ char, color, height }: { char: string; color: string; height: number }) {
   const lit = SEGMENTS[char] ?? "";
   return (
     <svg
-      viewBox={`-3 -3 ${DW + 6} ${DH + 6}`}
+      viewBox={`-3 -3 ${DIGIT_W + 6} ${DIGIT_H + 6}`}
       height={height}
-      width={(height * (DW + 6)) / (DH + 6)}
+      width={(height * (DIGIT_W + 6)) / (DIGIT_H + 6)}
       aria-hidden
       className="overflow-visible"
     >
@@ -309,30 +360,6 @@ function SegmentDigit({ char, color, height }: { char: string; color: string; he
   );
 }
 
-/* ---------- Flip card ---------- */
-
-export type FlipCardProps = {
-  /** Text on the leaf; null renders blank (e.g. before mount). Changing it flips. */
-  value: string | null;
-  width: number;
-  height: number;
-  /** Leaf color. */
-  color: string;
-  /** Draws the leaf's printed face, laid out at full card size. */
-  renderFace: (text: string) => React.ReactNode;
-  /** One full flip, in milliseconds. */
-  duration?: number;
-  /** Show the hinge pins at the seam. */
-  pins?: boolean;
-  /** Add the LCD dot screen to the leaves. */
-  dots?: boolean;
-  /** Clack when the leaf falls and lands. */
-  sound?: boolean;
-  /** Sound volume, 0–1. */
-  volume?: number;
-};
-
-/** The numerals printed on a leaf, laid out at full card size. */
 function Face({ text, digits, digitColor, height }: { text: string; digits: Digits; digitColor: string; height: number }) {
   if (digits === "print") {
     return (
@@ -353,7 +380,29 @@ function Face({ text, digits, digitColor, height }: { text: string; digits: Digi
   );
 }
 
-/** One half of a leaf. The face is card-tall and clipped so each half shows its slice. */
+/* Flip card */
+
+type FlipCardProps = {
+  /** null renders blank; changing it flips. */
+  value: string | null;
+  width: number;
+  height: number;
+  color: string;
+  /** Draws the leaf's face at full card size. */
+  renderFace: (text: string) => React.ReactNode;
+  /** Flip duration (ms). */
+  duration?: number;
+  /** Show hinge pins at the seam. */
+  pins?: boolean;
+  /** Add an LCD dot screen to the leaves. */
+  dots?: boolean;
+  /** Clack when the leaf falls and lands. */
+  sound?: boolean;
+  /** 0–1. */
+  volume?: number;
+};
+
+/** Face is card-tall and clipped so each half shows its slice. */
 function Half({
   children,
   half,
@@ -380,7 +429,6 @@ function Half({
         top: top ? 0 : "50%",
         height: "50%",
         backgroundColor: color,
-        // A light falloff on the upper leaf, a darker belly below, and optionally a fine LCD dot screen.
         backgroundImage: [
           top
             ? "linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.03))"
@@ -404,7 +452,7 @@ function Half({
   );
 }
 
-/** A single split-flap card. Exported so other clocks can build on the same mechanism. */
+/** One split-flap card; exported so CalendarClock can reuse it. */
 export function FlipCard({
   value,
   width,
@@ -418,24 +466,27 @@ export function FlipCard({
   volume = 0.5,
 }: FlipCardProps) {
   const reduced = useReducedMotion();
-  // `settled` is the number fully on show; while it trails `value`, a leaf is falling.
+  // Value fully shown; while it trails `value`, a leaf is falling.
   const [settled, setSettled] = useState(value);
   const topFlap = useRef<HTMLDivElement>(null);
   const bottomFlap = useRef<HTMLDivElement>(null);
+  const audio = useRef({ sound, volume });
+  useEffect(() => {
+    audio.current = { sound, volume };
+  });
 
-  // First real value (after mount) or reduced motion: swap straight in, no flip.
+  // First value or reduced motion: swap in without a flip.
   if (settled !== value && (settled === null || reduced)) setSettled(value);
   const flipping = settled !== null && settled !== value && !reduced;
 
   useEffect(() => {
     if (!flipping || !topFlap.current || !bottomFlap.current) return;
     const half = duration / 2;
-    if (sound) {
-      // A soft tick as the leaf lets go, then the slap as it lands.
-      clockSound.flip(volume * 0.35);
-      clockSound.flip(volume, half);
+    if (audio.current.sound) {
+      clockSound.flip(audio.current.volume * 0.35);
+      clockSound.flip(audio.current.volume, half);
     }
-    // Upper leaf falls toward you, accelerating and darkening as it tips away from the light…
+    // Top leaf falls and darkens, then its back lands on the bottom with a bounce.
     const fall = topFlap.current.animate(
       [
         { transform: "rotateX(0deg)", filter: "brightness(1)" },
@@ -443,7 +494,6 @@ export function FlipCard({
       ],
       { duration: half, easing: "cubic-bezier(0.55, 0, 0.9, 0.45)", fill: "forwards" }
     );
-    // …and its back lands on the lower half with a small bounce.
     const land = bottomFlap.current.animate(
       [
         { transform: "rotateX(90deg)", filter: "brightness(1.35)" },
@@ -456,20 +506,16 @@ export function FlipCard({
       fall.cancel();
       land.cancel();
     };
-  }, [flipping, value, duration, sound, volume]);
+  }, [flipping, value, duration]);
 
   const radius = width * 0.09;
+  const pinW = Math.max(2, width * 0.035);
   const face = (text: string | null) => renderFace(text ?? "");
 
   return (
     <div
       className="relative"
-      style={{
-        width,
-        height,
-        perspective: height * 4,
-        filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.3))",
-      }}
+      style={{ width, height, perspective: height * 4, filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.3))" }}
     >
       <Half half="top" color={color} radius={radius} dots={dots}>
         {face(value)}
@@ -495,7 +541,7 @@ export function FlipCard({
         </>
       )}
 
-      {/* The seam between leaves: a dark gap with a lit lip under it. */}
+      {/* Seam between leaves. */}
       <span
         className="pointer-events-none absolute inset-x-0 z-10"
         style={{
@@ -506,7 +552,6 @@ export function FlipCard({
           transform: "translateY(-50%)",
         }}
       />
-      {/* Inner rim so the card reads as a recessed window. */}
       <span
         className="pointer-events-none absolute inset-0 z-10"
         style={{
@@ -519,25 +564,17 @@ export function FlipCard({
           <span
             key={side}
             className="pointer-events-none absolute z-10 -translate-y-1/2 rounded-[1px] bg-neutral-800"
-            style={{
-              top: "50%",
-              [side]: -Math.max(2, width * 0.035) * 0.4,
-              width: Math.max(2, width * 0.035),
-              height: height * 0.14,
-            }}
+            style={{ top: "50%", [side]: -pinW * 0.4, width: pinW, height: height * 0.14 }}
           />
         ))}
     </div>
   );
 }
 
-/* ---------- Clock ---------- */
-
-const pad = (n: number) => String(n).padStart(2, "0");
+/* Clock */
 
 export default function FlipClock({
   time,
-  live = true,
   timeZone,
   hour12 = false,
   showSeconds = false,
@@ -549,7 +586,6 @@ export default function FlipClock({
   cardColor = "#7f8683",
   hourColor,
   minuteColor,
-  secondColor,
   digitColor = "#0d0f0f",
   labelColor = "#2b2b2b",
   flipDuration = 600,
@@ -558,20 +594,14 @@ export default function FlipClock({
   volume = 0.5,
   className,
 }: FlipClockProps) {
-  const parts = useFlipTime(time, live, timeZone);
-  useClockAudio(flipSound || tickSound);
+  const moment = useClockMoment(time, timeZone, showSeconds || tickSound);
+  useClockAudio({ enabled: flipSound || tickSound, tick: tickSound, second: moment?.s, volume });
 
-  const second = parts?.s;
-  useEffect(() => {
-    if (tickSound && second !== undefined) clockSound.tick(volume);
-  }, [tickSound, second, volume]);
+  const hours = moment ? pad(hour12 ? moment.h % 12 || 12 : moment.h) : null;
+  const minutes = moment ? pad(moment.m) : null;
+  const seconds = moment ? pad(moment.s) : null;
+  const pm = (moment?.h ?? 0) >= 12;
 
-  const hours = parts ? pad(hour12 ? parts.h % 12 || 12 : parts.h) : null;
-  const minutes = parts ? pad(parts.m) : null;
-  const seconds = parts ? pad(parts.s) : null;
-  const pm = parts ? parts.h >= 12 : false;
-
-  // Case geometry, all scaled from the width.
   const W = size;
   const H = W * 0.44;
   const rim = W * 0.034; // bright outer shell
@@ -580,31 +610,22 @@ export default function FlipClock({
   const btnH = W * 0.022;
   const footH = W * 0.05;
 
-  const meridiem = hour12;
-  const labelW = meridiem ? W * 0.085 : 0;
+  const labelW = hour12 ? W * 0.085 : 0;
   const n = showSeconds ? 3 : 2;
   const innerW = W - 2 * (rim + ring + groove);
   const gap = W * 0.012;
   const sidePad = W * 0.03;
-  const cardW = Math.min(
-    (innerW - labelW - sidePad * 2 - gap * (n - 1)) / n,
-    W * 0.3
-  );
+  const cardW = Math.min((innerW - labelW - sidePad * 2 - gap * (n - 1)) / n, W * 0.3);
   const cardH = Math.min(cardW * 0.84, H - 2 * (rim + ring + groove) - W * 0.05);
-
-  // Shades derived from the case color so a single prop recolors the whole shell.
-  const shadeDark = `color-mix(in srgb, ${caseColor} 78%, black)`;
-  const shadeDeep = `color-mix(in srgb, ${caseColor} 42%, black)`;
-  const shadeLight = `color-mix(in srgb, ${caseColor} 82%, white)`;
 
   const cards = [
     { key: "h", value: hours, color: hourColor ?? cardColor },
     { key: "m", value: minutes, color: minuteColor ?? cardColor },
-    ...(showSeconds ? [{ key: "s", value: seconds, color: secondColor ?? cardColor }] : []),
+    ...(showSeconds ? [{ key: "s", value: seconds, color: cardColor }] : []),
   ];
 
-  const label = parts
-    ? `${hours}:${minutes}${showSeconds ? `:${seconds}` : ""}${meridiem ? (pm ? " pm" : " am") : ""}`
+  const label = moment
+    ? `${hours}:${minutes}${showSeconds ? `:${seconds}` : ""}${hour12 ? (pm ? " pm" : " am") : ""}`
     : "Flip clock";
 
   return (
@@ -612,27 +633,13 @@ export default function FlipClock({
       role="img"
       aria-label={label}
       className={`relative shrink-0 select-none ${className ?? ""}`}
-      style={{
-        width: W,
-        paddingTop: hardware ? btnH : 0,
-        paddingBottom: hardware ? footH : W * 0.02,
-      }}
+      style={{ width: W, paddingTop: hardware ? btnH : 0, paddingBottom: hardware ? footH : W * 0.02 }}
     >
-      {/* Contact shadow on the surface it stands on. */}
-      <span
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-[50%]"
-        style={{
-          bottom: -W * 0.02,
-          width: W * 0.92,
-          height: W * 0.06,
-          background: "radial-gradient(closest-side, rgba(0,0,0,0.28), rgba(0,0,0,0))",
-          filter: `blur(${W * 0.008}px)`,
-        }}
-      />
+      <ContactShadow size={W} />
 
       {hardware && (
         <>
-          {/* Alarm / snooze bar on top. */}
+          {/* Alarm bar. */}
           <span
             className="absolute"
             style={{
@@ -644,7 +651,7 @@ export default function FlipClock({
               background: "linear-gradient(to bottom, #3a3a3a, #121212)",
             }}
           />
-          {/* The foot it stands on. */}
+          {/* Foot. */}
           <span
             className="absolute"
             style={{
@@ -653,13 +660,13 @@ export default function FlipClock({
               width: W * 0.72,
               height: footH + W * 0.02,
               borderRadius: `0 0 ${W * 0.012}px ${W * 0.012}px`,
-              background: `linear-gradient(to bottom, ${shadeDeep}, color-mix(in srgb, ${caseColor} 30%, black))`,
+              background: `linear-gradient(to bottom, ${shade(caseColor, 42)}, ${shade(caseColor, 30)})`,
             }}
           />
         </>
       )}
 
-      {/* Outer shell: molded plastic with a lit top lip and a shaded belly. */}
+      {/* Shell → inner ring → groove → face plate. */}
       <div
         className="relative"
         style={{
@@ -667,7 +674,7 @@ export default function FlipClock({
           height: H,
           padding: rim,
           borderRadius: H * 0.2,
-          background: `linear-gradient(to bottom, ${shadeLight} 0%, ${caseColor} 22%, ${caseColor} 70%, ${shadeDark} 100%)`,
+          background: `linear-gradient(to bottom, ${shade(caseColor, 82, "white")} 0%, ${caseColor} 22%, ${caseColor} 70%, ${shade(caseColor, 78)} 100%)`,
           boxShadow: [
             `inset 0 ${W * 0.004}px ${W * 0.004}px rgba(255,255,255,0.35)`,
             `inset 0 -${W * 0.006}px ${W * 0.01}px rgba(0,0,0,0.25)`,
@@ -675,24 +682,18 @@ export default function FlipClock({
           ].join(", "),
         }}
       >
-        {/* Inner ring, a step down from the shell. */}
         <div
           className="h-full w-full"
           style={{
             padding: ring,
             borderRadius: H * 0.2 - rim,
-            background: `linear-gradient(to bottom, ${shadeDark}, ${caseColor} 40%, ${caseColor})`,
+            background: `linear-gradient(to bottom, ${shade(caseColor, 78)}, ${caseColor} 40%, ${caseColor})`,
             boxShadow: `inset 0 ${W * 0.003}px ${W * 0.006}px rgba(0,0,0,0.35)`,
           }}
         >
-          {/* Dark groove, then the face plate. */}
           <div
             className="h-full w-full"
-            style={{
-              padding: groove,
-              borderRadius: H * 0.2 - rim - ring,
-              background: shadeDeep,
-            }}
+            style={{ padding: groove, borderRadius: H * 0.2 - rim - ring, background: shade(caseColor, 42) }}
           >
             <div
               className="relative flex h-full w-full items-center justify-center overflow-hidden"
@@ -700,11 +701,11 @@ export default function FlipClock({
                 gap,
                 paddingInline: sidePad,
                 borderRadius: H * 0.2 - rim - ring - groove,
-                background: `linear-gradient(to bottom, color-mix(in srgb, ${faceColor} 88%, white), ${faceColor} 30%, color-mix(in srgb, ${faceColor} 92%, black))`,
+                background: `linear-gradient(to bottom, ${shade(faceColor, 88, "white")}, ${faceColor} 30%, ${shade(faceColor, 92)})`,
                 boxShadow: `inset 0 ${W * 0.006}px ${W * 0.01}px rgba(0,0,0,0.22)`,
               }}
             >
-              {meridiem && (
+              {hour12 && (
                 <div
                   className="relative flex shrink-0 flex-col justify-center leading-none"
                   style={{ width: labelW, height: cardH, color: labelColor, gap: W * 0.012, fontSize: W * 0.034 }}
@@ -718,7 +719,7 @@ export default function FlipClock({
                           width: W * 0.016,
                           height: W * 0.016,
                           background: labelColor,
-                          opacity: parts && (m === "pm") === pm ? 1 : 0,
+                          opacity: moment && (m === "pm") === pm ? 1 : 0,
                         }}
                       />
                     </span>
@@ -737,12 +738,10 @@ export default function FlipClock({
                   volume={volume}
                   pins={digits === "print"}
                   dots={digits === "segment"}
-                  renderFace={(text) => (
-                    <Face text={text} digits={digits} digitColor={digitColor} height={cardH} />
-                  )}
+                  renderFace={(text) => <Face text={text} digits={digits} digitColor={digitColor} height={cardH} />}
                 />
               ))}
-              {/* Glare across the clear front. */}
+              {/* Glare. */}
               <span
                 className="pointer-events-none absolute inset-0 z-20"
                 style={{

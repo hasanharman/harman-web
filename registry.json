@@ -127,6 +127,19 @@
       ]
     },
     {
+      "name": "flip-clock",
+      "type": "registry:component",
+      "title": "Flip Clock",
+      "description": "A retro split-flap desk clock. Leaves fall over to show each new number. Case, card and digit colors, 12/24-hour, seconds, time zone and flip speed are props. Zero dependencies.",
+      "files": [
+        {
+          "path": "components/flip-clock/index.tsx",
+          "type": "registry:component",
+          "target": "components/flip-clock/index.tsx"
+        }
+      ]
+    },
+    {
       "name": "world-clocks",
       "type": "registry:component",
       "title": "World Clocks",

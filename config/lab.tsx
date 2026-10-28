@@ -3,6 +3,7 @@ import React from "react";
 import VinylRecord from "@/components/vinyl-record";
 import AnalogClock from "@/components/analog-clock";
 import WallSwitch from "@/components/wall-switch";
+import FlipClock from "@/components/flip-clock";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
@@ -611,6 +612,98 @@ export default function Example() {
         default: "—",
         description: "Extra classes on the outer wrapper.",
       },
+    ],
+  },
+  {
+    slug: "flip-clock",
+    title: "Flip Clock",
+    description:
+      "A retro split-flap desk clock in molded plastic. Each leaf falls over with a little bounce when the number changes. Case, card and digit colors, 12/24-hour, seconds, time zone and flip speed are all props. No dependencies.",
+    hint: "Wait for the minute",
+    installable: true,
+    importName: "FlipClock",
+    previewClassName: "min-h-[320px] items-center justify-center bg-muted/30",
+    preview: <FlipClock size={320} />,
+    examples: [
+      {
+        title: "With seconds",
+        description:
+          "showSeconds adds a third card so you can watch a leaf fall every second.",
+        hint: "Watch it flip",
+        previewClassName: "min-h-[300px] items-center justify-center bg-muted/30",
+        preview: <FlipClock size={320} showSeconds />,
+        code: `<FlipClock showSeconds />`,
+      },
+      {
+        title: "Colorways",
+        description:
+          "Recolor the case, backplate, cards and digits to make a different finish.",
+        previewClassName:
+          "min-h-[300px] flex-wrap items-center justify-center gap-8 bg-muted/30",
+        preview: (
+          <>
+            <FlipClock
+              size={220}
+              caseColor="#1c1c1c"
+              backplateColor="#2a2a2a"
+              hourColor="#f2f0eb"
+              minuteColor="#f2f0eb"
+              digitColor="#111111"
+            />
+            <FlipClock
+              size={220}
+              caseColor="#9fc9b4"
+              backplateColor="#f4efe6"
+              hourColor="#e86f3c"
+              minuteColor="#2f4f7a"
+              digitColor="#fdf6e3"
+            />
+          </>
+        ),
+        code: `<FlipClock
+  caseColor="#1c1c1c"
+  backplateColor="#2a2a2a"
+  hourColor="#f2f0eb"
+  minuteColor="#f2f0eb"
+  digitColor="#111111"
+/>`,
+      },
+      {
+        title: "Time zone, 12-hour",
+        description:
+          "Pass an IANA timeZone to show another city, and hour12 for 1–12 hours.",
+        previewClassName: "min-h-[300px] items-center justify-center bg-muted/30",
+        preview: <FlipClock size={300} timeZone="America/New_York" hour12 />,
+        code: `<FlipClock timeZone="America/New_York" hour12 />`,
+      },
+      {
+        title: "Fixed time",
+        description: "Give a time to freeze the clock, like a product shot.",
+        previewClassName: "min-h-[300px] items-center justify-center bg-muted/30",
+        preview: <FlipClock size={300} time="17:45" />,
+        code: `<FlipClock time="17:45" />`,
+      },
+    ],
+    usage: `import FlipClock from "@/components/flip-clock";
+
+export default function Example() {
+  return <FlipClock />;
+}`,
+    props: [
+      { name: "time", type: "Date | string", default: "—", description: 'Freeze at a fixed time (Date or "HH:MM" / "HH:MM:SS"); omit to tick live.' },
+      { name: "live", type: "boolean", default: "true", description: "Tick in real time. Ignored when a fixed time is provided." },
+      { name: "timeZone", type: "string", default: "local", description: 'IANA time zone for live mode, e.g. "Europe/Istanbul".' },
+      { name: "hour12", type: "boolean", default: "false", description: "Show 1–12 hours instead of 00–23." },
+      { name: "showSeconds", type: "boolean", default: "false", description: "Add a third card for seconds." },
+      { name: "size", type: "number", default: "300", description: "Case width in pixels; everything else scales from it." },
+      { name: "caseColor", type: "string", default: '"#c4352b"', description: "Plastic case color." },
+      { name: "backplateColor", type: "string", default: '"#eadfce"', description: "Panel behind the cards, seen through the clear front." },
+      { name: "hourColor", type: "string", default: '"#79a6c9"', description: "Hour card color." },
+      { name: "minuteColor", type: "string", default: '"#20785a"', description: "Minute card color." },
+      { name: "secondColor", type: "string", default: '"#2b2b2b"', description: "Seconds card color (when showSeconds)." },
+      { name: "digitColor", type: "string", default: '"#e8c36a"', description: "Numeral color printed on the cards." },
+      { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds. Reduced motion skips the flip." },
+      { name: "className", type: "string", default: "—", description: "Extra classes on the outer wrapper." },
     ],
   },
   {

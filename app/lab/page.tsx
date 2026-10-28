@@ -7,6 +7,7 @@ import { LAB_ITEMS } from "@/config/lab";
 import { cn } from "@/lib/utils";
 import { ogImageUrl } from "@/config/site";
 import { Badge } from "@/components/ui/badge";
+import { LabCard } from "@/components/lab/lab-card";
 
 const labDescription =
   "A lab of interactive React components I've built — animations, motion, and small UI experiments.";
@@ -35,11 +36,13 @@ export default function Lab() {
       <hr />
       <div className="grid gap-6 sm:grid-cols-2">
         {LAB_ITEMS.map((item) => (
-          <div
+          <LabCard
             key={item.slug}
-            className={`flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm ${
-              item.fullWidth ? "sm:col-span-2" : ""
-            }`}
+            href={`/lab/${item.slug}`}
+            className={cn(
+              "flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-colors hover:border-foreground/30",
+              item.fullWidth && "sm:col-span-2"
+            )}
           >
             <div
               className={cn(
@@ -88,7 +91,7 @@ export default function Lab() {
                 ) : null}
               </div>
             </div>
-          </div>
+          </LabCard>
         ))}
       </div>
       <p className="pt-2 text-sm font-light text-muted-foreground">

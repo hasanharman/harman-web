@@ -127,6 +127,33 @@
       ]
     },
     {
+      "name": "flip-clock",
+      "type": "registry:component",
+      "title": "Flip Clock",
+      "description": "A retro split-flap alarm clock with outlined seven-segment (or printed) numerals, an optional am/pm dot, alarm bar and foot, and synthesized flip/tick sounds. Zero dependencies.",
+      "files": [
+        {
+          "path": "components/flip-clock/index.tsx",
+          "type": "registry:component",
+          "target": "components/flip-clock/index.tsx"
+        }
+      ]
+    },
+    {
+      "name": "calendar-clock",
+      "type": "registry:component",
+      "title": "Calendar Clock",
+      "description": "A retro calendar alarm clock: flip-wheel weekday and date windows beside an analog dial, with push buttons that wind the wheels and arm the alarm. Builds on Flip Clock.",
+      "registryDependencies": ["https://hasanharman.dev/r/flip-clock.json"],
+      "files": [
+        {
+          "path": "components/calendar-clock/index.tsx",
+          "type": "registry:component",
+          "target": "components/calendar-clock/index.tsx"
+        }
+      ]
+    },
+    {
       "name": "world-clocks",
       "type": "registry:component",
       "title": "World Clocks",

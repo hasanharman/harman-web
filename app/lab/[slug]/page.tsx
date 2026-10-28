@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen } from "lucide-react";
 
 import {
   LAB_ITEMS,
@@ -10,7 +10,6 @@ import {
   installCommand,
   usageSnippet,
 } from "@/config/lab";
-import { ogImageUrl } from "@/config/site";
 import { getRegistryItem } from "@/lib/registry";
 import { highlightCode } from "@/lib/highlight";
 import { ComponentPreview } from "@/components/lab/component-preview";
@@ -38,21 +37,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const item = getLabItem(slug);
   if (!item) return {};
-  const og = ogImageUrl({
-    title: item.title,
-    label: "Lab",
-    desc: item.description,
-  });
+  const description = item.summary ?? item.description;
+  // Share images come from opengraph-image.tsx / twitter-image.tsx next to this page.
   return {
     title: `${item.title} - Lab`,
-    description: item.description,
-    openGraph: {
-      title: item.title,
-      description: item.description,
-      type: "article",
-      images: [{ url: og, width: 1200, height: 630, alt: item.title }],
-    },
-    twitter: { card: "summary_large_image", images: [og] },
+    description,
+    alternates: { canonical: `/lab/${slug}` },
+    openGraph: { title: item.title, description, type: "article", url: `/lab/${slug}` },
+    twitter: { card: "summary_large_image", title: item.title, description },
   };
 }
 
@@ -96,6 +88,23 @@ export default async function LabComponentPage({ params }: PageProps) {
         <p className="text-lg font-light text-muted-foreground">
           {item.description}
         </p>
+        {item.inspiration?.length ? (
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            <span>Inspired by</span>
+            {item.inspiration.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 text-foreground underline-offset-2 hover:underline"
+              >
+                {link.label}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            ))}
+          </p>
+        ) : null}
         {item.writing ? (
           <Link
             href={item.writing}

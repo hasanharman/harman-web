@@ -3,11 +3,14 @@ import React from "react";
 import VinylRecord from "@/components/vinyl-record";
 import AnalogClock from "@/components/analog-clock";
 import WallSwitch from "@/components/wall-switch";
+import FlipClock from "@/components/flip-clock";
+import CalendarClock from "@/components/calendar-clock";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
 import { PullCord } from "@/components/pull-cord";
 import TableOfContents from "@/components/table-of-contents";
+import { SoundToggle } from "@/components/lab/sound-toggle";
 
 /** Base URL each registry item is served from once deployed. */
 export const REGISTRY_BASE_URL = "https://hasanharman.dev/r";
@@ -53,6 +56,12 @@ export type LabItem = {
   props?: PropDoc[];
   /** Optional worked examples, each with its own preview + code (shadcn-style). */
   examples?: LabExample[];
+  /** Meta/share description (≤155 chars); falls back to description. */
+  summary?: string;
+  /** Products or posts the component is modeled on. */
+  inspiration?: { label: string; href: string }[];
+  /** Still rendered on /og-capture for the share image, on a `stage` background. */
+  og?: { preview: React.ReactNode; stage: string };
 };
 
 export type PropDoc = {
@@ -90,7 +99,286 @@ const COVERS = {
     "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/32/0e/f8/320ef83c-5748-d558-25e9-ac595ae63cac/cover.jpg/600x600bb.jpg",
 };
 
+const FLIP_STAGE = "min-h-[320px] bg-white";
+const CALENDAR_BG = "#e4e1dc";
+const CALENDAR_STAGE = "min-h-[320px] bg-[#e4e1dc]";
+
 export const LAB_ITEMS: LabItem[] = [
+  {
+    slug: "flip-clock",
+    title: "Flip Clock",
+    description:
+      "A retro split-flap alarm clock: a molded plastic case with an alarm bar and foot, LCD-gray cards with outlined seven-segment numerals, and an optional am/pm dot. Each leaf falls over with a little bounce when the number changes. Colors, numeral style, 12/24-hour, seconds, time zone, flip speed and synthesized flip/tick sounds are all props. No dependencies.",
+    summary:
+      "A retro split-flap alarm clock for React. Leaves fall with a bounce, with seven-segment or printed numerals, optional flip and tick sounds.",
+    inspiration: [
+      { label: "Zara Flip Saat", href: "https://www.zara.com/tr/tr/flip-saat-p46677060.html" },
+    ],
+    og: { preview: <FlipClock size={450} time="10:08" />, stage: "#f4f2ee" },
+    hint: "Wait for the minute",
+    installable: true,
+    importName: "FlipClock",
+    previewClassName: FLIP_STAGE,
+    preview: <FlipClock size={300} />,
+    examples: [
+      {
+        title: "With seconds",
+        description:
+          "showSeconds adds a third card so you can watch a leaf fall every second.",
+        hint: "Watch it flip",
+        previewClassName: FLIP_STAGE,
+        preview: <FlipClock size={380} showSeconds />,
+        code: `<FlipClock showSeconds />`,
+      },
+      {
+        title: "With sound",
+        description:
+          "flipSound clacks as each leaf falls and lands, and tickSound adds a quartz tick every second. Both are synthesized with the Web Audio API, so there are no audio files. Browsers start audio only after you click or press a key on the page.",
+        hint: "Click to hear it",
+        previewClassName: FLIP_STAGE,
+        preview: (
+          <SoundToggle>
+            <FlipClock size={380} showSeconds flipSound tickSound />
+          </SoundToggle>
+        ),
+        code: `<FlipClock showSeconds flipSound tickSound volume={0.5} />`,
+      },
+      {
+        title: "Printed cards",
+        description:
+          'digits="print" swaps the segments for solid printed numerals. Color the hour and minute cards apart and drop the hardware for a clean desk clock.',
+        previewClassName: "min-h-[300px] bg-[#d9d6d0]",
+        preview: (
+          <FlipClock
+            size={320}
+            digits="print"
+            hardware={false}
+            caseColor="#c4352b"
+            faceColor="#eadfce"
+            hourColor="#79a6c9"
+            minuteColor="#20785a"
+            digitColor="#e8c36a"
+          />
+        ),
+        code: `<FlipClock
+  digits="print"
+  hardware={false}
+  caseColor="#c4352b"
+  faceColor="#eadfce"
+  hourColor="#79a6c9"
+  minuteColor="#20785a"
+  digitColor="#e8c36a"
+/>`,
+      },
+      {
+        title: "Colorways",
+        description:
+          "caseColor shades the shell, inner ring and foot from one value. Pair it with face and card colors for a different finish.",
+        previewClassName: `${FLIP_STAGE} flex-wrap gap-10`,
+        preview: (
+          <>
+            <FlipClock
+              size={240}
+              caseColor="#262626"
+              faceColor="#3a3a3a"
+              cardColor="#f1eee8"
+              labelColor="#e6e3dd"
+            />
+            <FlipClock size={240} caseColor="#8cc3a9" cardColor="#d9d3c4" />
+          </>
+        ),
+        code: `<FlipClock
+  caseColor="#262626"
+  faceColor="#3a3a3a"
+  cardColor="#f1eee8"
+  labelColor="#e6e3dd"
+/>`,
+      },
+      {
+        title: "Time zone, 12-hour",
+        description:
+          "Pass an IANA timeZone to show another city. hour12 switches to 01–12 and shows the am/pm indicator.",
+        previewClassName: FLIP_STAGE,
+        preview: <FlipClock size={320} timeZone="America/New_York" hour12 />,
+        code: `<FlipClock timeZone="America/New_York" hour12 />`,
+      },
+      {
+        title: "Fixed time",
+        description: "Give a time to freeze the clock, like a product shot.",
+        previewClassName: FLIP_STAGE,
+        preview: <FlipClock size={320} time="07:30" />,
+        code: `<FlipClock time="07:30" />`,
+      },
+    ],
+    usage: `import FlipClock from "@/components/flip-clock";
+
+export default function Example() {
+  return <FlipClock />;
+}`,
+    props: [
+      { name: "time", type: "Date | string", default: "—", description: 'Freeze at a Date or "HH:MM[:SS]"; omit to tick live.' },
+      { name: "timeZone", type: "string", default: "local", description: 'IANA time zone, e.g. "Europe/Istanbul".' },
+      { name: "hour12", type: "boolean", default: "false", description: "Show 01–12 hours with an am/pm dot instead of 00–23." },
+      { name: "showSeconds", type: "boolean", default: "false", description: "Add a third card for seconds." },
+      { name: "digits", type: '"segment" | "print"', default: '"segment"', description: "Outlined seven-segment numerals, or solid printed type." },
+      { name: "hardware", type: "boolean", default: "true", description: "Show the alarm bar and foot." },
+      { name: "size", type: "number", default: "320", description: "Case width in pixels; everything else scales from it." },
+      { name: "caseColor", type: "string", default: '"#e2302c"', description: "Plastic case color. The inner ring and foot are shaded from it." },
+      { name: "faceColor", type: "string", default: '"#e6dcc6"', description: "Face plate around the cards." },
+      { name: "cardColor", type: "string", default: '"#7f8683"', description: "Color for every card." },
+      { name: "hourColor", type: "string", default: "cardColor", description: "Hour card color." },
+      { name: "minuteColor", type: "string", default: "cardColor", description: "Minute card color." },
+      { name: "digitColor", type: "string", default: '"#0d0f0f"', description: "Numeral color on the cards." },
+      { name: "labelColor", type: "string", default: '"#2b2b2b"', description: "am/pm label and dot color." },
+      { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds. Reduced motion skips the flip." },
+      { name: "flipSound", type: "boolean", default: "false", description: "Clack each time a leaf falls. Audio starts after the visitor's first click or key press." },
+      { name: "tickSound", type: "boolean", default: "false", description: "Tick every second, like a quartz movement." },
+      { name: "volume", type: "number", default: "0.5", description: "Sound volume, 0–1." },
+      { name: "className", type: "string", default: "—", description: "Extra classes on the outer wrapper." },
+    ],
+  },
+  {
+    slug: "calendar-clock",
+    title: "Calendar Clock",
+    description:
+      "A retro calendar alarm clock: flip-wheel weekday and date windows beside an analog dial, in a cream case with three push buttons. The left and middle buttons wind the wheels, and the right one arms the alarm. Tick, flip and alarm sounds are optional. It builds on Flip Clock.",
+    summary:
+      "A retro calendar alarm clock for React: flip-wheel day and date beside an analog dial, push buttons, an alarm and optional sounds.",
+    inspiration: [
+      {
+        label: "Zara Çarklı Alarmlı Takvim Saat",
+        href: "https://www.zara.com/tr/tr/carkli-alarmli-takvim-saat-p41662060.html?v1=551365188",
+      },
+    ],
+    og: {
+      preview: (
+        <CalendarClock
+          size={470}
+          time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
+          timeZone="UTC"
+          alarm="07:30"
+          defaultAlarmOn
+        />
+      ),
+      stage: CALENDAR_BG,
+    },
+    hint: "Press the buttons",
+    installable: true,
+    importName: "CalendarClock",
+    previewClassName: CALENDAR_STAGE,
+    preview: <CalendarClock size={300} alarm="07:30" />,
+    examples: [
+      {
+        title: "Alarm",
+        description:
+          "Give an alarm time and press the right button to arm it: the button stays down and an alarm hand appears on the dial. When the time comes, the clock rattles.",
+        hint: "Press the right button",
+        previewClassName: CALENDAR_STAGE,
+        preview: <CalendarClock size={360} alarm="07:30" defaultAlarmOn />,
+        code: `<CalendarClock alarm="07:30" defaultAlarmOn />`,
+      },
+      {
+        title: "With sound",
+        description:
+          "tickSound ticks every second, flipSound clacks when a wheel turns, and alarmSound beeps while the alarm goes off. All three are synthesized, so there are no audio files. Browsers start audio only after you click or press a key on the page.",
+        hint: "Click to hear it",
+        previewClassName: CALENDAR_STAGE,
+        preview: (
+          <SoundToggle>
+            <CalendarClock size={360} alarm="07:30" tickSound flipSound alarmSound />
+          </SoundToggle>
+        ),
+        code: `<CalendarClock alarm="07:30" tickSound flipSound alarmSound />`,
+      },
+      {
+        title: "Colorways",
+        description:
+          "Six colors cover the whole clock: case, trim, panel, cards, ink and alarm hand.",
+        previewClassName: `${CALENDAR_STAGE} flex-wrap gap-10`,
+        preview: (
+          <>
+            <CalendarClock
+              size={260}
+              caseColor="#2b2b2b"
+              trimColor="#111111"
+              panelColor="#3d5a4a"
+              cardColor="#f3efe4"
+              inkColor="#d9a441"
+            />
+            <CalendarClock
+              size={260}
+              caseColor="#f4f1ea"
+              trimColor="#2f3e63"
+              panelColor="#d8c9a7"
+              cardColor="#ffffff"
+              inkColor="#2f3e63"
+              alarmColor="#d1495b"
+            />
+          </>
+        ),
+        code: `<CalendarClock
+  caseColor="#2b2b2b"
+  trimColor="#111111"
+  panelColor="#3d5a4a"
+  cardColor="#f3efe4"
+  inkColor="#d9a441"
+/>`,
+      },
+      {
+        title: "Localized weekday",
+        description:
+          'locale sets the weekday names, and timeZone shows another city. This one is in Turkish, on Istanbul time.',
+        previewClassName: CALENDAR_STAGE,
+        preview: <CalendarClock size={340} locale="tr-TR" timeZone="Europe/Istanbul" />,
+        code: `<CalendarClock locale="tr-TR" timeZone="Europe/Istanbul" />`,
+      },
+      {
+        title: "Fixed moment",
+        description:
+          "Pass a Date to freeze the clock, like a product shot.",
+        previewClassName: CALENDAR_STAGE,
+        preview: (
+          <CalendarClock
+            size={340}
+            time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
+            timeZone="UTC"
+          />
+        ),
+        code: `<CalendarClock
+  time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
+  timeZone="UTC"
+/>`,
+      },
+    ],
+    usage: `import CalendarClock from "@/components/calendar-clock";
+
+export default function Example() {
+  return <CalendarClock alarm="07:30" />;
+}`,
+    props: [
+      { name: "time", type: "Date | string", default: "—", description: 'Freeze the clock; a string is "HH:MM[:SS]" on today\'s date.' },
+      { name: "timeZone", type: "string", default: "local", description: 'IANA time zone, e.g. "Europe/Istanbul".' },
+      { name: "locale", type: "string", default: '"en-US"', description: "BCP 47 locale for the weekday names." },
+      { name: "showSeconds", type: "boolean", default: "true", description: "Show the second hand." },
+      { name: "alarm", type: "string", default: "—", description: 'Alarm time "HH:MM". Draws the alarm hand while the alarm is on.' },
+      { name: "defaultAlarmOn", type: "boolean", default: "false", description: "Start with the alarm on (uncontrolled)." },
+      { name: "alarmOn", type: "boolean", default: "—", description: "Controlled alarm state." },
+      { name: "onAlarmChange", type: "(on: boolean) => void", default: "—", description: "Fired when the top-right button switches the alarm." },
+      { name: "size", type: "number", default: "360", description: "Case width in pixels; everything else scales from it." },
+      { name: "caseColor", type: "string", default: '"#efe8cd"', description: "Outer shell color." },
+      { name: "trimColor", type: "string", default: '"#5a3a2c"', description: "Groove, window frames and foot." },
+      { name: "panelColor", type: "string", default: '"#b4512f"', description: "Inset panel behind the windows." },
+      { name: "cardColor", type: "string", default: '"#f2e9cb"', description: "Day/date leaves and the dial face." },
+      { name: "inkColor", type: "string", default: '"#3f978b"', description: "Type, ticks, hands and the top buttons." },
+      { name: "alarmColor", type: "string", default: '"#b4512f"', description: "Alarm hand color." },
+      { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds." },
+      { name: "flipSound", type: "boolean", default: "false", description: "Clack when a wheel turns. Audio starts after the visitor's first click or key press." },
+      { name: "tickSound", type: "boolean", default: "false", description: "Tick every second, like a quartz movement." },
+      { name: "alarmSound", type: "boolean", default: "false", description: "Beep while the alarm is going off." },
+      { name: "volume", type: "number", default: "0.5", description: "Sound volume, 0–1." },
+      { name: "className", type: "string", default: "—", description: "Extra classes on the outer wrapper." },
+    ],
+  },
   {
     slug: "analog-clock",
     title: "Analog Clock",

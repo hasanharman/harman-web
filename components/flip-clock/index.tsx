@@ -19,7 +19,7 @@ export type FlipClockProps = {
   showSeconds?: boolean;
   /** "segment" draws outlined seven-segment numerals; "print" uses solid printed type. */
   digits?: Digits;
-  /** Show the alarm bar on top, the setting knob and the foot. */
+  /** Show the alarm bar on top and the foot. */
   hardware?: boolean;
   /** Case width in pixels; everything else scales from it. */
   size?: number;
@@ -192,14 +192,21 @@ function SegmentDigit({ char, color, height }: { char: string; color: string; he
 
 /* ---------- Flip card ---------- */
 
-type CardProps = {
+export type FlipCardProps = {
+  /** Text on the leaf; null renders blank (e.g. before mount). Changing it flips. */
   value: string | null;
   width: number;
   height: number;
+  /** Leaf color. */
   color: string;
-  digitColor: string;
-  digits: Digits;
-  duration: number;
+  /** Draws the leaf's printed face, laid out at full card size. */
+  renderFace: (text: string) => React.ReactNode;
+  /** One full flip, in milliseconds. */
+  duration?: number;
+  /** Show the hinge pins at the seam. */
+  pins?: boolean;
+  /** Add the LCD dot screen to the leaves. */
+  dots?: boolean;
 };
 
 /** The numerals printed on a leaf, laid out at full card size. */
@@ -229,6 +236,7 @@ function Half({
   half,
   color,
   radius,
+  dots,
   style,
   ref,
 }: {
@@ -236,6 +244,7 @@ function Half({
   half: "top" | "bottom";
   color: string;
   radius: number;
+  dots?: boolean;
   style?: React.CSSProperties;
   ref?: React.Ref<HTMLDivElement>;
 }) {
@@ -248,14 +257,14 @@ function Half({
         top: top ? 0 : "50%",
         height: "50%",
         backgroundColor: color,
-        // A light falloff on the upper leaf, a darker belly below, and a fine LCD dot screen.
+        // A light falloff on the upper leaf, a darker belly below, and optionally a fine LCD dot screen.
         backgroundImage: [
           top
             ? "linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.03))"
             : "linear-gradient(to bottom, rgba(0,0,0,0.07), rgba(0,0,0,0.16))",
-          "radial-gradient(rgba(0,0,0,0.07) 0.6px, transparent 0.8px)",
+          ...(dots ? ["radial-gradient(rgba(0,0,0,0.07) 0.6px, transparent 0.8px)"] : []),
         ].join(", "),
-        backgroundSize: "100% 100%, 3px 3px",
+        backgroundSize: dots ? "100% 100%, 3px 3px" : "100% 100%",
         borderRadius: top ? `${radius}px ${radius}px 0 0` : `0 0 ${radius}px ${radius}px`,
         transformOrigin: top ? "bottom" : "top",
         backfaceVisibility: "hidden",
@@ -272,7 +281,17 @@ function Half({
   );
 }
 
-function FlipCard({ value, width, height, color, digitColor, digits, duration }: CardProps) {
+/** A single split-flap card. Exported so other clocks can build on the same mechanism. */
+export function FlipCard({
+  value,
+  width,
+  height,
+  color,
+  renderFace,
+  duration = 600,
+  pins = false,
+  dots = false,
+}: FlipCardProps) {
   const reduced = useReducedMotion();
   // `settled` is the number fully on show; while it trails `value`, a leaf is falling.
   const [settled, setSettled] = useState(value);
@@ -310,9 +329,7 @@ function FlipCard({ value, width, height, color, digitColor, digits, duration }:
   }, [flipping, value, duration]);
 
   const radius = width * 0.09;
-  const face = (text: string | null) => (
-    <Face text={text ?? ""} digits={digits} digitColor={digitColor} height={height} />
-  );
+  const face = (text: string | null) => renderFace(text ?? "");
 
   return (
     <div
@@ -324,15 +341,15 @@ function FlipCard({ value, width, height, color, digitColor, digits, duration }:
         filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.3))",
       }}
     >
-      <Half half="top" color={color} radius={radius}>
+      <Half half="top" color={color} radius={radius} dots={dots}>
         {face(value)}
       </Half>
-      <Half half="bottom" color={color} radius={radius}>
+      <Half half="bottom" color={color} radius={radius} dots={dots}>
         {face(flipping ? settled : value)}
       </Half>
       {flipping && (
         <>
-          <Half ref={topFlap} half="top" color={color} radius={radius} style={{ zIndex: 2 }}>
+          <Half ref={topFlap} half="top" color={color} radius={radius} dots={dots} style={{ zIndex: 2 }}>
             {face(settled)}
           </Half>
           <Half
@@ -340,6 +357,7 @@ function FlipCard({ value, width, height, color, digitColor, digits, duration }:
             half="bottom"
             color={color}
             radius={radius}
+            dots={dots}
             style={{ zIndex: 2, transform: "rotateX(90deg)" }}
           >
             {face(value)}
@@ -366,7 +384,7 @@ function FlipCard({ value, width, height, color, digitColor, digits, duration }:
           boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25)",
         }}
       />
-      {digits === "print" &&
+      {pins &&
         (["left", "right"] as const).map((side) => (
           <span
             key={side}
@@ -391,7 +409,7 @@ export default function FlipClock({
   time,
   live = true,
   timeZone,
-  hour12 = true,
+  hour12 = false,
   showSeconds = false,
   digits = "segment",
   hardware = true,
@@ -421,7 +439,6 @@ export default function FlipClock({
   const ring = W * 0.014; // darker inner ring
   const groove = Math.max(1, W * 0.006);
   const btnH = W * 0.022;
-  const knobW = W * 0.03;
   const footH = W * 0.05;
 
   const meridiem = hour12;
@@ -457,7 +474,7 @@ export default function FlipClock({
       aria-label={label}
       className={`relative shrink-0 select-none ${className ?? ""}`}
       style={{
-        width: W + (hardware ? knobW : 0),
+        width: W,
         paddingTop: hardware ? btnH : 0,
         paddingBottom: hardware ? footH : W * 0.02,
       }}
@@ -481,24 +498,11 @@ export default function FlipClock({
             className="absolute"
             style={{
               top: 0,
-              right: knobW + W * 0.09,
+              right: W * 0.09,
               width: W * 0.2,
               height: btnH + W * 0.01,
               borderRadius: `${W * 0.01}px ${W * 0.01}px 0 0`,
               background: "linear-gradient(to bottom, #3a3a3a, #121212)",
-            }}
-          />
-          {/* Setting knob on the right side, with grip ridges. */}
-          <span
-            className="absolute"
-            style={{
-              right: 0,
-              top: (hardware ? btnH : 0) + H * 0.3,
-              width: knobW + W * 0.01,
-              height: H * 0.4,
-              borderRadius: `0 ${W * 0.012}px ${W * 0.012}px 0`,
-              background:
-                "repeating-linear-gradient(to bottom, rgba(255,255,255,0.08) 0 1px, transparent 1px 3px), linear-gradient(to right, #0d0d0d, #2e2e2e 55%, #111)",
             }}
           />
           {/* The foot it stands on. */}
@@ -506,7 +510,7 @@ export default function FlipClock({
             className="absolute"
             style={{
               bottom: 0,
-              left: W * 0.09,
+              left: W * 0.14,
               width: W * 0.72,
               height: footH + W * 0.02,
               borderRadius: `0 0 ${W * 0.012}px ${W * 0.012}px`,
@@ -589,9 +593,12 @@ export default function FlipClock({
                   width={cardW}
                   height={cardH}
                   color={card.color}
-                  digitColor={digitColor}
-                  digits={digits}
                   duration={flipDuration}
+                  pins={digits === "print"}
+                  dots={digits === "segment"}
+                  renderFace={(text) => (
+                    <Face text={text} digits={digits} digitColor={digitColor} height={cardH} />
+                  )}
                 />
               ))}
               {/* Glare across the clear front. */}

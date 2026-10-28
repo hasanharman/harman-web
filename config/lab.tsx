@@ -4,6 +4,7 @@ import VinylRecord from "@/components/vinyl-record";
 import AnalogClock from "@/components/analog-clock";
 import WallSwitch from "@/components/wall-switch";
 import FlipClock from "@/components/flip-clock";
+import CalendarClock from "@/components/calendar-clock";
 import WorldClocks from "@/components/world-clocks";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
@@ -618,7 +619,7 @@ export default function Example() {
     slug: "flip-clock",
     title: "Flip Clock",
     description:
-      "A retro split-flap alarm clock: a molded plastic case with an alarm bar, side knob and foot, LCD-gray cards with outlined seven-segment numerals, and an am/pm dot. Each leaf falls over with a little bounce when the number changes. Colors, numeral style, 12/24-hour, seconds, time zone and flip speed are all props. No dependencies.",
+      "A retro split-flap alarm clock: a molded plastic case with an alarm bar and foot, LCD-gray cards with outlined seven-segment numerals, and an optional am/pm dot. Each leaf falls over with a little bounce when the number changes. Colors, numeral style, 12/24-hour, seconds, time zone and flip speed are all props. No dependencies.",
     hint: "Wait for the minute",
     installable: true,
     importName: "FlipClock",
@@ -643,7 +644,6 @@ export default function Example() {
           <FlipClock
             size={320}
             digits="print"
-            hour12={false}
             hardware={false}
             caseColor="#c4352b"
             faceColor="#eadfce"
@@ -654,7 +654,6 @@ export default function Example() {
         ),
         code: `<FlipClock
   digits="print"
-  hour12={false}
   hardware={false}
   caseColor="#c4352b"
   faceColor="#eadfce"
@@ -689,12 +688,12 @@ export default function Example() {
 />`,
       },
       {
-        title: "Time zone, 24-hour",
+        title: "Time zone, 12-hour",
         description:
-          "Pass an IANA timeZone to show another city. hour12={false} drops the am/pm indicator.",
+          "Pass an IANA timeZone to show another city. hour12 switches to 01–12 and shows the am/pm indicator.",
         previewClassName: "min-h-[300px] items-center justify-center bg-white",
-        preview: <FlipClock size={320} timeZone="Asia/Tokyo" hour12={false} />,
-        code: `<FlipClock timeZone="Asia/Tokyo" hour12={false} />`,
+        preview: <FlipClock size={320} timeZone="America/New_York" hour12 />,
+        code: `<FlipClock timeZone="America/New_York" hour12 />`,
       },
       {
         title: "Fixed time",
@@ -713,10 +712,10 @@ export default function Example() {
       { name: "time", type: "Date | string", default: "—", description: 'Freeze at a fixed time (Date or "HH:MM" / "HH:MM:SS"); omit to tick live.' },
       { name: "live", type: "boolean", default: "true", description: "Tick in real time. Ignored when a fixed time is provided." },
       { name: "timeZone", type: "string", default: "local", description: 'IANA time zone for live mode, e.g. "Europe/Istanbul".' },
-      { name: "hour12", type: "boolean", default: "true", description: "01–12 hours with an am/pm dot; false shows 00–23." },
+      { name: "hour12", type: "boolean", default: "false", description: "Show 01–12 hours with an am/pm dot instead of 00–23." },
       { name: "showSeconds", type: "boolean", default: "false", description: "Add a third card for seconds." },
       { name: "digits", type: '"segment" | "print"', default: '"segment"', description: "Outlined seven-segment numerals, or solid printed type." },
-      { name: "hardware", type: "boolean", default: "true", description: "Show the alarm bar, side knob and foot." },
+      { name: "hardware", type: "boolean", default: "true", description: "Show the alarm bar and foot." },
       { name: "size", type: "number", default: "320", description: "Case width in pixels; everything else scales from it." },
       { name: "caseColor", type: "string", default: '"#e2302c"', description: "Plastic case color. The inner ring and foot are shaded from it." },
       { name: "faceColor", type: "string", default: '"#e6dcc6"', description: "Face plate around the cards." },
@@ -727,6 +726,116 @@ export default function Example() {
       { name: "digitColor", type: "string", default: '"#0d0f0f"', description: "Numeral color on the cards." },
       { name: "labelColor", type: "string", default: '"#2b2b2b"', description: "am/pm label and dot color." },
       { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds. Reduced motion skips the flip." },
+      { name: "className", type: "string", default: "—", description: "Extra classes on the outer wrapper." },
+    ],
+  },
+  {
+    slug: "calendar-clock",
+    title: "Calendar Clock",
+    description:
+      "A retro calendar alarm clock: flip-wheel weekday and date windows beside an analog dial, in a cream case with three push buttons. The left and middle buttons wind the wheels, and the right one arms the alarm. It builds on Flip Clock.",
+    hint: "Press the buttons",
+    installable: true,
+    importName: "CalendarClock",
+    previewClassName: "min-h-[340px] items-center justify-center bg-[#e4e1dc]",
+    preview: <CalendarClock size={380} alarm="07:30" />,
+    examples: [
+      {
+        title: "Alarm",
+        description:
+          "Give an alarm time and press the right button to arm it: the button stays down and an alarm hand appears on the dial. When the time comes, the clock rattles.",
+        hint: "Press the right button",
+        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+        preview: <CalendarClock size={360} alarm="07:30" defaultAlarmOn />,
+        code: `<CalendarClock alarm="07:30" defaultAlarmOn />`,
+      },
+      {
+        title: "Colorways",
+        description:
+          "Six colors cover the whole clock: case, trim, panel, cards, ink and alarm hand.",
+        previewClassName:
+          "min-h-[320px] flex-wrap items-center justify-center gap-10 bg-[#e4e1dc]",
+        preview: (
+          <>
+            <CalendarClock
+              size={260}
+              caseColor="#2b2b2b"
+              trimColor="#111111"
+              panelColor="#3d5a4a"
+              cardColor="#f3efe4"
+              inkColor="#d9a441"
+            />
+            <CalendarClock
+              size={260}
+              caseColor="#f4f1ea"
+              trimColor="#2f3e63"
+              panelColor="#d8c9a7"
+              cardColor="#ffffff"
+              inkColor="#2f3e63"
+              alarmColor="#d1495b"
+            />
+          </>
+        ),
+        code: `<CalendarClock
+  caseColor="#2b2b2b"
+  trimColor="#111111"
+  panelColor="#3d5a4a"
+  cardColor="#f3efe4"
+  inkColor="#d9a441"
+/>`,
+      },
+      {
+        title: "Localized weekday",
+        description:
+          'locale sets the weekday names, and timeZone shows another city. This one is in Turkish, on Istanbul time.',
+        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+        preview: <CalendarClock size={340} locale="tr-TR" timeZone="Europe/Istanbul" />,
+        code: `<CalendarClock locale="tr-TR" timeZone="Europe/Istanbul" />`,
+      },
+      {
+        title: "Fixed moment",
+        description:
+          "Pass a Date to freeze the clock, like a product shot. interactive={false} makes the buttons decorative.",
+        previewClassName: "min-h-[320px] items-center justify-center bg-[#e4e1dc]",
+        preview: (
+          <CalendarClock
+            size={340}
+            time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
+            timeZone="UTC"
+            interactive={false}
+          />
+        ),
+        code: `<CalendarClock
+  time={new Date(Date.UTC(2026, 7, 27, 10, 9, 30))}
+  timeZone="UTC"
+  interactive={false}
+/>`,
+      },
+    ],
+    usage: `import CalendarClock from "@/components/calendar-clock";
+
+export default function Example() {
+  return <CalendarClock alarm="07:30" />;
+}`,
+    props: [
+      { name: "time", type: "Date | string", default: "—", description: 'Freeze at a fixed moment. A string is a time ("HH:MM[:SS]") on today\'s date.' },
+      { name: "live", type: "boolean", default: "true", description: "Tick in real time. Ignored when a fixed time is provided." },
+      { name: "timeZone", type: "string", default: "local", description: 'IANA time zone, e.g. "Europe/Istanbul".' },
+      { name: "locale", type: "string", default: '"en-US"', description: "BCP 47 locale for the weekday names." },
+      { name: "showSeconds", type: "boolean", default: "true", description: "Show the second hand." },
+      { name: "alarm", type: "string", default: "—", description: 'Alarm time "HH:MM". Draws the alarm hand while the alarm is on.' },
+      { name: "defaultAlarmOn", type: "boolean", default: "false", description: "Start with the alarm on (uncontrolled)." },
+      { name: "alarmOn", type: "boolean", default: "—", description: "Controlled alarm state." },
+      { name: "onAlarmChange", type: "(on: boolean) => void", default: "—", description: "Fired when the top-right button switches the alarm." },
+      { name: "interactive", type: "boolean", default: "true", description: "Let the top buttons wind the day and date wheels and switch the alarm." },
+      { name: "size", type: "number", default: "360", description: "Case width in pixels; everything else scales from it." },
+      { name: "caseColor", type: "string", default: '"#efe8cd"', description: "Outer shell color." },
+      { name: "trimColor", type: "string", default: '"#5a3a2c"', description: "Groove, window frames and foot." },
+      { name: "panelColor", type: "string", default: '"#b4512f"', description: "Inset panel behind the windows." },
+      { name: "cardColor", type: "string", default: '"#f2e9cb"', description: "Day/date leaves and the dial face." },
+      { name: "inkColor", type: "string", default: '"#3f978b"', description: "Type, ticks, hands and the top buttons." },
+      { name: "alarmColor", type: "string", default: '"#b4512f"', description: "Alarm hand color." },
+      { name: "flipDuration", type: "number", default: "600", description: "One full flip, in milliseconds." },
       { name: "className", type: "string", default: "—", description: "Extra classes on the outer wrapper." },
     ],
   },

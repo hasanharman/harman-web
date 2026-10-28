@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
-import { FlipCard } from "@/components/flip-clock";
+import { FlipCard, clockSound, useClockAudio } from "@/components/flip-clock";
 
 /** A retro calendar alarm clock: flip day and date wheels beside an analog dial. */
 
@@ -43,6 +43,14 @@ export type CalendarClockProps = {
   alarmColor?: string;
   /** One full flip, in milliseconds. */
   flipDuration?: number;
+  /** Clack when a wheel turns. Audio starts after the visitor's first click or key press. */
+  flipSound?: boolean;
+  /** Tick every second, like a quartz movement. */
+  tickSound?: boolean;
+  /** Beep while the alarm is going off. */
+  alarmSound?: boolean;
+  /** Sound volume, 0–1. */
+  volume?: number;
   /** Extra classes on the outer wrapper. */
   className?: string;
 };
@@ -238,9 +246,14 @@ export default function CalendarClock({
   inkColor = "#3f978b",
   alarmColor = "#b4512f",
   flipDuration = 600,
+  flipSound = false,
+  tickSound = false,
+  alarmSound = false,
+  volume = 0.5,
   className,
 }: CalendarClockProps) {
   const moment = useMoment(time, live, timeZone);
+  useClockAudio(flipSound || tickSound || alarmSound);
   const reduced = useReducedMotion();
   const names = useMemo(() => weekdayNames(locale), [locale]);
   const alarmTime = useMemo(() => (alarm ? parseTimeString(alarm) : null), [alarm]);
@@ -256,6 +269,18 @@ export default function CalendarClock({
 
   const ringing =
     armed && alarmTime && moment ? moment.h === alarmTime.h && moment.m === alarmTime.m : false;
+
+  const second = moment?.s;
+  useEffect(() => {
+    if (tickSound && second !== undefined) clockSound.tick(volume);
+  }, [tickSound, second, volume]);
+
+  useEffect(() => {
+    if (!ringing || !alarmSound) return;
+    clockSound.alarm(volume);
+    const id = setInterval(() => clockSound.alarm(volume), 1000);
+    return () => clearInterval(id);
+  }, [ringing, alarmSound, volume]);
 
   // Rattle the whole clock while the alarm is going off.
   const body = useRef<HTMLDivElement>(null);
@@ -440,6 +465,8 @@ export default function CalendarClock({
                   height={cardH}
                   color={cardColor}
                   duration={flipDuration}
+                  sound={flipSound}
+                  volume={volume}
                   renderFace={face}
                 />
                 {/* Edges of the leaves stacked up behind the front one. */}

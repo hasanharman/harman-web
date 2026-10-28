@@ -41,6 +41,12 @@ export type FlipClockProps = {
   labelColor?: string;
   /** One full flip, in milliseconds. */
   flipDuration?: number;
+  /** Clack each time a leaf falls. Audio starts after the visitor's first click or key press. */
+  flipSound?: boolean;
+  /** Tick every second, like a quartz movement. */
+  tickSound?: boolean;
+  /** Sound volume, 0–1. */
+  volume?: number;
   /** Extra classes on the outer wrapper. */
   className?: string;
 };
@@ -115,6 +121,119 @@ function useReducedMotion() {
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     () => false
   );
+}
+
+/* ---------- Sound ---------- */
+
+// One shared context for every clock on the page. Browsers keep it suspended
+// until the visitor's first click or key press, so resume it on that gesture.
+let audioCtx: AudioContext | null = null;
+let noiseBuffer: AudioBuffer | null = null;
+
+function getAudio() {
+  if (typeof window === "undefined") return null;
+  if (!audioCtx) {
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return null;
+    audioCtx = new Ctor();
+    const resume = () => {
+      void audioCtx?.resume();
+      window.removeEventListener("pointerdown", resume);
+      window.removeEventListener("keydown", resume);
+    };
+    window.addEventListener("pointerdown", resume);
+    window.addEventListener("keydown", resume);
+  }
+  return audioCtx.state === "closed" ? null : audioCtx;
+}
+
+function noise(ctx: AudioContext) {
+  if (!noiseBuffer) {
+    noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.25, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer;
+  return src;
+}
+
+/** A gain node that snaps to `peak` and decays exponentially over `decay` seconds. */
+function envelope(ctx: AudioContext, at: number, peak: number, decay: number) {
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak), at + 0.002);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + decay);
+  gain.connect(ctx.destination);
+  return gain;
+}
+
+/** Synthesized clock sounds — no audio files. `delay` is in milliseconds. */
+export const clockSound = {
+  /** A plastic leaf slapping onto the stack: a filtered noise snap over a low knock. */
+  flip(volume = 0.5, delay = 0) {
+    const ctx = getAudio();
+    if (!ctx || ctx.state !== "running") return;
+    const at = ctx.currentTime + delay / 1000;
+    const snap = noise(ctx);
+    const band = ctx.createBiquadFilter();
+    band.type = "bandpass";
+    band.frequency.value = 2400;
+    band.Q.value = 0.9;
+    snap.connect(band).connect(envelope(ctx, at, volume * 0.9, 0.05));
+    snap.start(at, Math.random() * 0.2, 0.06);
+    const knock = ctx.createOscillator();
+    knock.type = "triangle";
+    knock.frequency.setValueAtTime(220, at);
+    knock.frequency.exponentialRampToValueAtTime(90, at + 0.04);
+    knock.connect(envelope(ctx, at, volume * 0.5, 0.045));
+    knock.start(at);
+    knock.stop(at + 0.06);
+  },
+  /** A quartz movement's dry tick. */
+  tick(volume = 0.5, delay = 0) {
+    const ctx = getAudio();
+    if (!ctx || ctx.state !== "running") return;
+    const at = ctx.currentTime + delay / 1000;
+    const click = noise(ctx);
+    const high = ctx.createBiquadFilter();
+    high.type = "highpass";
+    high.frequency.value = 3200;
+    click.connect(high).connect(envelope(ctx, at, volume * 0.35, 0.012));
+    click.start(at, Math.random() * 0.2, 0.02);
+  },
+  /** One burst of the classic four-beep digital alarm. */
+  alarm(volume = 0.5, delay = 0) {
+    const ctx = getAudio();
+    if (!ctx || ctx.state !== "running") return;
+    const start = ctx.currentTime + delay / 1000;
+    for (let i = 0; i < 4; i++) {
+      const at = start + i * 0.13;
+      const beep = ctx.createOscillator();
+      beep.type = "square";
+      beep.frequency.value = 2048;
+      const soft = ctx.createBiquadFilter();
+      soft.type = "lowpass";
+      soft.frequency.value = 3500;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(volume * 0.25, at + 0.005);
+      gain.gain.setValueAtTime(volume * 0.25, at + 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
+      beep.connect(soft).connect(gain).connect(ctx.destination);
+      beep.start(at);
+      beep.stop(at + 0.09);
+    }
+  },
+};
+
+/** Create the audio context early (while idle) so the first gesture can unlock it. */
+export function useClockAudio(enabled: boolean) {
+  useEffect(() => {
+    if (enabled) getAudio();
+  }, [enabled]);
 }
 
 /* ---------- Seven-segment numerals ---------- */
@@ -207,6 +326,10 @@ export type FlipCardProps = {
   pins?: boolean;
   /** Add the LCD dot screen to the leaves. */
   dots?: boolean;
+  /** Clack when the leaf falls and lands. */
+  sound?: boolean;
+  /** Sound volume, 0–1. */
+  volume?: number;
 };
 
 /** The numerals printed on a leaf, laid out at full card size. */
@@ -291,6 +414,8 @@ export function FlipCard({
   duration = 600,
   pins = false,
   dots = false,
+  sound = false,
+  volume = 0.5,
 }: FlipCardProps) {
   const reduced = useReducedMotion();
   // `settled` is the number fully on show; while it trails `value`, a leaf is falling.
@@ -305,6 +430,11 @@ export function FlipCard({
   useEffect(() => {
     if (!flipping || !topFlap.current || !bottomFlap.current) return;
     const half = duration / 2;
+    if (sound) {
+      // A soft tick as the leaf lets go, then the slap as it lands.
+      clockSound.flip(volume * 0.35);
+      clockSound.flip(volume, half);
+    }
     // Upper leaf falls toward you, accelerating and darkening as it tips away from the light…
     const fall = topFlap.current.animate(
       [
@@ -326,7 +456,7 @@ export function FlipCard({
       fall.cancel();
       land.cancel();
     };
-  }, [flipping, value, duration]);
+  }, [flipping, value, duration, sound, volume]);
 
   const radius = width * 0.09;
   const face = (text: string | null) => renderFace(text ?? "");
@@ -423,9 +553,18 @@ export default function FlipClock({
   digitColor = "#0d0f0f",
   labelColor = "#2b2b2b",
   flipDuration = 600,
+  flipSound = false,
+  tickSound = false,
+  volume = 0.5,
   className,
 }: FlipClockProps) {
   const parts = useFlipTime(time, live, timeZone);
+  useClockAudio(flipSound || tickSound);
+
+  const second = parts?.s;
+  useEffect(() => {
+    if (tickSound && second !== undefined) clockSound.tick(volume);
+  }, [tickSound, second, volume]);
 
   const hours = parts ? pad(hour12 ? parts.h % 12 || 12 : parts.h) : null;
   const minutes = parts ? pad(parts.m) : null;
@@ -594,6 +733,8 @@ export default function FlipClock({
                   height={cardH}
                   color={card.color}
                   duration={flipDuration}
+                  sound={flipSound}
+                  volume={volume}
                   pins={digits === "print"}
                   dots={digits === "segment"}
                   renderFace={(text) => (

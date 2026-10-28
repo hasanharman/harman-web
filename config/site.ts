@@ -20,10 +20,13 @@ export function ogImageUrl(params: {
   label?: string;
   desc?: string;
   meta?: string;
+  /** Path under /og/ of a stage image to show beside the text, e.g. "/og/lab/flip-clock.png". */
+  image?: string;
 }) {
   const search = new URLSearchParams({ title: params.title });
   if (params.label) search.set("label", params.label);
   if (params.desc) search.set("desc", params.desc);
   if (params.meta) search.set("meta", params.meta);
+  if (params.image) search.set("image", params.image);
   return `/api/og?${search.toString()}`;
 }

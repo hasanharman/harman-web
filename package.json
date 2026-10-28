@@ -8,7 +8,8 @@
     "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "eslint .",
-    "registry:build": "shadcn build"
+    "registry:build": "shadcn build",
+    "og:capture": "node scripts/capture-og.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

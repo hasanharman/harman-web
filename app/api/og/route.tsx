@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 const FONT_URLS = {
   wordmark:
@@ -32,6 +34,19 @@ function clean(text: string) {
     .trim();
 }
 
+// Stills are read from disk once and inlined — next/og won't fetch our own host.
+const stageCache = new Map<string, string | null>();
+
+/** Load a captured still from public/og as a data URI. Only our own files, never a URL. */
+async function stageImage(imagePath: string | null) {
+  if (!imagePath || !/^\/og\/[\w/-]+\.png$/.test(imagePath)) return null;
+  if (!stageCache.has(imagePath)) {
+    const data = await readFile(path.join(process.cwd(), "public", imagePath)).catch(() => null);
+    stageCache.set(imagePath, data ? `data:image/png;base64,${data.toString("base64")}` : null);
+  }
+  return stageCache.get(imagePath) ?? null;
+}
+
 function truncate(text: string, max: number) {
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 }
@@ -51,7 +66,16 @@ export async function GET(req: NextRequest) {
     // Scale the title down as it gets longer so it always fits.
     const titleSize = title.length > 64 ? 60 : title.length > 40 ? 72 : 84;
 
+    const image = await stageImage(searchParams.get("image"));
+
     if (!fontCache) fontCache = await fetchFonts();
+
+    if (image) {
+      return new ImageResponse(
+        <StageCard title={title} label={label} description={description} meta={meta} image={image} />,
+        { width: 1200, height: 630, fonts: fontCache }
+      );
+    }
 
     return new ImageResponse(
       (
@@ -170,4 +194,128 @@ export async function GET(req: NextRequest) {
   } catch {
     return new Response("Failed to generate image", { status: 500 });
   }
+}
+
+/** Text on the left, the component itself on a lit stage to the right. */
+function StageCard({
+  title,
+  label,
+  description,
+  meta,
+  image,
+}: {
+  title: string;
+  label: string;
+  description: string | null;
+  meta: string | null;
+  image: string;
+}) {
+  // The stage is 560×534 — the size scripts/capture-og.mjs shoots at.
+  // Two-line titles get a smaller size and tighter copy so the footer keeps its room.
+  const long = title.length > 12;
+  const titleSize = long ? 64 : 76;
+  return (
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        // Brand tint washing in from the top-left (Satori clips radial glows, linear is safe).
+        background: "linear-gradient(135deg, #12302b 0%, #0d1716 28%, #0b0b0c 55%)",
+        padding: 48,
+        position: "relative",
+        fontFamily: "Questrial",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          width: 520,
+          height: "100%",
+          padding: "12px 40px 12px 16px",
+        }}
+      >
+        <div style={{ display: "flex", fontFamily: "Pacifico", fontSize: 34, color: "#ffffff" }}>
+          Hasan Harman
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex" }}>
+            <div
+              style={{
+                display: "flex",
+                padding: "8px 20px",
+                border: "1px solid rgba(127,222,208,0.35)",
+                borderRadius: 999,
+                fontSize: 18,
+                letterSpacing: 3,
+                color: "#7fded0",
+              }}
+            >
+              {label.toUpperCase()}
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              marginTop: 24,
+              fontFamily: "Inter",
+              fontWeight: 600,
+              fontSize: titleSize,
+              lineHeight: 1.02,
+              letterSpacing: -2,
+              color: "#fafafa",
+            }}
+          >
+            {title}
+          </div>
+          {description ? (
+            <div
+              style={{
+                display: "flex",
+                marginTop: long ? 18 : 22,
+                fontSize: long ? 23 : 25,
+                lineHeight: 1.42,
+                color: "#a1a1aa",
+              }}
+            >
+              {description}
+            </div>
+          ) : null}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", fontSize: 20, color: "#71717a" }}>
+          <div
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: 999,
+              background: "#2F7B70",
+              display: "flex",
+              marginRight: 12,
+            }}
+          />
+          {meta ?? "hasanharman.dev"}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          width: 560,
+          height: 534,
+          borderRadius: 28,
+          overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- Satori renders plain <img>. */}
+        <img src={image} width={560} height={534} alt="" style={{ objectFit: "cover" }} />
+      </div>
+    </div>
+  );
 }

@@ -27,6 +27,12 @@ module.exports = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: __dirname,
+  // The share-image route reads captured component stills from disk; public/ isn't
+  // bundled into server functions by default.
+  outputFileTracingIncludes: {
+    "/api/og": ["./public/og/**/*"],
+    "/lab/[slug]": ["./public/og/**/*"],
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

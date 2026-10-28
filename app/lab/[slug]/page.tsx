@@ -1,8 +1,10 @@
 import React from "react";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen } from "lucide-react";
 
 import {
   LAB_ITEMS,
@@ -38,21 +40,35 @@ export async function generateMetadata({
   const { slug } = await params;
   const item = getLabItem(slug);
   if (!item) return {};
+  const description = item.summary ?? item.description;
+  // A captured still of the component (scripts/capture-og.mjs), when one exists.
+  const stage = `/og/lab/${slug}.png`;
+  const hasStage = existsSync(path.join(process.cwd(), "public", stage));
   const og = ogImageUrl({
     title: item.title,
     label: "Lab",
-    desc: item.description,
+    desc: description,
+    meta: `hasanharman.dev/lab/${slug}`,
+    image: hasStage ? stage : undefined,
   });
+  const image = { url: og, width: 1200, height: 630, alt: `${item.title} — ${description}` };
   return {
     title: `${item.title} - Lab`,
-    description: item.description,
+    description,
+    alternates: { canonical: `/lab/${slug}` },
     openGraph: {
       title: item.title,
-      description: item.description,
+      description,
       type: "article",
-      images: [{ url: og, width: 1200, height: 630, alt: item.title }],
+      url: `/lab/${slug}`,
+      images: [image],
     },
-    twitter: { card: "summary_large_image", images: [og] },
+    twitter: {
+      card: "summary_large_image",
+      title: item.title,
+      description,
+      images: [image],
+    },
   };
 }
 
@@ -96,6 +112,23 @@ export default async function LabComponentPage({ params }: PageProps) {
         <p className="text-lg font-light text-muted-foreground">
           {item.description}
         </p>
+        {item.inspiration?.length ? (
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            <span>Inspired by</span>
+            {item.inspiration.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 text-foreground underline-offset-2 hover:underline"
+              >
+                {link.label}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            ))}
+          </p>
+        ) : null}
         {item.writing ? (
           <Link
             href={item.writing}

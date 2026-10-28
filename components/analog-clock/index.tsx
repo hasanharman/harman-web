@@ -52,7 +52,9 @@ export type AnalogClockProps = {
 /** Cartesian point on the 100×100 dial for a radius and clock angle (deg, 12 o'clock = 0). */
 function point(radius: number, deg: number): [number, number] {
   const a = (deg * Math.PI) / 180;
-  return [50 + radius * Math.sin(a), 50 - radius * Math.cos(a)];
+  // Rounded so server and browser trig agree and hydration matches.
+  const round = (n: number) => Math.round(n * 1000) / 1000;
+  return [round(50 + radius * Math.sin(a)), round(50 - radius * Math.cos(a))];
 }
 
 /** Resolve the props into the h/m/s the hands should point at. */

@@ -6,6 +6,7 @@ import WallSwitch from "@/components/wall-switch";
 import FlipClock from "@/components/flip-clock";
 import CalendarClock from "@/components/calendar-clock";
 import WorldClocks from "@/components/world-clocks";
+import SnowGlobe from "@/components/snow-globe";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
 import { PullCord } from "@/components/pull-cord";
@@ -99,11 +100,140 @@ const COVERS = {
     "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/32/0e/f8/320ef83c-5748-d558-25e9-ac595ae63cac/cover.jpg/600x600bb.jpg",
 };
 
+/** Avatars clustered roughly where the Mesh map view pins them. */
+const avatar = (n: number) => `https://i.pravatar.cc/96?img=${n}`;
+const GLOBE_MARKERS = [
+  { lat: 34.05, lng: -118.24, src: avatar(12), label: "Los Angeles", count: 13 },
+  { lat: 37.77, lng: -122.42, src: avatar(32), label: "San Francisco" },
+  { lat: 39.74, lng: -104.99, src: avatar(47), label: "Denver" },
+  { lat: 49.28, lng: -116.12, src: avatar(15), label: "Calgary" },
+  { lat: 41.88, lng: -87.63, src: avatar(44), label: "Chicago" },
+  { lat: 27.95, lng: -82.46, src: avatar(5), label: "Tampa" },
+  { lat: 51.51, lng: -0.13, src: avatar(59), label: "London", count: 20 },
+  { lat: 52.52, lng: 13.4, src: avatar(68), label: "Berlin" },
+  { lat: 40.42, lng: -3.7, src: avatar(53), label: "Madrid" },
+];
+const GLOBE_STAGE = "min-h-[340px] items-center justify-center bg-[#f5f4f2] p-4";
+
 const FLIP_STAGE = "min-h-[320px] bg-white";
 const CALENDAR_BG = "#e4e1dc";
 const CALENDAR_STAGE = "min-h-[320px] bg-[#e4e1dc]";
 
 export const LAB_ITEMS: LabItem[] = [
+  {
+    slug: "snow-globe",
+    title: "Snow Globe",
+    description:
+      "A glass snow globe with the Earth inside, drawn with a real orthographic projection. Drag to spin it and the snow swirls up with the motion, then settles. Tap for a quick shake. Pin avatars with cluster counts, turn on the map chrome for working zoom buttons and a weather chip, or let it spin on its own.",
+    summary:
+      "A glass snow globe for React with a draggable Earth inside. Drag to spin it and stir the snow, and pin avatars to the map.",
+    inspiration: [
+      {
+        label: "Arthur Lambillotte’s Mesh map view",
+        href: "https://x.com/artlambi/status/1876278377872855118",
+      },
+    ],
+    hint: "Drag to spin, tap to shake",
+    installable: true,
+    importName: "SnowGlobe",
+    fullWidth: true,
+    previewClassName: GLOBE_STAGE,
+    preview: <SnowGlobe controls markers={GLOBE_MARKERS} />,
+    examples: [
+      {
+        title: "Just the globe",
+        description:
+          "Without markers or controls it is a plain glass ornament. Drag it around to stir the snow.",
+        hint: "Drag to stir",
+        previewClassName: GLOBE_STAGE,
+        preview: <SnowGlobe size={520} />,
+        code: `<SnowGlobe />`,
+      },
+      {
+        title: "Spinning",
+        description:
+          "autoRotate turns the Earth on its own, in degrees per second. Dragging still takes over. center picks the starting view as [longitude, latitude].",
+        previewClassName: GLOBE_STAGE,
+        preview: <SnowGlobe size={520} autoRotate={8} center={[100, 20]} />,
+        code: `<SnowGlobe autoRotate={8} center={[100, 20]} />`,
+      },
+      {
+        title: "Blizzard",
+        description: "Raise snow for a denser storm.",
+        hint: "Tap to shake",
+        previewClassName: GLOBE_STAGE,
+        preview: <SnowGlobe size={520} snow={480} />,
+        code: `<SnowGlobe snow={480} />`,
+      },
+    ],
+    usage: `import SnowGlobe from "@/components/snow-globe";
+
+const markers = [
+  { lat: 34.05, lng: -118.24, src: "/avatars/ana.jpg", label: "Ana", count: 13 },
+  { lat: 51.51, lng: -0.13, src: "/avatars/tom.jpg", label: "Tom" },
+];
+
+export default function Example() {
+  return <SnowGlobe controls markers={markers} />;
+}`,
+    props: [
+      {
+        name: "markers",
+        type: "SnowGlobeMarker[]",
+        default: "[]",
+        description:
+          "Avatars pinned to the map: { lat, lng, src?, label?, count? }. Without src they show initials from label, and count adds a cluster badge.",
+      },
+      {
+        name: "center",
+        type: "[number, number]",
+        default: "[-38, 40]",
+        description: "Starting [longitude, latitude] facing the viewer.",
+      },
+      {
+        name: "snow",
+        type: "number",
+        default: "220",
+        description: "Number of snow particles.",
+      },
+      {
+        name: "autoRotate",
+        type: "number",
+        default: "0",
+        description: "Spin speed in degrees per second. 0 keeps it still.",
+      },
+      {
+        name: "draggable",
+        type: "boolean",
+        default: "true",
+        description: "Drag to spin the Earth and stir the snow, tap to shake.",
+      },
+      {
+        name: "controls",
+        type: "boolean",
+        default: "false",
+        description: "Show the map chrome: a view pill, working zoom buttons and a weather chip.",
+      },
+      {
+        name: "temperature",
+        type: "string",
+        default: '"32°F"',
+        description: "Text in the weather chip when controls is on.",
+      },
+      {
+        name: "size",
+        type: "number",
+        default: "640",
+        description: "Maximum width in pixels. The globe scales down to fit its container.",
+      },
+      {
+        name: "className",
+        type: "string",
+        default: "—",
+        description: "Extra classes on the outer wrapper.",
+      },
+    ],
+  },
   {
     slug: "flip-clock",
     title: "Flip Clock",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { geoCircle, geoDistance, geoOrthographic, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
@@ -15,8 +15,14 @@ export type SnowGlobeMarker = {
   lng: number;
   /** Avatar image URL. Falls back to initials from `label`. */
   src?: string;
-  /** Name used for the alt text and initials fallback. */
+  /** Name shown in the card, and used for alt text and the initials fallback. */
   label?: string;
+  /** Handle shown under the name in the card, e.g. "@shadcn". */
+  handle?: string;
+  /** Where they are, shown in the card, e.g. "Spain". */
+  location?: string;
+  /** Profile link; the card gets a "View profile" link when set. */
+  href?: string;
   /** Optional cluster count shown as a badge, e.g. 13. */
   count?: number;
 };
@@ -32,10 +38,10 @@ export type SnowGlobeProps = {
   autoRotate?: number;
   /** Drag to spin the Earth and stir the snow. */
   draggable?: boolean;
-  /** Show the map chrome: view pill, zoom buttons and weather chip. */
+  /** Show zoom in/out buttons. */
   controls?: boolean;
-  /** Text in the weather chip when `controls` is on. */
-  temperature?: string;
+  /** Fired when a marker is clicked, after the globe starts turning to it. */
+  onMarkerClick?: (marker: SnowGlobeMarker) => void;
   /** Maximum width in pixels; the globe scales down to fit its container. */
   size?: number;
   /** Extra classes on the outer wrapper. */
@@ -156,14 +162,17 @@ export default function SnowGlobe({
   autoRotate = 0,
   draggable = true,
   controls = false,
-  temperature = "32°F",
+  onMarkerClick,
   size = 640,
   className,
 }: SnowGlobeProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const earthRef = useRef<HTMLCanvasElement>(null);
   const snowRef = useRef<HTMLCanvasElement>(null);
-  const markerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const markerRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<number | null>(null);
+  const activeRef = useRef<number | null>(null);
   const view = useRef({
     lng: center[0],
     lat: center[1],
@@ -173,6 +182,8 @@ export default function SnowGlobe({
     vLat: 0,
     energy: 0,
     dragging: false,
+    fly: null as [number, number] | null,
+    redraw: false,
   });
 
   useEffect(() => {
@@ -302,6 +313,8 @@ export default function SnowGlobe({
       ctx.restore();
 
       const facing: [number, number] = [v.lng, v.lat];
+      const card = cardRef.current;
+      if (card) card.style.opacity = "0";
       markers.forEach((m, i) => {
         const el = markerRefs.current[i];
         if (!el) return;
@@ -315,12 +328,21 @@ export default function SnowGlobe({
         const front = Math.cos(Math.min(d, Math.PI / 2));
         if (!p || !inside || d > 1.45) {
           el.style.opacity = "0";
+          el.style.pointerEvents = "none";
+          el.tabIndex = -1;
           return;
         }
+        const scale = 0.7 + 0.3 * front;
         el.style.opacity = String(Math.min(1, front * 2.2));
-        el.style.transform = `translate3d(${p[0] * k}px, ${p[1] * k}px, 0) translate(-50%, -50%) scale(${
-          0.7 + 0.3 * front
-        })`;
+        el.style.pointerEvents = front > 0.35 ? "auto" : "none";
+        el.tabIndex = front > 0.35 ? 0 : -1;
+        el.style.transform = `translate3d(${p[0] * k}px, ${p[1] * k}px, 0) translate(-50%, -50%) scale(${scale})`;
+        if (card && i === activeRef.current) {
+          // Sit the card just above the avatar.
+          const half = ((m.count ? 4.6 : 3.8) / 100) * FW * k * scale * 0.5;
+          card.style.opacity = String(Math.min(1, front * 2.2));
+          card.style.transform = `translate3d(${p[0] * k}px, ${p[1] * k - half - 10}px, 0) translate(-50%, -100%)`;
+        }
       });
     };
 
@@ -402,11 +424,12 @@ export default function SnowGlobe({
     let last: { x: number; y: number; t: number } | null = null;
     let moved = 0;
     const onDown = (e: PointerEvent) => {
-      if (!draggable || (e.target as HTMLElement).closest("button")) return;
+      if (!draggable || (e.target as HTMLElement).closest("button, a, [role=dialog]")) return;
       root.setPointerCapture(e.pointerId);
       last = { x: e.clientX, y: e.clientY, t: performance.now() };
       moved = 0;
       v.dragging = true;
+      v.fly = null;
       v.vLng = v.vLat = 0;
     };
     const onMove = (e: PointerEvent) => {
@@ -427,7 +450,11 @@ export default function SnowGlobe({
     };
     const onUp = () => {
       if (!last) return;
-      if (moved < 4) stir(0.9); // a tap gives it a shake
+      if (moved < 4) {
+        // A tap closes an open card, otherwise gives the globe a shake.
+        if (activeRef.current !== null) setActive(null);
+        else stir(0.9);
+      }
       last = null;
       v.dragging = false;
     };
@@ -455,7 +482,18 @@ export default function SnowGlobe({
           v.vLat *= decay;
           dirty = true;
         }
-        if (autoRotate && !reduced) {
+        if (v.fly) {
+          // Ease to the clicked marker along the shortest way round.
+          const dLng = ((((v.fly[0] - v.lng) % 360) + 540) % 360) - 180;
+          const dLat = v.fly[1] - v.lat;
+          const ease = reduced ? 1 : Math.min(1, dt * 5);
+          v.lng += dLng * ease;
+          v.lat += dLat * ease;
+          v.vLng = v.vLat = 0;
+          if (Math.abs(dLng) + Math.abs(dLat) < 0.02) v.fly = null;
+          dirty = true;
+        }
+        if (autoRotate && !reduced && activeRef.current === null) {
           v.lng += autoRotate * dt;
           dirty = true;
         }
@@ -464,9 +502,10 @@ export default function SnowGlobe({
         v.zoom += (v.zoomTarget - v.zoom) * Math.min(1, dt * 8);
         dirty = true;
       }
-      if (dirty) {
+      if (dirty || v.redraw) {
         drawEarth();
         dirty = false;
+        v.redraw = false;
       }
       if (!reduced || v.energy > 0.01) stepSnow(dt);
       drawSnow(reduced ? 0 : now / 1000);
@@ -493,6 +532,23 @@ export default function SnowGlobe({
     };
   }, [markers, snow, autoRotate, draggable]);
 
+  useEffect(() => {
+    activeRef.current = active;
+    view.current.redraw = true;
+  }, [active]);
+
+  const select = (i: number) => {
+    if (active === i) {
+      setActive(null);
+      return;
+    }
+    const m = markers[i];
+    view.current.fly = [m.lng, m.lat];
+    setActive(i);
+    onMarkerClick?.(m);
+  };
+  const activeMarker = active !== null ? markers[active] : undefined;
+
   const zoomBy = (step: number) => {
     const v = view.current;
     v.zoomTarget = Math.max(1, Math.min(2.5, v.zoomTarget + step));
@@ -505,8 +561,11 @@ export default function SnowGlobe({
   return (
     <div
       ref={rootRef}
-      role="img"
-      aria-label="A snow globe with the Earth inside"
+      role="group"
+      aria-label="Snow globe with the Earth inside"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") setActive(null);
+      }}
       className={`relative w-full select-none touch-none ${
         draggable ? "cursor-grab active:cursor-grabbing" : ""
       } ${className ?? ""}`}
@@ -585,26 +644,39 @@ export default function SnowGlobe({
       <canvas ref={earthRef} className="pointer-events-none absolute inset-0 h-full w-full" />
 
       {markers.map((m, i) => (
-        <div
+        <button
           key={`${m.lat},${m.lng},${i}`}
           ref={(el) => {
             markerRefs.current[i] = el;
           }}
-          className="pointer-events-none absolute left-0 top-0 opacity-0"
-          style={{ width: m.count ? "4.6cqw" : "3.8cqw", zIndex: m.count ? 1 : 0 }}
+          type="button"
+          tabIndex={-1}
+          aria-label={m.label ? `Show ${m.label}` : "Show marker"}
+          aria-pressed={active === i}
+          onClick={() => select(i)}
+          className="pointer-events-none absolute left-0 top-0 cursor-pointer rounded-full opacity-0 outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+          style={{
+            width: m.count ? "4.6cqw" : "3.8cqw",
+            zIndex: active === i ? 3 : m.count ? 2 : 1,
+          }}
         >
-          <div
-            className="aspect-square w-full overflow-hidden rounded-full bg-slate-200"
+          {active === i ? (
+            <span className="absolute inset-0 animate-ping rounded-full bg-sky-400/60" />
+          ) : null}
+          <span
+            className="relative block aspect-square w-full overflow-hidden rounded-full bg-slate-200 transition-shadow"
             style={{
               boxShadow:
-                "0 0 0 0.3cqw rgba(255,255,255,0.95), 0 0.4cqw 1.2cqw rgba(20,60,90,0.3)",
+                active === i
+                  ? "0 0 0 0.3cqw #fff, 0 0 0 0.6cqw rgba(56,160,240,0.95), 0 0.4cqw 1.2cqw rgba(20,60,90,0.3)"
+                  : "0 0 0 0.3cqw rgba(255,255,255,0.95), 0 0.4cqw 1.2cqw rgba(20,60,90,0.3)",
             }}
           >
             {m.src ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={m.src}
-                alt={m.label ?? ""}
+                alt=""
                 draggable={false}
                 className="h-full w-full object-cover"
               />
@@ -616,7 +688,7 @@ export default function SnowGlobe({
                 {initials(m.label)}
               </span>
             )}
-          </div>
+          </span>
           {m.count ? (
             <span
               className="absolute font-medium tabular-nums text-white"
@@ -634,7 +706,7 @@ export default function SnowGlobe({
               {m.count}
             </span>
           ) : null}
-        </div>
+        </button>
       ))}
 
       <canvas
@@ -751,91 +823,74 @@ export default function SnowGlobe({
         </g>
       </svg>
 
-      {controls ? (
-        <>
-          <span
-            aria-hidden
-            className="absolute flex items-center bg-white text-neutral-700"
-            style={{
-              left: pct(55, FW),
-              top: pct(55, FH),
-              gap: "0.8cqw",
-              padding: "0.9cqw 1.3cqw",
-              borderRadius: "1.1cqw",
-              fontSize: "2.4cqw",
-              boxShadow: "0 0.3cqw 1.4cqw rgba(0,0,0,0.08)",
-            }}
-          >
-            Map
-            <svg viewBox="0 0 12 12" style={{ width: "1.6cqw" }} fill="none">
-              <path
-                d="M2.5 4.5 6 8l3.5-3.5"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <div
-            className="absolute flex flex-col overflow-hidden bg-white text-neutral-600"
-            style={{
-              right: pct(55, FW),
-              top: pct(55, FH),
-              borderRadius: "1.1cqw",
-              boxShadow: "0 0.3cqw 1.4cqw rgba(0,0,0,0.08)",
-            }}
-          >
-            {[
-              { label: "Zoom in", step: 0.25, d: "M6 2v8M2 6h8" },
-              { label: "Zoom out", step: -0.25, d: "M2 6h8" },
-            ].map((b, i) => (
-              <button
-                key={b.label}
-                type="button"
-                aria-label={b.label}
-                onClick={() => zoomBy(b.step)}
-                className={`flex items-center justify-center transition-colors hover:bg-neutral-100 ${
-                  i ? "border-t border-neutral-100" : ""
-                }`}
-                style={{ width: "4.7cqw", height: "4.7cqw" }}
+      {activeMarker ? (
+        <div
+          ref={cardRef}
+          role="dialog"
+          aria-label={activeMarker.label ?? "Marker"}
+          className="pointer-events-auto absolute left-0 top-0 z-10 flex w-max max-w-[16rem] items-center gap-2.5 rounded-xl bg-white/95 p-2.5 pr-3.5 text-left opacity-0 shadow-lg ring-1 ring-black/5 backdrop-blur"
+        >
+          {activeMarker.src ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={activeMarker.src}
+              alt=""
+              className="size-9 shrink-0 rounded-full object-cover"
+            />
+          ) : null}
+          <div className="min-w-0 leading-tight">
+            <p className="truncate text-sm font-semibold text-neutral-900">
+              {activeMarker.label}
+            </p>
+            {activeMarker.handle || activeMarker.location ? (
+              <p className="truncate text-xs text-neutral-500">
+                {[activeMarker.handle, activeMarker.location].filter(Boolean).join(" · ")}
+              </p>
+            ) : null}
+            {activeMarker.href ? (
+              <a
+                href={activeMarker.href}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-0.5 inline-block text-xs font-medium text-sky-600 hover:underline"
               >
-                <svg viewBox="0 0 12 12" style={{ width: "2cqw" }} fill="none">
-                  <path d={b.d} stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
-              </button>
-            ))}
+                View profile ↗
+              </a>
+            ) : null}
           </div>
-          <span
-            className="absolute flex items-center bg-white text-neutral-700"
-            style={{
-              right: pct(55, FW),
-              bottom: pct(56, FH),
-              gap: "0.8cqw",
-              padding: "0.9cqw 1.2cqw",
-              borderRadius: "1.1cqw",
-              fontSize: "2.2cqw",
-              boxShadow: "0 0.3cqw 1.4cqw rgba(0,0,0,0.08)",
-            }}
-          >
-            <svg viewBox="0 0 24 24" style={{ width: "2.6cqw" }} fill="none" aria-hidden>
-              <path
-                d="M7 15a4 4 0 1 1 .9-7.9A5.5 5.5 0 0 1 18.5 9 3.5 3.5 0 0 1 18 16H7"
-                fill="#d4d8dc"
-              />
-              {[
-                [8, 19],
-                [12, 20],
-                [16, 19],
-                [10, 22],
-                [14, 22.5],
-              ].map(([cx, cy]) => (
-                <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="0.9" fill="#b4bcc4" />
-              ))}
-            </svg>
-            {temperature}
-          </span>
-        </>
+        </div>
+      ) : null}
+
+      {controls ? (
+        <div
+          className="absolute z-10 flex flex-col overflow-hidden bg-white text-neutral-600"
+          style={{
+            right: pct(55, FW),
+            top: pct(55, FH),
+            borderRadius: "1.1cqw",
+            boxShadow: "0 0.3cqw 1.4cqw rgba(0,0,0,0.08)",
+          }}
+        >
+          {[
+            { label: "Zoom in", step: 0.25, d: "M6 2v8M2 6h8" },
+            { label: "Zoom out", step: -0.25, d: "M2 6h8" },
+          ].map((b, i) => (
+            <button
+              key={b.label}
+              type="button"
+              aria-label={b.label}
+              onClick={() => zoomBy(b.step)}
+              className={`flex items-center justify-center transition-colors hover:bg-neutral-100 ${
+                i ? "border-t border-neutral-100" : ""
+              }`}
+              style={{ width: "4.7cqw", height: "4.7cqw" }}
+            >
+              <svg viewBox="0 0 12 12" style={{ width: "2cqw" }} fill="none">
+                <path d={b.d} stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+              </svg>
+            </button>
+          ))}
+        </div>
       ) : null}
     </div>
   );

@@ -101,21 +101,38 @@ const COVERS = {
 };
 
 /** X profile pictures, pinned roughly where each dev is based. */
-const xAvatar = (id: string) => `https://pbs.twimg.com/profile_images/${id}_200x200.jpg`;
+const xDev = (
+  label: string,
+  handle: string,
+  location: string,
+  avatarId: string,
+  lat: number,
+  lng: number,
+  count?: number
+) => ({
+  lat,
+  lng,
+  label,
+  handle: `@${handle}`,
+  location,
+  href: `https://x.com/${handle}`,
+  src: `https://pbs.twimg.com/profile_images/${avatarId}_200x200.jpg`,
+  count,
+});
 /** Mersin, Türkiye — the default view of the main demo. */
 const GLOBE_CENTER: [number, number] = [34.64, 36.81];
 const GLOBE_MARKERS = [
-  { lat: 36.81, lng: 34.64, src: xAvatar("1972611039066791936/cwvQHJ0S"), label: "Hasan Harman" },
-  { lat: 39.5, lng: -98.35, src: xAvatar("1593304942210478080/TUYae5z7"), label: "shadcn" },
-  { lat: 40.42, lng: -3.7, src: xAvatar("1756766826736893952/6Gvg6jha"), label: "OrcDev" },
-  { lat: 37.77, lng: -122.42, src: xAvatar("1783856060249595904/8TfcCN0r"), label: "Guillermo Rauch", count: 13 },
-  { lat: 37.33, lng: -121.89, src: xAvatar("1840190186245746688/VVPe1CP0"), label: "Theo" },
-  { lat: 41.59, lng: -93.62, src: xAvatar("1862717563311968256/xfgt1L9l"), label: "Lee Robinson" },
-  { lat: 43.36, lng: -80.31, src: xAvatar("1677042510839857154/Kq4tpySA"), label: "Adam Wathan" },
-  { lat: 55.68, lng: 12.57, src: xAvatar("2093715898204884992/goERjC9G"), label: "DHH" },
-  { lat: 51.51, lng: -0.13, src: xAvatar("1998689716229558272/GSFU7BiZ"), label: "Steve Ruiz" },
-  { lat: 48.86, lng: 2.35, src: xAvatar("1980306076479201281/0WC7AqxQ"), label: "Anthony Fu" },
-  { lat: 38.72, lng: -9.14, src: xAvatar("2077111020305162240/PwddgOau"), label: "Pieter Levels" },
+  xDev("Hasan Harman", "strad3r", "Türkiye", "1972611039066791936/cwvQHJ0S", 36.81, 34.64),
+  xDev("shadcn", "shadcn", "USA", "1593304942210478080/TUYae5z7", 39.5, -98.35),
+  xDev("OrcDev", "orcdev", "Spain", "1756766826736893952/6Gvg6jha", 40.42, -3.7),
+  xDev("Guillermo Rauch", "rauchg", "USA", "1783856060249595904/8TfcCN0r", 37.77, -122.42, 13),
+  xDev("Theo", "t3dotgg", "USA", "1840190186245746688/VVPe1CP0", 37.33, -121.89),
+  xDev("Lee Robinson", "leerob", "USA", "1862717563311968256/xfgt1L9l", 41.59, -93.62),
+  xDev("Adam Wathan", "adamwathan", "Canada", "1677042510839857154/Kq4tpySA", 43.36, -80.31),
+  xDev("DHH", "dhh", "Denmark", "2093715898204884992/goERjC9G", 55.68, 12.57),
+  xDev("Steve Ruiz", "steveruizok", "UK", "1998689716229558272/GSFU7BiZ", 51.51, -0.13),
+  xDev("Anthony Fu", "antfu7", "France", "1980306076479201281/0WC7AqxQ", 48.86, 2.35),
+  xDev("Pieter Levels", "levelsio", "Portugal", "2077111020305162240/PwddgOau", 38.72, -9.14),
 ];
 const GLOBE_STAGE = "min-h-[340px] items-center justify-center bg-[#f5f4f2] p-4";
 
@@ -128,7 +145,7 @@ export const LAB_ITEMS: LabItem[] = [
     slug: "snow-globe",
     title: "Snow Globe",
     description:
-      "A glass snow globe with the Earth inside, drawn with a real orthographic projection. Drag to spin it and the snow swirls up with the motion, then settles. Tap for a quick shake. Pin avatars with cluster counts, turn on the map chrome for working zoom buttons and a weather chip, or let it spin on its own.",
+      "A glass snow globe with the Earth inside, drawn with a real orthographic projection. Drag to spin it and the snow swirls up with the motion, then settles. Tap for a quick shake. Pin avatars to the map; click one and the globe turns to it and opens a little profile card. Add zoom buttons, or let it spin on its own.",
     summary:
       "A glass snow globe for React with a draggable Earth inside. Drag to spin it and stir the snow, and pin avatars to the map.",
     inspiration: [
@@ -137,7 +154,7 @@ export const LAB_ITEMS: LabItem[] = [
         href: "https://x.com/artlambi/status/1876278377872855118",
       },
     ],
-    hint: "Drag to spin, tap to shake",
+    hint: "Drag to spin, click a face",
     installable: true,
     importName: "SnowGlobe",
     fullWidth: true,
@@ -173,8 +190,16 @@ export const LAB_ITEMS: LabItem[] = [
     usage: `import SnowGlobe from "@/components/snow-globe";
 
 const markers = [
-  { lat: 34.05, lng: -118.24, src: "/avatars/ana.jpg", label: "Ana", count: 13 },
-  { lat: 51.51, lng: -0.13, src: "/avatars/tom.jpg", label: "Tom" },
+  {
+    lat: 40.42,
+    lng: -3.7,
+    src: "/avatars/ana.jpg",
+    label: "Ana García",
+    handle: "@ana",
+    location: "Spain",
+    href: "https://x.com/ana",
+  },
+  { lat: 51.51, lng: -0.13, src: "/avatars/tom.jpg", label: "Tom", count: 13 },
 ];
 
 export default function Example() {
@@ -186,7 +211,7 @@ export default function Example() {
         type: "SnowGlobeMarker[]",
         default: "[]",
         description:
-          "Avatars pinned to the map: { lat, lng, src?, label?, count? }. Without src they show initials from label, and count adds a cluster badge.",
+          "Avatars pinned to the map: { lat, lng, src?, label?, handle?, location?, href?, count? }. Clicking one turns the globe to it and opens a card with the label, handle, location and a profile link. Without src it shows initials, and count adds a cluster badge.",
       },
       {
         name: "center",
@@ -216,13 +241,13 @@ export default function Example() {
         name: "controls",
         type: "boolean",
         default: "false",
-        description: "Show the map chrome: a view pill, working zoom buttons and a weather chip.",
+        description: "Show zoom in/out buttons.",
       },
       {
-        name: "temperature",
-        type: "string",
-        default: '"32°F"',
-        description: "Text in the weather chip when controls is on.",
+        name: "onMarkerClick",
+        type: "(marker: SnowGlobeMarker) => void",
+        default: "—",
+        description: "Fired when a marker is clicked, e.g. to show your own UI or track it.",
       },
       {
         name: "size",

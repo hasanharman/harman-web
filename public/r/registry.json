@@ -130,7 +130,7 @@
       "name": "snow-globe",
       "type": "registry:component",
       "title": "Snow Globe",
-      "description": "A glass snow globe with a draggable Earth inside. Drag to spin it and stir the snow, pin avatars to the map, and optionally show map chrome with working zoom.",
+      "description": "A glass snow globe with a draggable Earth inside. Drag to spin it and stir the snow, and pin avatars that open a profile card when clicked.",
       "dependencies": ["d3-geo@^3.1.1", "topojson-client@^3.1.0", "world-atlas@^2.0.2"],
       "devDependencies": [
         "@types/d3-geo@^3.1.1",

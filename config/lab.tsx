@@ -100,18 +100,22 @@ const COVERS = {
     "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/32/0e/f8/320ef83c-5748-d558-25e9-ac595ae63cac/cover.jpg/600x600bb.jpg",
 };
 
-/** Avatars clustered roughly where the Mesh map view pins them. */
-const avatar = (n: number) => `https://i.pravatar.cc/96?img=${n}`;
+/** X profile pictures, pinned roughly where each dev is based. */
+const xAvatar = (id: string) => `https://pbs.twimg.com/profile_images/${id}_200x200.jpg`;
+/** Mersin, Türkiye — the default view of the main demo. */
+const GLOBE_CENTER: [number, number] = [34.64, 36.81];
 const GLOBE_MARKERS = [
-  { lat: 34.05, lng: -118.24, src: avatar(12), label: "Los Angeles", count: 13 },
-  { lat: 37.77, lng: -122.42, src: avatar(32), label: "San Francisco" },
-  { lat: 39.74, lng: -104.99, src: avatar(47), label: "Denver" },
-  { lat: 49.28, lng: -116.12, src: avatar(15), label: "Calgary" },
-  { lat: 41.88, lng: -87.63, src: avatar(44), label: "Chicago" },
-  { lat: 27.95, lng: -82.46, src: avatar(5), label: "Tampa" },
-  { lat: 51.51, lng: -0.13, src: avatar(59), label: "London", count: 20 },
-  { lat: 52.52, lng: 13.4, src: avatar(68), label: "Berlin" },
-  { lat: 40.42, lng: -3.7, src: avatar(53), label: "Madrid" },
+  { lat: 36.81, lng: 34.64, src: xAvatar("1972611039066791936/cwvQHJ0S"), label: "Hasan Harman" },
+  { lat: 39.5, lng: -98.35, src: xAvatar("1593304942210478080/TUYae5z7"), label: "shadcn" },
+  { lat: 40.42, lng: -3.7, src: xAvatar("1756766826736893952/6Gvg6jha"), label: "OrcDev" },
+  { lat: 37.77, lng: -122.42, src: xAvatar("1783856060249595904/8TfcCN0r"), label: "Guillermo Rauch", count: 13 },
+  { lat: 37.33, lng: -121.89, src: xAvatar("1840190186245746688/VVPe1CP0"), label: "Theo" },
+  { lat: 41.59, lng: -93.62, src: xAvatar("1862717563311968256/xfgt1L9l"), label: "Lee Robinson" },
+  { lat: 43.36, lng: -80.31, src: xAvatar("1677042510839857154/Kq4tpySA"), label: "Adam Wathan" },
+  { lat: 55.68, lng: 12.57, src: xAvatar("2093715898204884992/goERjC9G"), label: "DHH" },
+  { lat: 51.51, lng: -0.13, src: xAvatar("1998689716229558272/GSFU7BiZ"), label: "Steve Ruiz" },
+  { lat: 48.86, lng: 2.35, src: xAvatar("1980306076479201281/0WC7AqxQ"), label: "Anthony Fu" },
+  { lat: 38.72, lng: -9.14, src: xAvatar("2077111020305162240/PwddgOau"), label: "Pieter Levels" },
 ];
 const GLOBE_STAGE = "min-h-[340px] items-center justify-center bg-[#f5f4f2] p-4";
 
@@ -138,7 +142,7 @@ export const LAB_ITEMS: LabItem[] = [
     importName: "SnowGlobe",
     fullWidth: true,
     previewClassName: GLOBE_STAGE,
-    preview: <SnowGlobe controls markers={GLOBE_MARKERS} />,
+    preview: <SnowGlobe controls markers={GLOBE_MARKERS} center={GLOBE_CENTER} />,
     examples: [
       {
         title: "Just the globe",

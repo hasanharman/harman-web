@@ -6,6 +6,7 @@ import WallSwitch from "@/components/wall-switch";
 import FlipClock from "@/components/flip-clock";
 import CalendarClock from "@/components/calendar-clock";
 import WorldClocks from "@/components/world-clocks";
+import SnowGlobe from "@/components/snow-globe";
 import ThreeDPhotoCarousel from "@/components/three-d-carousel";
 import PhotoFrames from "@/components/photo-frames";
 import { PullCord } from "@/components/pull-cord";
@@ -99,11 +100,169 @@ const COVERS = {
     "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/32/0e/f8/320ef83c-5748-d558-25e9-ac595ae63cac/cover.jpg/600x600bb.jpg",
 };
 
+/** X profile pictures, pinned roughly where each dev is based. */
+const xDev = (
+  label: string,
+  handle: string,
+  location: string,
+  avatarId: string,
+  lat: number,
+  lng: number,
+  count?: number
+) => ({
+  lat,
+  lng,
+  label,
+  handle: `@${handle}`,
+  location,
+  href: `https://x.com/${handle}`,
+  src: `https://pbs.twimg.com/profile_images/${avatarId}_200x200.jpg`,
+  count,
+});
+/** Mersin, Türkiye — the default view of the main demo. */
+const GLOBE_CENTER: [number, number] = [34.64, 36.81];
+const GLOBE_MARKERS = [
+  xDev("Hasan Harman", "strad3r", "Türkiye", "1972611039066791936/cwvQHJ0S", 36.81, 34.64),
+  xDev("shadcn", "shadcn", "USA", "1593304942210478080/TUYae5z7", 39.5, -98.35),
+  xDev("OrcDev", "orcdev", "Spain", "1756766826736893952/6Gvg6jha", 40.42, -3.7),
+  xDev("Guillermo Rauch", "rauchg", "USA", "1783856060249595904/8TfcCN0r", 37.77, -122.42, 13),
+  xDev("Theo", "t3dotgg", "USA", "1840190186245746688/VVPe1CP0", 37.33, -121.89),
+  xDev("Lee Robinson", "leerob", "USA", "1862717563311968256/xfgt1L9l", 41.59, -93.62),
+  xDev("Adam Wathan", "adamwathan", "Canada", "1677042510839857154/Kq4tpySA", 43.36, -80.31),
+  xDev("DHH", "dhh", "Denmark", "2093715898204884992/goERjC9G", 55.68, 12.57),
+  xDev("Steve Ruiz", "steveruizok", "UK", "1998689716229558272/GSFU7BiZ", 51.51, -0.13),
+  xDev("Anthony Fu", "antfu7", "France", "1980306076479201281/0WC7AqxQ", 48.86, 2.35),
+  xDev("Pieter Levels", "levelsio", "Portugal", "2077111020305162240/PwddgOau", 38.72, -9.14),
+];
+const GLOBE_STAGE = "min-h-[340px] items-center justify-center bg-[#f5f4f2] p-4";
+
 const FLIP_STAGE = "min-h-[320px] bg-white";
 const CALENDAR_BG = "#e4e1dc";
 const CALENDAR_STAGE = "min-h-[320px] bg-[#e4e1dc]";
 
 export const LAB_ITEMS: LabItem[] = [
+  {
+    slug: "snow-globe",
+    title: "Snow Globe",
+    description:
+      "A glass snow globe with the Earth inside, drawn with a real orthographic projection. Drag to spin it and the snow swirls up with the motion, then settles. Tap for a quick shake. Pin avatars to the map; click one and the globe turns to it and opens a little profile card. Add zoom buttons, or let it spin on its own.",
+    summary:
+      "A glass snow globe for React with a draggable Earth inside. Drag to spin it and stir the snow, and pin avatars to the map.",
+    inspiration: [
+      {
+        label: "Arthur Lambillotte’s Mesh map view",
+        href: "https://x.com/artlambi/status/1876278377872855118",
+      },
+    ],
+    hint: "Drag to spin, click a face",
+    installable: true,
+    importName: "SnowGlobe",
+    fullWidth: true,
+    previewClassName: GLOBE_STAGE,
+    preview: <SnowGlobe controls markers={GLOBE_MARKERS} center={GLOBE_CENTER} />,
+    examples: [
+      {
+        title: "Just the globe",
+        description:
+          "Without markers or controls it is a plain glass ornament. Drag it around to stir the snow.",
+        hint: "Drag to stir",
+        previewClassName: GLOBE_STAGE,
+        preview: <SnowGlobe size={520} />,
+        code: `<SnowGlobe />`,
+      },
+      {
+        title: "Spinning",
+        description:
+          "autoRotate turns the Earth on its own, in degrees per second. Dragging still takes over. center picks the starting view as [longitude, latitude].",
+        previewClassName: GLOBE_STAGE,
+        preview: <SnowGlobe size={520} autoRotate={8} center={[100, 20]} />,
+        code: `<SnowGlobe autoRotate={8} center={[100, 20]} />`,
+      },
+      {
+        title: "Blizzard",
+        description: "Raise snow for a denser storm.",
+        hint: "Tap to shake",
+        previewClassName: GLOBE_STAGE,
+        preview: <SnowGlobe size={520} snow={480} />,
+        code: `<SnowGlobe snow={480} />`,
+      },
+    ],
+    usage: `import SnowGlobe from "@/components/snow-globe";
+
+const markers = [
+  {
+    lat: 40.42,
+    lng: -3.7,
+    src: "/avatars/ana.jpg",
+    label: "Ana García",
+    handle: "@ana",
+    location: "Spain",
+    href: "https://x.com/ana",
+  },
+  { lat: 51.51, lng: -0.13, src: "/avatars/tom.jpg", label: "Tom", count: 13 },
+];
+
+export default function Example() {
+  return <SnowGlobe controls markers={markers} />;
+}`,
+    props: [
+      {
+        name: "markers",
+        type: "SnowGlobeMarker[]",
+        default: "[]",
+        description:
+          "Avatars pinned to the map: { lat, lng, src?, label?, handle?, location?, href?, count? }. Clicking one turns the globe to it and opens a card with the label, handle, location and a profile link. Without src it shows initials, and count adds a cluster badge.",
+      },
+      {
+        name: "center",
+        type: "[number, number]",
+        default: "[-38, 40]",
+        description: "Starting [longitude, latitude] facing the viewer.",
+      },
+      {
+        name: "snow",
+        type: "number",
+        default: "220",
+        description: "Number of snow particles.",
+      },
+      {
+        name: "autoRotate",
+        type: "number",
+        default: "0",
+        description: "Spin speed in degrees per second. 0 keeps it still.",
+      },
+      {
+        name: "draggable",
+        type: "boolean",
+        default: "true",
+        description: "Drag to spin the Earth and stir the snow, tap to shake.",
+      },
+      {
+        name: "controls",
+        type: "boolean",
+        default: "false",
+        description: "Show zoom in/out buttons.",
+      },
+      {
+        name: "onMarkerClick",
+        type: "(marker: SnowGlobeMarker) => void",
+        default: "—",
+        description: "Fired when a marker is clicked, e.g. to show your own UI or track it.",
+      },
+      {
+        name: "size",
+        type: "number",
+        default: "640",
+        description: "Maximum width in pixels. The globe scales down to fit its container.",
+      },
+      {
+        name: "className",
+        type: "string",
+        default: "—",
+        description: "Extra classes on the outer wrapper.",
+      },
+    ],
+  },
   {
     slug: "flip-clock",
     title: "Flip Clock",

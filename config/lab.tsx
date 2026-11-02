@@ -61,8 +61,8 @@ export type LabItem = {
   summary?: string;
   /** Products or posts the component is modeled on. */
   inspiration?: { label: string; href: string }[];
-  /** Still rendered on /og-capture for the share image, on a `stage` background. */
-  og?: { preview: React.ReactNode; stage: string };
+  /** Share image still overrides: what to shoot instead of `preview`, and a light `stage` instead of the dark default. */
+  og?: { preview?: React.ReactNode; stage?: string };
 };
 
 export type PropDoc = {
@@ -93,7 +93,7 @@ export function usageSnippet(item: LabItem) {
 /** Album covers used across the Vinyl Record previews. */
 const COVERS = {
   linkinPark:
-    "https://linkinpedia.com/w/images/thumb/f/fe/Album-From_Zero.png/800px-Album-From_Zero.png",
+    "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/69/21/cf/6921cff3-7074-118a-ece2-4012450e6c75/093624839811.jpg/600x600bb.jpg",
   redHotChiliPeppers:
     "https://is1-ssl.mzstatic.com/image/thumb/Music5/v4/5e/49/35/5e493511-d87b-5aa2-b379-30fffbae902b/093624932154.jpg/600x600bb.jpg",
   sebnemFerah:
@@ -154,6 +154,10 @@ export const LAB_ITEMS: LabItem[] = [
         href: "https://x.com/artlambi/status/1876278377872855118",
       },
     ],
+    og: {
+      preview: <SnowGlobe size={540} markers={GLOBE_MARKERS} center={GLOBE_CENTER} />,
+      stage: "#f5f4f2",
+    },
     hint: "Drag to spin, click a face",
     installable: true,
     importName: "SnowGlobe",
@@ -547,6 +551,7 @@ export default function Example() {
     importName: "AnalogClock",
     previewClassName:
       "min-h-[360px] items-center justify-center bg-muted/30",
+    og: { preview: <AnalogClock size={420} /> },
     preview: <AnalogClock size={240} />,
     examples: [
       {
@@ -792,6 +797,13 @@ export default function Example() {
     importName: "PullCord",
     named: true,
     previewClassName: "min-h-[280px] items-start bg-muted/30",
+    og: {
+      preview: (
+        <div className="relative h-full w-full origin-top scale-[2.4]">
+          <PullCord className="absolute inset-x-0 top-0 z-10 mx-auto" />
+        </div>
+      ),
+    },
     preview: <PullCord className="absolute inset-x-0 top-0 z-10 mx-auto" />,
   },
   {
@@ -805,6 +817,17 @@ export default function Example() {
     writing:
       "/writings/creating-a-vinyl-record-animation-in-react-using-framer-motion",
     previewClassName: "min-h-[360px] items-center justify-center bg-muted/30",
+    og: {
+      preview: (
+        <VinylRecord
+          open
+          size={300}
+          className="-translate-x-16"
+          cover={COVERS.linkinPark}
+          alt="Linkin Park — From Zero"
+        />
+      ),
+    },
     preview: (
       <VinylRecord
         size={220}
@@ -941,6 +964,12 @@ export default function Example() {
         description: "Edge length of the square sleeve, in pixels.",
       },
       {
+        name: "open",
+        type: "boolean",
+        default: "false",
+        description: "Keep the discs slid out instead of waiting for hover.",
+      },
+      {
         name: "className",
         type: "string",
         default: "—",
@@ -958,6 +987,7 @@ export default function Example() {
     importName: "WallSwitch",
     previewClassName:
       "min-h-[240px] items-center justify-center bg-muted/30",
+    og: { preview: <WallSwitch defaultChecked size={280} /> },
     preview: <WallSwitch defaultChecked />,
     examples: [
       {
@@ -1088,6 +1118,7 @@ export default function Example() {
   return <TableOfContents tocList={toc} />;
 }`,
     previewClassName: "min-h-[240px] items-center justify-center bg-muted/30",
+    og: { preview: <TableOfContents tocList={sampleToc} /> },
     preview: (
       <>
         <span className="text-xs text-muted-foreground">Hover the marks →</span>
@@ -1118,6 +1149,14 @@ export default function Example() {
     importName: "ThreeDPhotoCarousel",
     fullWidth: true,
     previewClassName: "h-[420px] overflow-hidden bg-muted/30",
+    og: {
+      preview: (
+        // The 560px shot gets the carousel's mobile image height; give it a taller one.
+        <div className="w-full scale-[2.1] [&_img]:!h-20">
+          <ThreeDPhotoCarousel />
+        </div>
+      ),
+    },
     preview: <ThreeDPhotoCarousel />,
   },
 ];

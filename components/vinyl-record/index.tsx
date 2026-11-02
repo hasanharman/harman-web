@@ -35,6 +35,8 @@ export type VinylRecordProps = {
   finish?: VinylFinish;
   /** Edge length of the square sleeve, in pixels. */
   size?: number;
+  /** Keep the discs slid out instead of waiting for hover. */
+  open?: boolean;
   /** Extra classes on the outer wrapper. */
   className?: string;
 };
@@ -63,12 +65,13 @@ function offsets(slide: SlideDirection, distance: number) {
 }
 
 export default function VinylRecord({
-  cover = "https://linkinpedia.com/w/images/thumb/f/fe/Album-From_Zero.png/800px-Album-From_Zero.png",
+  cover = "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/69/21/cf/6921cff3-7074-118a-ece2-4012450e6c75/093624839811.jpg/600x600bb.jpg",
   alt = "Album cover",
   discs = 1,
   slide = "right",
   finish = "glossy",
   size = 256,
+  open = false,
   className,
 }: VinylRecordProps) {
   const glossy = finish === "glossy";
@@ -122,7 +125,7 @@ export default function VinylRecord({
               WebkitMaskImage: punch,
             }}
             initial={hidden}
-            animate={isHovered ? visible : hidden}
+            animate={open || isHovered ? visible : hidden}
             transition={{ type: "spring", stiffness: 260, damping: 28 }}
           >
             {/* Grooves — fine concentric rings across the playing area. */}

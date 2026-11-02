@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 import { getLabItem } from "@/config/lab";
-import { OG_SIZE, StageCard, TextCard, labStill, ogFonts } from "@/lib/og";
+import { OG_SIZE, StageCard, TextCard, labStill, ogFonts, truncate } from "@/lib/og";
 
 export function generateImageMetadata({ params }: { params: { slug: string } }) {
   const item = getLabItem(params.slug);
@@ -15,10 +15,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const card = {
     title: item?.title ?? "Lab",
     label: "Lab",
-    description: item ? (item.summary ?? item.description) : null,
+    description: item ? truncate(item.summary ?? item.description, 155) : null,
     meta: `hasanharman.dev/lab/${slug}`,
   };
-  const still = item?.og ? await labStill(slug) : null;
+  const still = item ? await labStill(slug) : null;
 
   return new ImageResponse(
     still && item ? <StageCard {...card} code={`<${item.importName} />`} image={still} /> : <TextCard {...card} />,

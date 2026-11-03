@@ -91,6 +91,19 @@ export default function Home() {
       isSquare: true,
       isTransparent: true,
     },
+    {
+      title: "Tüpraş Stadyumu",
+      company: "bjk.fan",
+      date: "2026",
+      description:
+        "An isometric scroll-through teardown of Beşiktaş JK's home: the roof lifts, the stands open up, and the camera drops onto the pitch.",
+      logo: "https://bjk.fan/icon.svg",
+      url: "https://bjk.fan/",
+      github: "https://github.com/hasanharman/tupras-stadyumu",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
   ];
 
   const experiences = [

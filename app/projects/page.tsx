@@ -58,6 +58,15 @@ const projects = [
     github: "https://github.com/hasanharman/open-ss",
     tech: ["Swift 6", "AppKit", "ScreenCaptureKit", "GitHub Actions"],
   },
+  {
+    title: "Tüpraş Stadyumu",
+    description:
+      "An isometric scroll-through teardown of Tüpraş Stadyumu, home of Beşiktaş JK. The roof lifts, the stands open up, and the camera sweeps over every block down to the pitch — in Turkish and English.",
+    logo: "https://bjk.fan/icon.svg",
+    url: "https://bjk.fan/",
+    github: "https://github.com/hasanharman/tupras-stadyumu",
+    tech: ["Next.js 16", "React 19", "Three.js", "Motion", "Tailwind CSS"],
+  },
 ];
 
 export default function Projects() {

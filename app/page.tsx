@@ -104,6 +104,18 @@ export default function Home() {
       isSquare: true,
       isTransparent: true,
     },
+    {
+      title: "My Pocket Library",
+      company: "iOS app",
+      date: "2026",
+      description:
+        "Your whole home library in your pocket. Scan a barcode or photograph a shelf, track your reading and lend books to friends.",
+      logo: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/3f/e2/74/3fe27494-4671-1b9c-c290-19874e9761a5/AppIcon-0-0-1x_U007emarketing-0-6-0-0-85-220.png/512x512bb.jpg",
+      url: "https://apps.apple.com/app/my-pocket-library-bookshelf/id6769303550",
+      isRounded: true,
+      isSquare: true,
+      isTransparent: true,
+    },
   ];
 
   const experiences = [

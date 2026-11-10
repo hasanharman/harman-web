@@ -67,6 +67,15 @@ const projects = [
     github: "https://github.com/hasanharman/tupras-stadyumu",
     tech: ["Next.js 16", "React 19", "Three.js", "Motion", "Tailwind CSS"],
   },
+  {
+    title: "My Pocket Library",
+    description:
+      "Your whole home library, in your pocket. Scan a barcode or photograph a whole shelf to catalog every book you own, track your reading with streaks and goals, lend books to friends and run book clubs together.",
+    logo: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/3f/e2/74/3fe27494-4671-1b9c-c290-19874e9761a5/AppIcon-0-0-1x_U007emarketing-0-6-0-0-85-220.png/512x512bb.jpg",
+    url: "https://www.mypocketlibrary.app/",
+    appStore: "https://apps.apple.com/app/my-pocket-library-bookshelf/id6769303550",
+    tech: ["Swift 6", "SwiftUI", "VisionKit", "Firebase", "WidgetKit"],
+  },
 ];
 
 export default function Projects() {
@@ -124,14 +133,26 @@ export default function Projects() {
                   <ExternalLink className="w-3.5 h-3.5" />
                   Live
                 </Link>
-                <Link
-                  href={project.github}
-                  target="_blank"
-                  className="inline-flex items-center gap-1 text-sm hover:underline underline-offset-2"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  GitHub
-                </Link>
+                {project.appStore && (
+                  <Link
+                    href={project.appStore}
+                    target="_blank"
+                    className="inline-flex items-center gap-1 text-sm hover:underline underline-offset-2"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    App Store
+                  </Link>
+                )}
+                {project.github && (
+                  <Link
+                    href={project.github}
+                    target="_blank"
+                    className="inline-flex items-center gap-1 text-sm hover:underline underline-offset-2"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    GitHub
+                  </Link>
+                )}
               </div>
             </div>
           </div>

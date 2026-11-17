@@ -14,7 +14,6 @@ class VeliteWebpackPlugin {
       VeliteWebpackPlugin.started = true;
       const dev = compiler.options.mode === "development";
       this.options.watch = this.options.watch ?? dev;
-      this.options.clean = this.options.clean ?? !dev;
       // velite is ESM-only, so load it via dynamic import from this CJS config.
       const { build } = await import("velite");
       await build(this.options);

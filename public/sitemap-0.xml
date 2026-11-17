@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://hasanharman.dev</loc><lastmod>2026-04-02T19:23:14.141Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/connect</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/photos</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/projects</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/test</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/writings/creating-a-vinyl-record-animation-in-react-using-framer-motion</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/writings/creating-photos-page-with-unsplash-nextjs</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://hasanharman.dev/writings/custom-hubspot-forms-with-nextjs-and-shadcn</loc><lastmod>2026-04-02T19:23:14.142Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev</loc><lastmod>2026-11-17T16:45:49.219Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/connect</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/analog-clock</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/calendar-clock</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/flip-clock</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/photo-frames</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/pull-cord</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/snow-globe</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/table-of-contents</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/three-d-carousel</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/vinyl-record</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/wall-switch</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/lab/world-clocks</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/photos</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/projects</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/test</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/writings/creating-a-vinyl-record-animation-in-react-using-framer-motion</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/writings/creating-photos-page-with-unsplash-nextjs</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/writings/custom-hubspot-forms-with-nextjs-and-shadcn</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/writings/submit-to-google-forms-with-nextjs-and-shadcn</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.hasanharman.dev/writings/why-i-built-openss-a-long-screenshot-app-for-macos</loc><lastmod>2026-11-17T16:45:49.220Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>

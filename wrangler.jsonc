@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "harman-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  // Lets the worker call itself for revalidation; must match "name".
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "harman-web" }],
+  "workers_dev": true,
+  // www is the canonical host (SITE_URL); a Cloudflare redirect rule sends the bare domain to it.
+  "routes": [
+    { "pattern": "www.hasanharman.dev", "custom_domain": true },
+    { "pattern": "hasanharman.dev", "custom_domain": true }
+  ],
+  "observability": { "enabled": true }
+}

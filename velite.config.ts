@@ -51,7 +51,8 @@ export default defineConfig({
     assets: "public/static",
     base: "/static/",
     name: "[name]-[hash:6].[ext]",
-    clean: true,
+    // public/static also holds hand-added images the writings link to; cleaning would delete them.
+    clean: false,
   },
   collections: { posts },
   mdx: {

@@ -37,3 +37,7 @@ next-env.d.ts
 
 #velite
 .velite
+# cloudflare (OpenNext build output, local wrangler state)
+.open-next
+.wrangler
+.dev.vars*

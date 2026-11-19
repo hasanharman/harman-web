@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { ViewTransitions } from "next-view-transitions";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 
 import { Questrial } from "next/font/google";
@@ -64,8 +63,12 @@ export default function RootLayout({
           </ThemeProvider>
         </body>
       </html>
-      <Analytics />
-      <SpeedInsights />
+      <Script
+        src="https://umami.harmanstack.fyi/script.js"
+        data-website-id="9a91619f-50c3-4e1f-b698-2e0cb049800e"
+        data-domains="www.hasanharman.dev"
+        strategy="afterInteractive"
+      />
     </ViewTransitions>
   );
 }
